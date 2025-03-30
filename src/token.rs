@@ -13,6 +13,13 @@ pub(crate) enum TokenType {
     // Operators
     ASSIGN,
     PLUS,
+    MINUS,
+    BANG,
+    ASTERISK,
+    SLASH,
+
+    LT,
+    GT,
 
     // Delimiters
     COMMA,
@@ -39,6 +46,13 @@ impl Display for TokenType {
 
             TokenType::ASSIGN => "=",
             TokenType::PLUS => "+",
+            TokenType::MINUS => "-",
+            TokenType::BANG => "!",
+            TokenType::ASTERISK => "*",
+            TokenType::SLASH => "/",
+
+            TokenType::LT => "<",
+            TokenType::GT => ">",
 
             TokenType::COMMA => ",",
             TokenType::SEMICOLON => ";",
