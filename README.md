@@ -33,3 +33,11 @@ e.g. parentheses are implied by the structure of the tree
 ### 1.2
 
 What token(s) would we need to add if we were writing a lexer for Python (or another whitespace-sensitive language)?
+
+### 1.3
+
+Parsing Unicode could be complex!
+
+What issues might we encounter if we wanted our lexer to support not just ASCII, but the full Unicode range?
+
+Java allows (letters, \$, _) as the first character of an identifier, but (letter, digit, \$, _) for subsequent characters. How would you implement this in a lexer?
