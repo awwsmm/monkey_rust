@@ -31,6 +31,8 @@ impl Lexer {
     fn next_token(&mut self) -> token::Token {
         let mut tok = token::Token::default();
 
+        self.skip_whitespace();
+
         match self.ch {
             0 => tok = token::Token::new(token::TokenType::EOF, String::from("")),
 
@@ -58,6 +60,12 @@ impl Lexer {
 
         self.read_char();
         tok
+    }
+    
+    fn skip_whitespace(&mut self) {
+        while self.ch == b' ' || self.ch == b'\t' || self.ch == b'\n' || self.ch == b'\r' {
+            self.read_char()
+        }
     }
 
     fn read_identifier(&mut self) -> String {
