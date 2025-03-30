@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-enum TokenType {
+pub(crate) enum TokenType {
     ILLEGAL,
     EOF,
 
