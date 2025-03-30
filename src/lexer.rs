@@ -1,5 +1,22 @@
 use crate::token;
 
+#[derive(Default)]
+struct Lexer {
+    input: String,
+    position: usize,
+    read_position: usize,
+    ch: u8,
+}
+
+impl Lexer {
+    fn new(input: String) -> Self {
+        Self {
+            input,
+            ..Default::default()
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
