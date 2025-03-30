@@ -11,3 +11,21 @@ Before writing any code
     - enable with `chmod +x .git/hooks/pre-commit`
 
 This book uses a TDD style. Has anyone used that before?
+
+### 1.1
+
+**"lexer" vs. "tokenizer" vs. "scanner"?**
+
+https://en.wikipedia.org/wiki/Lexical_analysis
+
+"scanning" / "tokenizing" is the first stage of a lexer
+
+"lexing" involves adding contextual information, like the type of the token, its position in the source code, etc.
+
+**What makes an abstract syntax tree "abstract"?**
+
+https://en.wikipedia.org/wiki/Abstract_syntax_tree
+
+not every detail is captured as-is in the tree
+
+e.g. parentheses are implied by the structure of the tree
