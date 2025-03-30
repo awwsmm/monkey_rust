@@ -56,6 +56,16 @@ impl Display for TokenType {
     }
 }
 
+impl TokenType {
+    fn lookup_ident(ident: &str) -> Self {
+        match ident {
+            "fn" => Self::FUNCTION,
+            "let" => Self::LET,
+            _ => Self::IDENT
+        }
+    }
+}
+
 #[derive(Default)]
 pub(crate) struct Token {
     pub(crate) token_type: TokenType,
