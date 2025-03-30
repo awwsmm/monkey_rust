@@ -29,11 +29,46 @@ impl Lexer {
     }
 
     fn next_token(&mut self) -> token::Token {
-        let token_type = token::TokenType::from(self.ch);
-        let tok = token::Token::new(token_type, self.ch);
+        let mut tok = token::Token::default();
+
+        match self.ch {
+            0 => tok = token::Token::new(token::TokenType::EOF, String::from("")),
+
+            b'=' => tok = token::Token::new(token::TokenType::ASSIGN, String::from_utf8(vec![self.ch]).unwrap()),
+            b'+' => tok = token::Token::new(token::TokenType::PLUS, String::from_utf8(vec![self.ch]).unwrap()),
+
+            b',' => tok = token::Token::new(token::TokenType::COMMA, String::from_utf8(vec![self.ch]).unwrap()),
+            b';' => tok = token::Token::new(token::TokenType::SEMICOLON, String::from_utf8(vec![self.ch]).unwrap()),
+
+            b'(' => tok = token::Token::new(token::TokenType::LPAREN, String::from_utf8(vec![self.ch]).unwrap()),
+            b')' => tok = token::Token::new(token::TokenType::RPAREN, String::from_utf8(vec![self.ch]).unwrap()),
+            b'{' => tok = token::Token::new(token::TokenType::LBRACE, String::from_utf8(vec![self.ch]).unwrap()),
+            b'}' => tok = token::Token::new(token::TokenType::RBRACE, String::from_utf8(vec![self.ch]).unwrap()),
+
+            _ => {
+                if Self::is_letter(self.ch) {
+                    tok.literal = self.read_identifier();
+                    return tok;
+                } else {
+                    tok = token::Token::new(token::TokenType::ILLEGAL, String::from_utf8(vec![self.ch]).unwrap())
+                }
+            }
+        };
 
         self.read_char();
         tok
+    }
+
+    fn read_identifier(&mut self) -> String {
+        let position = self.position;
+        while Self::is_letter(self.ch) {
+            self.read_char()
+        }
+        String::from(&self.input[position..self.position])
+    }
+
+    fn is_letter(ch: u8) -> bool {
+        b'a' <= ch && ch <= b'z' || b'A' <= ch && ch <= b'Z' || ch == b'_'
     }
 }
 

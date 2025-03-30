@@ -1,7 +1,8 @@
 use std::fmt::{Display, Formatter};
 
-#[derive(Eq, PartialEq)]
+#[derive(Default, Eq, PartialEq)]
 pub(crate) enum TokenType {
+    #[default]
     ILLEGAL,
     EOF,
 
@@ -55,39 +56,14 @@ impl Display for TokenType {
     }
 }
 
-impl From<u8> for TokenType {
-    fn from(value: u8) -> Self {
-        match value {
-            0 => TokenType::EOF,
-
-            b'=' => TokenType::ASSIGN,
-            b'+' => TokenType::PLUS,
-
-            b',' => TokenType::COMMA,
-            b';' => TokenType::SEMICOLON,
-
-            b'(' => TokenType::LPAREN,
-            b')' => TokenType::RPAREN,
-            b'{' => TokenType::LBRACE,
-            b'}' => TokenType::RBRACE,
-
-            _ => unimplemented!()
-        }
-    }
-}
-
+#[derive(Default)]
 pub(crate) struct Token {
     pub(crate) token_type: TokenType,
     pub(crate) literal: String,
 }
 
 impl Token {
-    pub(crate) fn new(token_type: TokenType, ch: u8) -> Self {
-        let literal = match ch {
-            0 => String::from(""),
-            _ => String::from_utf8(vec![ch]).unwrap()
-        };
-
+    pub(crate) fn new(token_type: TokenType, literal: String) -> Self {
         Self { token_type, literal }
     }
 }
