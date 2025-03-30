@@ -29,3 +29,7 @@ https://en.wikipedia.org/wiki/Abstract_syntax_tree
 not every detail is captured as-is in the tree
 
 e.g. parentheses are implied by the structure of the tree
+
+### 1.2
+
+What token(s) would we need to add if we were writing a lexer for Python (or another whitespace-sensitive language)?
