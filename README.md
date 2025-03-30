@@ -41,3 +41,9 @@ Parsing Unicode could be complex!
 What issues might we encounter if we wanted our lexer to support not just ASCII, but the full Unicode range?
 
 Java allows (letters, \$, _) as the first character of an identifier, but (letter, digit, \$, _) for subsequent characters. How would you implement this in a lexer?
+
+### 1.4
+
+Adding < and > to our tokens reminds me of HTML: https://stackoverflow.com/a/1732454
+
+HTML is too complex to parse with only regular expressions, you need a parser, like the one we're writing: https://stackoverflow.com/a/1758162
