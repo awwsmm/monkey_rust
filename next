@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+commits=( $(git log --oneline --all | sed 's/ .*//g') )
+
+
+current_commit=$(git rev-parse --short HEAD)
+
+# echo "current commit is $current_commit"
+
+for i in "${!commits[@]}"; do
+    # echo "$i == ${commits[$i]}"
+
+    if [[ "${commits[$i]}" = "${current_commit}" ]]; then
+        current_commit_index=$i
+        # echo "current commit index is $current_commit_index"
+
+        if [[ "${current_commit_index}" -gt "0" ]]; then
+            # echo "moving to next commit"
+            next_commit_index=$(($i-1))
+            # echo "next commit index is $next_commit_index"
+
+            if [[ "${next_commit_index}" -eq "0" ]]; then
+                # echo "next commit is latest commit"
+                git checkout master
+            else
+                next_commit=${commits[$next_commit_index]}
+                # echo "next commit is $next_commit"
+                git -c advice.detachedHead=false checkout $next_commit
+            fi
+
+        else
+            echo "there is no next commit"
+        fi
+    fi
+done
