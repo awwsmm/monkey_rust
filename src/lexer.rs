@@ -52,6 +52,10 @@ impl Lexer {
                     tok.literal = self.read_identifier();
                     tok.token_type = token::TokenType::lookup_ident(tok.literal.as_str());
                     return tok;
+                } else if Self::is_digit(self.ch) {
+                    tok.literal = self.read_number();
+                    tok.token_type = token::TokenType::INT;
+                    return tok;
                 } else {
                     tok = token::Token::new(token::TokenType::ILLEGAL, String::from_utf8(vec![self.ch]).unwrap())
                 }
@@ -61,7 +65,19 @@ impl Lexer {
         self.read_char();
         tok
     }
-    
+
+    fn read_number(&mut self) -> String {
+        let position = self.position;
+        while Self::is_digit(self.ch) {
+            self.read_char()
+        }
+        String::from(&self.input[position..self.position])
+    }
+
+    fn is_digit(ch: u8) -> bool {
+        b'0' <= ch && ch <= b'9'
+    }
+
     fn skip_whitespace(&mut self) {
         while self.ch == b' ' || self.ch == b'\t' || self.ch == b'\n' || self.ch == b'\r' {
             self.read_char()
@@ -86,7 +102,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn test_next_token() {
         let input = String::from("let five = 5;
 let ten = 10;
 
