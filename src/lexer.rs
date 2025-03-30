@@ -27,6 +27,14 @@ impl Lexer {
         self.position = self.read_position;
         self.read_position += 1;
     }
+
+    fn next_token(&mut self) -> token::Token {
+        let token_type = token::TokenType::from(self.ch);
+        let tok = token::Token::new(token_type, self.ch);
+
+        self.read_char();
+        tok
+    }
 }
 
 #[cfg(test)]
