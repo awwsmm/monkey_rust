@@ -10,10 +10,12 @@ struct Lexer {
 
 impl Lexer {
     fn new(input: String) -> Self {
-        Self {
+        let mut l = Self {
             input,
             ..Default::default()
-        }
+        };
+        l.read_char();
+        l
     }
 
     fn read_char(&mut self) {
