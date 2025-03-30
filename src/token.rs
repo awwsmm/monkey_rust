@@ -57,7 +57,7 @@ impl Display for TokenType {
 }
 
 impl TokenType {
-    fn lookup_ident(ident: &str) -> Self {
+    pub(crate) fn lookup_ident(ident: &str) -> Self {
         match ident {
             "fn" => Self::FUNCTION,
             "let" => Self::LET,

@@ -48,6 +48,7 @@ impl Lexer {
             _ => {
                 if Self::is_letter(self.ch) {
                     tok.literal = self.read_identifier();
+                    tok.token_type = token::TokenType::lookup_ident(tok.literal.as_str());
                     return tok;
                 } else {
                     tok = token::Token::new(token::TokenType::ILLEGAL, String::from_utf8(vec![self.ch]).unwrap())
