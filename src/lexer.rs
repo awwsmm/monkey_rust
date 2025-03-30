@@ -38,6 +38,13 @@ impl Lexer {
 
             b'=' => tok = token::Token::new(token::TokenType::ASSIGN, String::from_utf8(vec![self.ch]).unwrap()),
             b'+' => tok = token::Token::new(token::TokenType::PLUS, String::from_utf8(vec![self.ch]).unwrap()),
+            b'-' => tok = token::Token::new(token::TokenType::MINUS, String::from_utf8(vec![self.ch]).unwrap()),
+            b'!' => tok = token::Token::new(token::TokenType::BANG, String::from_utf8(vec![self.ch]).unwrap()),
+            b'/' => tok = token::Token::new(token::TokenType::SLASH, String::from_utf8(vec![self.ch]).unwrap()),
+            b'*' => tok = token::Token::new(token::TokenType::ASTERISK, String::from_utf8(vec![self.ch]).unwrap()),
+
+            b'<' => tok = token::Token::new(token::TokenType::LT, String::from_utf8(vec![self.ch]).unwrap()),
+            b'>' => tok = token::Token::new(token::TokenType::GT, String::from_utf8(vec![self.ch]).unwrap()),
 
             b',' => tok = token::Token::new(token::TokenType::COMMA, String::from_utf8(vec![self.ch]).unwrap()),
             b';' => tok = token::Token::new(token::TokenType::SEMICOLON, String::from_utf8(vec![self.ch]).unwrap()),
