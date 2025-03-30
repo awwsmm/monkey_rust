@@ -15,6 +15,16 @@ impl Lexer {
             ..Default::default()
         }
     }
+
+    fn read_char(&mut self) {
+        if self.read_position >= self.input.len() {
+            self.ch = 0
+        } else {
+            self.ch = self.input.bytes().nth(self.read_position).unwrap()
+        }
+        self.position = self.read_position;
+        self.read_position += 1;
+    }
 }
 
 #[cfg(test)]
