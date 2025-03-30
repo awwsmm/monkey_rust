@@ -111,6 +111,8 @@ let add = fn(x, y) {
 };
 
 let result = add(five, ten);
+!-/*5;
+5 < 10 > 5;
 ");
 
         struct Test {
@@ -160,6 +162,18 @@ let result = add(five, ten);
             Test::new(token::TokenType::COMMA, ","),
             Test::new(token::TokenType::IDENT, "ten"),
             Test::new(token::TokenType::RPAREN, ")"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::BANG, "!"),
+            Test::new(token::TokenType::MINUS, "-"),
+            Test::new(token::TokenType::SLASH, "/"),
+            Test::new(token::TokenType::ASTERISK, "*"),
+            Test::new(token::TokenType::INT, "5"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::INT, "5"),
+            Test::new(token::TokenType::LT, "<"),
+            Test::new(token::TokenType::INT, "10"),
+            Test::new(token::TokenType::GT, ">"),
+            Test::new(token::TokenType::INT, "5"),
             Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::EOF, ""),
         ];
