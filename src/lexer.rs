@@ -43,7 +43,15 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let input = String::from("=+(){},;");
+        let input = String::from("let five = 5;
+let ten = 10;
+
+let add = fn(x, y) {
+  x + y;
+};
+
+let result = add(five, ten);
+");
 
         struct Test {
             expected_type: token::TokenType,
@@ -57,13 +65,41 @@ mod tests {
         }
 
         let tests = [
+            Test::new(token::TokenType::LET, "let"),
+            Test::new(token::TokenType::IDENT, "five"),
             Test::new(token::TokenType::ASSIGN, "="),
-            Test::new(token::TokenType::PLUS, "+"),
+            Test::new(token::TokenType::INT, "5"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::LET, "let"),
+            Test::new(token::TokenType::IDENT, "ten"),
+            Test::new(token::TokenType::ASSIGN, "="),
+            Test::new(token::TokenType::INT, "10"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::LET, "let"),
+            Test::new(token::TokenType::IDENT, "add"),
+            Test::new(token::TokenType::ASSIGN, "="),
+            Test::new(token::TokenType::FUNCTION, "fn"),
             Test::new(token::TokenType::LPAREN, "("),
+            Test::new(token::TokenType::IDENT, "x"),
+            Test::new(token::TokenType::COMMA, ","),
+            Test::new(token::TokenType::IDENT, "y"),
             Test::new(token::TokenType::RPAREN, ")"),
             Test::new(token::TokenType::LBRACE, "{"),
+            Test::new(token::TokenType::IDENT, "x"),
+            Test::new(token::TokenType::PLUS, "+"),
+            Test::new(token::TokenType::IDENT, "y"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::RBRACE, "}"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::LET, "let"),
+            Test::new(token::TokenType::IDENT, "result"),
+            Test::new(token::TokenType::ASSIGN, "="),
+            Test::new(token::TokenType::IDENT, "add"),
+            Test::new(token::TokenType::LPAREN, "("),
+            Test::new(token::TokenType::IDENT, "five"),
             Test::new(token::TokenType::COMMA, ","),
+            Test::new(token::TokenType::IDENT, "ten"),
+            Test::new(token::TokenType::RPAREN, ")"),
             Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::EOF, ""),
         ];
