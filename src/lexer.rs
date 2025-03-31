@@ -126,6 +126,9 @@ if (5 < 10) {
 } else {
 	return false;
 }
+
+10 == 10;
+10 != 9;
 ");
 
         struct Test {
@@ -205,6 +208,14 @@ if (5 < 10) {
             Test::new(token::TokenType::FALSE, "false"),
             Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::RBRACE, "}"),
+            Test::new(token::TokenType::INT, "10"),
+            Test::new(token::TokenType::EQ, "=="),
+            Test::new(token::TokenType::INT, "10"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::INT, "10"),
+            Test::new(token::TokenType::NOT_EQ, "!="),
+            Test::new(token::TokenType::INT, "9"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::EOF, ""),
         ];
 
