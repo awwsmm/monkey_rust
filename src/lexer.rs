@@ -36,10 +36,28 @@ impl Lexer {
         match self.ch {
             0 => tok = token::Token::new(token::TokenType::EOF, String::from("")),
 
-            b'=' => tok = token::Token::new(token::TokenType::ASSIGN, String::from_utf8(vec![self.ch]).unwrap()),
+            b'=' => {
+                if self.peek_char() == b'=' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let literal = String::from_utf8(vec![ch, self.ch]).unwrap();
+                    tok = token::Token::new(token::TokenType::EQ, literal)
+                } else {
+                    tok = token::Token::new(token::TokenType::ASSIGN, String::from_utf8(vec![self.ch]).unwrap())
+                }
+            }
             b'+' => tok = token::Token::new(token::TokenType::PLUS, String::from_utf8(vec![self.ch]).unwrap()),
             b'-' => tok = token::Token::new(token::TokenType::MINUS, String::from_utf8(vec![self.ch]).unwrap()),
-            b'!' => tok = token::Token::new(token::TokenType::BANG, String::from_utf8(vec![self.ch]).unwrap()),
+            b'!' => {
+                if self.peek_char() == b'=' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let literal = String::from_utf8(vec![ch, self.ch]).unwrap();
+                    tok = token::Token::new(token::TokenType::NEQ, literal)
+                } else {
+                    tok = token::Token::new(token::TokenType::BANG, String::from_utf8(vec![self.ch]).unwrap())
+                }
+            }
             b'/' => tok = token::Token::new(token::TokenType::SLASH, String::from_utf8(vec![self.ch]).unwrap()),
             b'*' => tok = token::Token::new(token::TokenType::ASTERISK, String::from_utf8(vec![self.ch]).unwrap()),
 
