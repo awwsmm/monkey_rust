@@ -22,7 +22,7 @@ impl Lexer {
         if self.read_position >= self.input.len() {
             self.ch = 0
         } else {
-            self.ch = self.input.bytes().nth(self.read_position).unwrap()
+            self.ch = self.input.as_bytes()[self.read_position]
         }
         self.position = self.read_position;
         self.read_position += 1;
@@ -71,6 +71,14 @@ impl Lexer {
 
         self.read_char();
         tok
+    }
+
+    fn peek_char(&self) -> u8 {
+        if self.read_position >= self.input.len() {
+            0
+        } else {
+            self.input.as_bytes()[self.read_position]
+        }
     }
 
     fn read_number(&mut self) -> String {
