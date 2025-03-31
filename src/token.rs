@@ -21,6 +21,9 @@ pub(crate) enum TokenType {
     LT,
     GT,
 
+    EQ,
+    NEQ,
+
     // Delimiters
     COMMA,
     SEMICOLON,
@@ -58,6 +61,9 @@ impl Display for TokenType {
 
             TokenType::LT => "<",
             TokenType::GT => ">",
+
+            TokenType::EQ => "==",
+            TokenType::NEQ => "!=",
 
             TokenType::COMMA => ",",
             TokenType::SEMICOLON => ";",

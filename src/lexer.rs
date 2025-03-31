@@ -221,7 +221,7 @@ if (5 < 10) {
             Test::new(token::TokenType::INT, "10"),
             Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::INT, "10"),
-            Test::new(token::TokenType::NOT_EQ, "!="),
+            Test::new(token::TokenType::NEQ, "!="),
             Test::new(token::TokenType::INT, "9"),
             Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::EOF, ""),
