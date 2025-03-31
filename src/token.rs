@@ -33,6 +33,11 @@ pub(crate) enum TokenType {
     // Keywords
     FUNCTION,
     LET,
+    TRUE,
+    FALSE,
+    IF,
+    ELSE,
+    RETURN,
 }
 
 impl Display for TokenType {
@@ -64,6 +69,11 @@ impl Display for TokenType {
 
             TokenType::FUNCTION => "FUNCTION",
             TokenType::LET => "LET",
+            TokenType::TRUE => "TRUE",
+            TokenType::FALSE => "FALSE",
+            TokenType::IF => "IF",
+            TokenType::ELSE => "ELSE",
+            TokenType::RETURN => "RETURN",
         };
 
         write!(f, "{}", string)
@@ -75,6 +85,11 @@ impl TokenType {
         match ident {
             "fn" => Self::FUNCTION,
             "let" => Self::LET,
+            "true" => Self::TRUE,
+            "false" => Self::FALSE,
+            "if" => Self::IF,
+            "else" => Self::ELSE,
+            "return" => Self::RETURN,
             _ => Self::IDENT
         }
     }
