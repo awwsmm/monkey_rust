@@ -120,6 +120,12 @@ let add = fn(x, y) {
 let result = add(five, ten);
 !-/*5;
 5 < 10 > 5;
+
+if (5 < 10) {
+	return true;
+} else {
+	return false;
+}
 ");
 
         struct Test {
@@ -182,6 +188,23 @@ let result = add(five, ten);
             Test::new(token::TokenType::GT, ">"),
             Test::new(token::TokenType::INT, "5"),
             Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::IF, "if"),
+            Test::new(token::TokenType::LPAREN, "("),
+            Test::new(token::TokenType::INT, "5"),
+            Test::new(token::TokenType::LT, "<"),
+            Test::new(token::TokenType::INT, "10"),
+            Test::new(token::TokenType::RPAREN, ")"),
+            Test::new(token::TokenType::LBRACE, "{"),
+            Test::new(token::TokenType::RETURN, "return"),
+            Test::new(token::TokenType::TRUE, "true"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::RBRACE, "}"),
+            Test::new(token::TokenType::ELSE, "else"),
+            Test::new(token::TokenType::LBRACE, "{"),
+            Test::new(token::TokenType::RETURN, "return"),
+            Test::new(token::TokenType::FALSE, "false"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::RBRACE, "}"),
             Test::new(token::TokenType::EOF, ""),
         ];
 
