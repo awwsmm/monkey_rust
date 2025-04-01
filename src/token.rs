@@ -107,6 +107,12 @@ pub(crate) struct Token {
     pub(crate) literal: String,
 }
 
+impl Display for Token {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{{Type:{} Literal:{}}}", self.token_type, self.literal)
+    }
+}
+
 impl Token {
     pub(crate) fn new(token_type: TokenType, literal: String) -> Self {
         Self { token_type, literal }
