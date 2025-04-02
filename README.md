@@ -12,6 +12,8 @@ Before writing any code
 
 This book uses a TDD style. Has anyone used that before?
 
+## Chapter 1
+
 ### 1.1
 
 **"lexer" vs. "tokenizer" vs. "scanner"?**
@@ -47,3 +49,11 @@ Java allows (letters, \$, _) as the first character of an identifier, but (lette
 Adding < and > to our tokens reminds me of HTML: https://stackoverflow.com/a/1732454
 
 HTML is too complex to parse with only regular expressions, you need a parser, like the one we're writing: https://stackoverflow.com/a/1758162
+
+## Chapter 2
+
+### 2.2
+
+yacc, bison, and ANTLR are tools that are commonly used in the programming language development community.
+
+EBNF is all that is needed to automatically define a parser using these tools.
