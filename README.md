@@ -57,3 +57,11 @@ HTML is too complex to parse with only regular expressions, you need a parser, l
 yacc, bison, and ANTLR are tools that are commonly used in the programming language development community.
 
 EBNF is all that is needed to automatically define a parser using these tools.
+
+### 2.4
+
+As you read this book and write Monkey code, compare it to the Go code we're using to write the interpreter. Go assignments are very different from Monkey ones (= vs. := operators).
+
+Can anyone think of constructs which are expressions vs. statements in various languages?
+
+Recursive descent is just one kind of parser. Did anyone look into other kinds?
