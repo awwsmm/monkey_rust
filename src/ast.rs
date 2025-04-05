@@ -8,7 +8,7 @@ trait Statement: Node {}
 
 trait Expression: Node {}
 
-struct Program {
+pub(crate) struct Program {
     statements: Vec<Box<dyn Statement>>
 }
 

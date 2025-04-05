@@ -5,6 +5,7 @@ mod token;
 mod lexer;
 mod repl;
 mod ast;
+mod parser;
 
 fn main() {
     let mut stdout = io::stdout();

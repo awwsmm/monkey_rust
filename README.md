@@ -65,3 +65,7 @@ As you read this book and write Monkey code, compare it to the Go code we're usi
 Can anyone think of constructs which are expressions vs. statements in various languages?
 
 Recursive descent is just one kind of parser. Did anyone look into other kinds?
+
+Why are some Go function names uppercase? Uppercase functions are exported, lowercase ones are not.
+
+https://go.dev/tour/basics/3
