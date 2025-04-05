@@ -4,6 +4,7 @@ use std::io::Write;
 mod token;
 mod lexer;
 mod repl;
+mod ast;
 
 fn main() {
     let mut stdout = io::stdout();
