@@ -1,44 +1,67 @@
 use crate::token;
 
-trait Node {
+pub(crate) trait Node {
     fn token_literal(&self) -> String;
 }
 
-trait Statement: Node {}
+#[derive(Clone, Debug)]
+pub(crate) enum Statement {
+    LetStatement(LetStatement),
+}
 
-trait Expression: Node {}
+impl Node for Statement {
+    fn token_literal(&self) -> String {
+        match self {
+            Statement::LetStatement(let_statement) => let_statement.token_literal(),
+        }
+    }
+}
 
+#[derive(Clone, Debug)]
+pub(crate) enum Expression {
+    Identifier(Identifier),
+}
+
+impl Node for Expression {
+    fn token_literal(&self) -> String {
+        match self {
+            Expression::Identifier(identifier) => identifier.token_literal(),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub(crate) struct Program {
-    statements: Vec<Box<dyn Statement>>
+    pub(crate) statements: Vec<Statement>,
 }
 
 impl Node for Program {
     fn token_literal(&self) -> String {
-        if self.statements.len() > 0 {
-            self.statements.iter().next().map(|s| (*s).token_literal()).unwrap()
+        if let [head, ..] = &*self.statements {
+            head.token_literal()
         } else {
             String::from("")
         }
     }
 }
 
-struct LetStatement<'a> {
-    token: token::Token, // the token::TokenType::LET token
-    name: &'a Identifier,
-    value: dyn Expression,
+#[derive(Clone, Debug)]
+pub(crate) struct LetStatement {
+    pub(crate) token: token::Token, // the token::TokenType::LET token
+    pub(crate) name: Option<Identifier>,
+    pub(crate) value: Option<Expression>,
 }
 
-impl Node for LetStatement<'_> {
+impl Node for LetStatement {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
 }
 
-impl Statement for LetStatement<'_> {}
-
-struct Identifier {
-    token: token::Token, // the token::TokenType::IDENT token
-    value: String
+#[derive(Clone, Debug)]
+pub(crate) struct Identifier {
+    pub(crate) token: token::Token, // the token::TokenType::IDENT token
+    pub(crate) value: String,
 }
 
 impl Node for Identifier {
@@ -46,5 +69,3 @@ impl Node for Identifier {
         self.token.literal.clone()
     }
 }
-
-impl Expression for Identifier {}
