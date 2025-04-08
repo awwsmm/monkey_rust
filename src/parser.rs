@@ -46,6 +46,52 @@ impl<'a> Parser<'a> {
             _ => None,
         }
     }
+
+    fn parse_let_statement(&mut self) -> Option<ast::LetStatement> {
+        let mut stmt = ast::LetStatement{
+            token: self.cur_token.clone(),
+            name: None,
+            value: None,
+        };
+
+        if !self.expect_peek(token::TokenType::IDENT) {
+            return None
+        }
+
+        stmt.name = Some(ast::Identifier{
+            token: self.cur_token.clone(),
+            value: self.cur_token.literal.clone(),
+        });
+
+        if !self.expect_peek(token::TokenType::ASSIGN) {
+            return None
+        }
+
+        // TODO: We're skipping the expressions until we
+        // encounter a semicolon
+        while !self.cur_token_is(token::TokenType::SEMICOLON) {
+            self.next_token()
+        }
+
+        Some(stmt)
+    }
+
+    fn cur_token_is(&self, t: token::TokenType) -> bool {
+        self.cur_token.token_type == t
+    }
+
+    fn peek_token_is(&self, t: token::TokenType) -> bool {
+        self.peek_token.token_type == t
+    }
+
+    fn expect_peek(&mut self, t: token::TokenType) -> bool {
+        if self.peek_token_is(t) {
+            self.next_token();
+            true
+        } else {
+            false
+        }
+    }
 }
 
 #[cfg(test)]
