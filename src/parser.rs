@@ -39,6 +39,13 @@ impl<'a> Parser<'a> {
 
         program
     }
+
+    fn parse_statement(&mut self) -> Option<ast::LetStatement> {
+        match self.cur_token.token_type {
+            token::TokenType::LET => self.parse_let_statement(),
+            _ => None,
+        }
+    }
 }
 
 #[cfg(test)]
