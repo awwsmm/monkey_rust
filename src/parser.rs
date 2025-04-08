@@ -124,6 +124,7 @@ let foobar = 838383;
         let mut p = Parser::new(&mut l);
 
         let program = p.parse_program();
+        check_parser_errors(p);
 
         if program.statements.len() != 3 {
             panic!("program.statements does not contain 3 statements. got={}",
@@ -152,6 +153,19 @@ let foobar = 838383;
                 panic!()
             }
         }
+    }
+
+    fn check_parser_errors(p: Parser) {
+        let errors = p.errors();
+        if errors.len() == 0 {
+            return
+        }
+
+        eprint!("parser has {} errors", errors.len());
+        for msg in errors.iter() {
+            eprint!("parser error: {}", msg)
+        }
+        panic!()
     }
 
     fn test_let_statement(s: Statement, name: String) -> bool {
