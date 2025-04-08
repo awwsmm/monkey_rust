@@ -3,6 +3,8 @@ use crate::{ast, lexer, token};
 struct Parser<'a> {
     l: &'a mut lexer::Lexer,
 
+    errors: Vec<String>,
+
     cur_token: token::Token,
     peek_token: token::Token,
 }
@@ -11,6 +13,7 @@ impl<'a> Parser<'a> {
     fn new(l: &'a mut lexer::Lexer) -> Self {
         let mut p = Parser{
             l,
+            errors: vec![],
             cur_token: Default::default(),
             peek_token: Default::default(),
         };
@@ -20,6 +23,16 @@ impl<'a> Parser<'a> {
         p.next_token();
 
         p
+    }
+
+    fn errors(&self) -> Vec<String> {
+        self.errors.clone()
+    }
+
+    fn peek_error(&mut self, t: token::TokenType) {
+        let msg = format!("expected next token to be {}, got {} instead",
+            t, self.peek_token.token_type);
+        self.errors.push(msg)
     }
 
     fn next_token(&mut self) {
