@@ -98,10 +98,11 @@ impl<'a> Parser<'a> {
     }
 
     fn expect_peek(&mut self, t: token::TokenType) -> bool {
-        if self.peek_token_is(t) {
+        if self.peek_token_is(t.clone()) {
             self.next_token();
             true
         } else {
+            self.peek_error(t);
             false
         }
     }
@@ -161,9 +162,9 @@ let foobar = 838383;
             return
         }
 
-        eprint!("parser has {} errors", errors.len());
+        eprint!("parser has {} errors\n", errors.len());
         for msg in errors.iter() {
-            eprint!("parser error: {}", msg)
+            eprint!("parser error: {}\n", msg)
         }
         panic!()
     }
