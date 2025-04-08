@@ -27,8 +27,17 @@ impl<'a> Parser<'a> {
         self.peek_token = self.l.next_token();
     }
 
-    fn parse_program(&self) -> &'a ast::Program {
-        unimplemented!()
+    fn parse_program(&mut self) -> ast::Program {
+        let mut program = ast::Program{ statements: vec![] };
+
+        while self.cur_token.token_type != token::TokenType::EOF {
+            if let Some(stmt) = self.parse_statement() {
+                program.statements.push(ast::Statement::LetStatement(stmt))
+            }
+            self.next_token();
+        }
+
+        program
     }
 }
 
