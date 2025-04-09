@@ -73,9 +73,9 @@ impl Node for Identifier {
 }
 
 #[derive(Clone, Debug)]
-struct ReturnStatement {
-    token: token::Token,
-    return_value: Expression,
+pub(crate) struct ReturnStatement {
+    pub(crate) token: token::Token,
+    pub(crate) return_value: Option<Expression>,
 }
 
 impl Node for ReturnStatement {

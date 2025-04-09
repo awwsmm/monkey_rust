@@ -1,7 +1,7 @@
 use crate::{ast, lexer, token};
 
-struct Parser<'a> {
-    l: &'a mut lexer::Lexer,
+struct Parser {
+    l: lexer::Lexer,
 
     errors: Vec<String>,
 
@@ -9,8 +9,8 @@ struct Parser<'a> {
     peek_token: token::Token,
 }
 
-impl<'a> Parser<'a> {
-    fn new(l: &'a mut lexer::Lexer) -> Self {
+impl Parser {
+    fn new(l: lexer::Lexer) -> Self {
         let mut p = Parser{
             l,
             errors: vec![],
@@ -45,7 +45,7 @@ impl<'a> Parser<'a> {
 
         while self.cur_token.token_type != token::TokenType::EOF {
             if let Some(stmt) = self.parse_statement() {
-                program.statements.push(ast::Statement::LetStatement(stmt))
+                program.statements.push(stmt)
             }
             self.next_token();
         }
@@ -53,9 +53,9 @@ impl<'a> Parser<'a> {
         program
     }
 
-    fn parse_statement(&mut self) -> Option<ast::LetStatement> {
+    fn parse_statement(&mut self) -> Option<ast::Statement> {
         match self.cur_token.token_type {
-            token::TokenType::LET => self.parse_let_statement(),
+            token::TokenType::LET => self.parse_let_statement().map(|x| ast::Statement::LetStatement(x)),
             _ => None,
         }
     }
@@ -121,8 +121,8 @@ let y = 10;
 let foobar = 838383;
 ");
 
-        let mut l = lexer::Lexer::new(input);
-        let mut p = Parser::new(&mut l);
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
 
         let program = p.parse_program();
         check_parser_errors(p);
@@ -195,5 +195,39 @@ let foobar = 838383;
         };
 
         true
+    }
+
+    #[test]
+    fn test_return_statements() {
+        let input = String::from("
+return 5;
+return 10;
+return 993322;
+");
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 3 {
+            panic!("program.statements does not contain 3 statements. got={}",
+                   program.statements.len());
+        }
+
+        for stmt in program.statements.iter() {
+            let return_statement = match stmt {
+                Statement::ReturnStatement(rs) => rs,
+                _ => {
+                    eprint!("s not ast::ReturnStatement. got={:?}", stmt.clone());
+                    continue
+                },
+            };
+            if return_statement.token_literal() != "return" {
+                eprint!("return_statement.token_literal() not 'return', got {}",
+                    return_statement.token_literal())
+            }
+        }
     }
 }
