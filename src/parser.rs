@@ -107,6 +107,23 @@ impl Parser {
             false
         }
     }
+
+    fn parse_return_statement(&mut self) -> Option<ast::ReturnStatement> {
+        let stmt = ast::ReturnStatement{
+            token: self.cur_token.clone(),
+            return_value: None,
+        };
+
+        self.next_token();
+
+        // TODO we're skipping the expressions until we
+        // encounter a semicolon
+        while !self.cur_token_is(token::TokenType::SEMICOLON) {
+            self.next_token()
+        }
+
+        Some(stmt)
+    }
 }
 
 #[cfg(test)]
