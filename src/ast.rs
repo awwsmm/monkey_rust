@@ -7,12 +7,14 @@ pub(crate) trait Node {
 #[derive(Clone, Debug)]
 pub(crate) enum Statement {
     LetStatement(LetStatement),
+    ReturnStatement(ReturnStatement),
 }
 
 impl Node for Statement {
     fn token_literal(&self) -> String {
         match self {
             Statement::LetStatement(let_statement) => let_statement.token_literal(),
+            Statement::ReturnStatement(return_statement) => return_statement.token_literal(),
         }
     }
 }
@@ -65,6 +67,18 @@ pub(crate) struct Identifier {
 }
 
 impl Node for Identifier {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
+#[derive(Clone, Debug)]
+struct ReturnStatement {
+    token: token::Token,
+    return_value: Expression,
+}
+
+impl Node for ReturnStatement {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
