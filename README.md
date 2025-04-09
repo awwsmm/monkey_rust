@@ -66,6 +66,8 @@ Can anyone think of constructs which are expressions vs. statements in various l
 
 Recursive descent is just one kind of parser. Did anyone look into other kinds?
 
-Why are some Go function names uppercase? Uppercase functions are exported, lowercase ones are not.
+### 2.6
 
-https://go.dev/tour/basics/3
+In the 1960s, a programming language called PL/I had become famous for (apparently) violating these precedence rules.
+
+https://en.wikipedia.org/wiki/Principle_of_least_astonishment

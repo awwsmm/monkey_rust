@@ -83,3 +83,14 @@ impl Node for ReturnStatement {
         self.token.literal.clone()
     }
 }
+
+struct ExpressionStatement {
+    token: token::Token, // the first token of the expression
+    expression: Expression,
+}
+
+impl Node for ExpressionStatement {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
