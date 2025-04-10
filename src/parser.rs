@@ -126,6 +126,9 @@ impl Parser {
     }
 }
 
+type PrefixParseFn = fn() -> ast::Expression;
+type InfixParseFn = fn(ast::Expression) -> ast::Expression;
+
 #[cfg(test)]
 mod tests {
     use super::*;
