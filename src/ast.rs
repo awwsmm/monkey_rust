@@ -147,3 +147,46 @@ impl Node for ExpressionStatement {
         self.token.literal.clone()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_string() {
+        let program = Program{
+            statements: vec![
+                Statement::LetStatement(LetStatement{
+                    token: token::Token{
+                        token_type: token::TokenType::LET,
+                        literal: String::from("let"),
+                    },
+                    name: Some(
+                        Identifier{
+                            token: token::Token{
+                                token_type: token::TokenType::IDENT,
+                                literal: String::from("myVar"),
+                            },
+                            value: String::from("myVar"),
+                        }
+                    ),
+                    value: Some(
+                        Expression::Identifier(
+                            Identifier{
+                                token: token::Token{
+                                    token_type: token::TokenType::IDENT,
+                                    literal: String::from("anotherVar"),
+                                },
+                                value: String::from("anotherVar"),
+                            }
+                        )
+                    ),
+                })
+            ],
+        };
+
+        if program.to_string() != "let myVar = anotherVar;" {
+            panic!("program.to_string() wrong. got={}", program.to_string())
+        }
+    }
+}
