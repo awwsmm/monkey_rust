@@ -80,6 +80,14 @@ pub(crate) struct LetStatement {
     pub(crate) value: Option<Expression>,
 }
 
+impl Display for LetStatement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let name = self.name.clone().map(|x| x.to_string()).unwrap_or(String::from(""));
+        let value = self.value.clone().map(|x| format!("{}", x)).unwrap_or(String::from(""));
+        write!(f, "{} {} = {};", self.token_literal(), name, value)
+    }
+}
+
 impl Node for LetStatement {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
@@ -104,6 +112,13 @@ pub(crate) struct ReturnStatement {
     pub(crate) return_value: Option<Expression>,
 }
 
+impl Display for ReturnStatement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let return_value = self.return_value.clone().map(|x| format!(" {}", x));
+        write!(f, "{}{};", self.token_literal(), return_value.unwrap_or(String::from("")))
+    }
+}
+
 impl Node for ReturnStatement {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
@@ -113,6 +128,12 @@ impl Node for ReturnStatement {
 struct ExpressionStatement {
     token: token::Token, // the first token of the expression
     expression: Expression,
+}
+
+impl Display for ExpressionStatement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.expression.to_string())
+    }
 }
 
 impl Node for ExpressionStatement {
