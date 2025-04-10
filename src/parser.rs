@@ -129,6 +129,14 @@ impl Parser {
 
         Some(stmt)
     }
+
+    fn register_prefix(&mut self, token_type: token::TokenType, f: PrefixParseFn) {
+        self.prefix_parse_fns.insert(token_type, f);
+    }
+
+    fn register_infix(&mut self, token_type: token::TokenType, f: InfixParseFn) {
+        self.infix_parse_fns.insert(token_type, f);
+    }
 }
 
 type PrefixParseFn = fn() -> ast::Expression;
