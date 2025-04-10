@@ -1,12 +1,15 @@
 use crate::{ast, lexer, token};
+use std::collections::HashMap;
 
 struct Parser {
     l: lexer::Lexer,
-
     errors: Vec<String>,
 
     cur_token: token::Token,
     peek_token: token::Token,
+
+    prefix_parse_fns: HashMap<token::TokenType, PrefixParseFn>,
+    infix_parse_fns: HashMap<token::TokenType, InfixParseFn>,
 }
 
 impl Parser {
@@ -16,6 +19,8 @@ impl Parser {
             errors: vec![],
             cur_token: Default::default(),
             peek_token: Default::default(),
+            prefix_parse_fns: HashMap::new(),
+            infix_parse_fns: HashMap::new(),
         };
 
         // Read two tokens, so cur_token and peek_token are both set
