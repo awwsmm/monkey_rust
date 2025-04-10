@@ -1,6 +1,7 @@
 use crate::token;
+use std::fmt::{Display, Formatter};
 
-pub(crate) trait Node {
+pub(crate) trait Node : Display {
     fn token_literal(&self) -> String;
 }
 
@@ -8,6 +9,16 @@ pub(crate) trait Node {
 pub(crate) enum Statement {
     LetStatement(LetStatement),
     ReturnStatement(ReturnStatement),
+}
+
+impl Display for Statement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let string = match self {
+            Statement::LetStatement(let_statement) => let_statement.to_string(),
+            Statement::ReturnStatement(return_statement) => return_statement.to_string(),
+        };
+        write!(f, "{}", string)
+    }
 }
 
 impl Node for Statement {
@@ -22,6 +33,15 @@ impl Node for Statement {
 #[derive(Clone, Debug)]
 pub(crate) enum Expression {
     Identifier(Identifier),
+}
+
+impl Display for Expression {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let string = match self {
+            Expression::Identifier(identifier) => identifier.to_string(),
+        };
+        write!(f, "{}", string)
+    }
 }
 
 impl Node for Expression {

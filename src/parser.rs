@@ -130,6 +130,7 @@ impl Parser {
 mod tests {
     use super::*;
     use crate::ast::{Node, Statement};
+    use std::any::type_name_of_val;
 
     #[test]
     fn test_let_statements() {
@@ -234,18 +235,26 @@ return 993322;
                    program.statements.len());
         }
 
+        let mut should_panic = false;
+
         for stmt in program.statements.iter() {
             let return_statement = match stmt {
                 Statement::ReturnStatement(rs) => rs,
                 _ => {
-                    eprint!("s not ast::ReturnStatement. got={:?}", stmt.clone());
+                    eprint!("s not ast::ReturnStatement. got={:?}", type_name_of_val(stmt));
+                    should_panic = true;
                     continue
                 },
             };
             if return_statement.token_literal() != "return" {
                 eprint!("return_statement.token_literal() not 'return', got {}",
-                    return_statement.token_literal())
+                    return_statement.token_literal());
+                should_panic = true;
             }
+        }
+
+        if should_panic {
+            panic!()
         }
     }
 }
