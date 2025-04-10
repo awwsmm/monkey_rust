@@ -57,6 +57,12 @@ pub(crate) struct Program {
     pub(crate) statements: Vec<Statement>,
 }
 
+impl Display for Program {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.statements.iter().map(|s| write!(f, "{}", s.to_string())).into_iter().collect()
+    }
+}
+
 impl Node for Program {
     fn token_literal(&self) -> String {
         if let [head, ..] = &*self.statements {
