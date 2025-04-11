@@ -152,6 +152,16 @@ impl Parser {
     }
 }
 
+enum Precedence {
+    Lowest,
+    Equals,      // ==
+    LessGreater, // > or <
+    Sum,         // +
+    Product,     // *
+    Prefix,      // -X or !X
+    Call,        // myFunction(X)
+}
+
 type PrefixParseFn = fn(&Parser) -> ast::Expression;
 type InfixParseFn = fn(&Parser, ast::Expression) -> ast::Expression;
 
