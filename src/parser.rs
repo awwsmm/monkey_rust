@@ -62,7 +62,7 @@ impl Parser {
         match self.cur_token.token_type {
             token::TokenType::LET => self.parse_let_statement().map(|x| ast::Statement::LetStatement(x)),
             token::TokenType::RETURN => self.parse_return_statement().map(|x| ast::Statement::ReturnStatement(x)),
-            _ => None,
+            _ => self.parse_expression_statement().map(|x| ast::Statement::ExpressionStatement(x)),
         }
     }
 
