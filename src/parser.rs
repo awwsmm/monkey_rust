@@ -23,11 +23,22 @@ impl Parser {
             infix_parse_fns: HashMap::new(),
         };
 
+        p.register_prefix(token::TokenType::IDENT, Parser::parse_identifier);
+
         // Read two tokens, so cur_token and peek_token are both set
         p.next_token();
         p.next_token();
 
         p
+    }
+
+    fn parse_identifier(&self) -> ast::Expression {
+       ast::Expression::Identifier(
+           ast::Identifier{
+               token: self.cur_token.clone(),
+               value: self.cur_token.literal.clone(),
+           }
+       )
     }
 
     fn errors(&self) -> Vec<String> {
