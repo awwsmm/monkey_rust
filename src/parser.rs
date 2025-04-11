@@ -150,6 +150,15 @@ impl Parser {
 
         Some(stmt)
     }
+
+    fn parse_expression(&self, precedence: Precedence) -> Option<ast::Expression> {
+        let prefix = self.prefix_parse_fns.get(&self.cur_token.token_type);
+        if prefix.is_none() {
+            return None
+        }
+
+        Some((*prefix.unwrap())(self))
+    }
 }
 
 enum Precedence {
