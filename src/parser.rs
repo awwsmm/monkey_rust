@@ -139,13 +139,13 @@ impl Parser {
     }
 }
 
-type PrefixParseFn = fn() -> ast::Expression;
-type InfixParseFn = fn(ast::Expression) -> ast::Expression;
+type PrefixParseFn = fn(&Parser) -> ast::Expression;
+type InfixParseFn = fn(&Parser, ast::Expression) -> ast::Expression;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Node, Statement};
+    use crate::ast::*;
     use std::any::type_name_of_val;
 
     #[test]
@@ -257,7 +257,7 @@ return 993322;
             let return_statement = match stmt {
                 Statement::ReturnStatement(rs) => rs,
                 _ => {
-                    eprint!("s not ast::ReturnStatement. got={:?}", type_name_of_val(stmt));
+                    eprint!("s not ast::ReturnStatement. got={}", type_name_of_val(stmt));
                     should_panic = true;
                     continue
                 },
@@ -267,6 +267,48 @@ return 993322;
                     return_statement.token_literal());
                 should_panic = true;
             }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_identifier_expression() {
+        let input = String::from("foobar;");
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 1 {
+            panic!("program.statements has not enough statements. got={}",
+                   program.statements.len());
+        }
+
+        let stmt = match program.statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(program.statements.get(0).unwrap())),
+        };
+
+        let ident = match stmt.expression.clone() {
+            Some(Expression::Identifier(identifier)) => identifier,
+            _ => panic!("exp not ast::Identifier. got={:?}", type_name_of_val(&stmt.expression))
+        };
+
+        let mut should_panic = false;
+
+        if ident.value != "foobar" {
+            should_panic = true;
+            eprint!("ident.value not {}. got={}\n", "foobar", ident.value)
+        }
+
+        if ident.token_literal() != "foobar" {
+            should_panic = true;
+            eprint!("ident.token_literal() not {}. got={}\n", "foobar", ident.token_literal())
         }
 
         if should_panic {

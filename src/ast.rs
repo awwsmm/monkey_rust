@@ -9,6 +9,7 @@ pub(crate) trait Node : Display {
 pub(crate) enum Statement {
     LetStatement(LetStatement),
     ReturnStatement(ReturnStatement),
+    ExpressionStatement(ExpressionStatement),
 }
 
 impl Display for Statement {
@@ -16,6 +17,7 @@ impl Display for Statement {
         let string = match self {
             Statement::LetStatement(let_statement) => let_statement.to_string(),
             Statement::ReturnStatement(return_statement) => return_statement.to_string(),
+            Statement::ExpressionStatement(expression_statement) => expression_statement.to_string(),
         };
         write!(f, "{}", string)
     }
@@ -26,6 +28,7 @@ impl Node for Statement {
         match self {
             Statement::LetStatement(let_statement) => let_statement.token_literal(),
             Statement::ReturnStatement(return_statement) => return_statement.token_literal(),
+            Statement::ExpressionStatement(expression_statement) => expression_statement.token_literal(),
         }
     }
 }
@@ -131,14 +134,15 @@ impl Node for ReturnStatement {
     }
 }
 
-struct ExpressionStatement {
-    token: token::Token, // the first token of the expression
-    expression: Expression,
+#[derive(Clone, Debug)]
+pub(crate) struct ExpressionStatement {
+    pub(crate) token: token::Token, // the first token of the expression
+    pub(crate) expression: Option<Expression>,
 }
 
 impl Display for ExpressionStatement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.expression.to_string())
+        write!(f, "{}", self.expression.clone().map(|x| x.to_string()).unwrap_or(String::from("")))
     }
 }
 
