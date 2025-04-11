@@ -137,6 +137,19 @@ impl Parser {
     fn register_infix(&mut self, token_type: token::TokenType, f: InfixParseFn) {
         self.infix_parse_fns.insert(token_type, f);
     }
+
+    fn parse_expression_statement(&mut self) -> Option<ast::ExpressionStatement> {
+        let stmt = ast::ExpressionStatement{
+            token: self.cur_token.clone(),
+            expression: self.parse_expression(Precedence::Lowest),
+        };
+
+        if self.peek_token_is(token::TokenType::SEMICOLON) {
+            self.next_token()
+        }
+
+        Some(stmt)
+    }
 }
 
 type PrefixParseFn = fn(&Parser) -> ast::Expression;
