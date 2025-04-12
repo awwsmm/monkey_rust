@@ -215,6 +215,36 @@ impl Parser {
 
         Some(ast::Expression::PrefixExpression(expression))
     }
+
+    fn peek_precedence(&self) -> Precedence {
+        let thing = PRECEDENCES.iter().find_map(|(token_type, precedence)| {
+            if token_type == &self.peek_token.token_type {
+                Some(precedence)
+            } else {
+                None
+            }
+        });
+
+        match thing {
+            None => Precedence::Lowest,
+            Some(precedence) => *precedence,
+        }
+    }
+
+    fn cur_precedence(&self) -> Precedence {
+        let thing = PRECEDENCES.iter().find_map(|(token_type, precedence)| {
+            if token_type == &self.cur_token.token_type {
+                Some(precedence)
+            } else {
+                None
+            }
+        });
+
+        match thing {
+            None => Precedence::Lowest,
+            Some(precedence) => *precedence,
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialOrd, PartialEq)]
@@ -227,6 +257,17 @@ enum Precedence {
     Prefix,      // -X or !X
     Call,        // myFunction(X)
 }
+
+const PRECEDENCES: [(token::TokenType, Precedence); 8] = [
+    (token::TokenType::EQ, Precedence::Equals),
+    (token::TokenType::NEQ, Precedence::Equals),
+    (token::TokenType::LT, Precedence::LessGreater),
+    (token::TokenType::GT, Precedence::LessGreater),
+    (token::TokenType::PLUS, Precedence::Sum),
+    (token::TokenType::MINUS, Precedence::Sum),
+    (token::TokenType::SLASH, Precedence::Product),
+    (token::TokenType::ASTERISK, Precedence::Product),
+];
 
 type PrefixParseFn = fn(&mut Parser) -> Option<ast::Expression>;
 type InfixParseFn = fn(&mut Parser, ast::Expression) -> Option<ast::Expression>;
