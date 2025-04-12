@@ -24,6 +24,7 @@ impl Parser {
         };
 
         p.register_prefix(token::TokenType::IDENT, Parser::parse_identifier);
+        p.register_prefix(token::TokenType::INT, Parser::parse_integer_literal);
 
         // Read two tokens, so cur_token and peek_token are both set
         p.next_token();
