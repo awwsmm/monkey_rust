@@ -32,13 +32,15 @@ impl Parser {
         p
     }
 
-    fn parse_identifier(&self) -> ast::Expression {
-       ast::Expression::Identifier(
-           ast::Identifier{
-               token: self.cur_token.clone(),
-               value: self.cur_token.literal.clone(),
-           }
-       )
+    fn parse_identifier(&mut self) -> Option<ast::Expression> {
+        Some(
+           ast::Expression::Identifier(
+               ast::Identifier{
+                   token: self.cur_token.clone(),
+                   value: self.cur_token.literal.clone(),
+               }
+           )
+        )
     }
 
     fn errors(&self) -> Vec<String> {
@@ -162,13 +164,13 @@ impl Parser {
         Some(stmt)
     }
 
-    fn parse_expression(&self, precedence: Precedence) -> Option<ast::Expression> {
+    fn parse_expression(&mut self, precedence: Precedence) -> Option<ast::Expression> {
         let prefix = self.prefix_parse_fns.get(&self.cur_token.token_type);
         if prefix.is_none() {
             return None
         }
 
-        Some((*prefix.unwrap())(self))
+        (*prefix.unwrap())(self)
     }
 }
 
@@ -182,7 +184,7 @@ enum Precedence {
     Call,        // myFunction(X)
 }
 
-type PrefixParseFn = fn(&Parser) -> ast::Expression;
+type PrefixParseFn = fn(&mut Parser) -> Option<ast::Expression>;
 type InfixParseFn = fn(&Parser, ast::Expression) -> ast::Expression;
 
 #[cfg(test)]
@@ -352,6 +354,48 @@ return 993322;
         if ident.token_literal() != "foobar" {
             should_panic = true;
             eprint!("ident.token_literal() not {}. got={}\n", "foobar", ident.token_literal())
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_integer_literal_expression() {
+        let input = String::from("5;");
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 1 {
+            panic!("program has not enough statements. got={}",
+                   program.statements.len());
+        }
+
+        let stmt = match program.statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(program.statements.get(0).unwrap())),
+        };
+
+        let literal = match stmt.expression.clone() {
+            Some(Expression::IntegerLiteral(integer_literal)) => integer_literal,
+            _ => panic!("exp not ast::IntegerLiteral. got={:?}", type_name_of_val(&stmt.expression))
+        };
+
+        let mut should_panic = false;
+
+        if literal.value != 5 {
+            should_panic = true;
+            eprint!("literal.value not {}. got={}\n", 5, literal.value)
+        }
+
+        if literal.token_literal() != "5" {
+            should_panic = true;
+            eprint!("literal.token_literal() not {}. got={}\n", "5", literal.token_literal())
         }
 
         if should_panic {
