@@ -420,4 +420,60 @@ return 993322;
             panic!()
         }
     }
+
+    #[test]
+    fn test_parsing_prefix_expressions() {
+        struct Test {
+            input: String,
+            operator: String,
+            integer_value: i32,
+        }
+
+        impl Test {
+            fn new(input: &str, operator: &str, integer_value: i32) -> Self {
+                Self {
+                    input: input.to_string(),
+                    operator: operator.to_string(),
+                    integer_value,
+                }
+            }
+        }
+
+        let prefix_tests = vec![
+            Test::new("!5", "!", 5),
+            Test::new("-15", "-", 15),
+        ];
+
+        for tt in prefix_tests.into_iter() {
+            let l = lexer::Lexer::new(tt.input);
+            let mut p = Parser::new(l);
+            let program = p.parse_program();
+            check_parser_errors(p);
+
+            if program.statements.len() != 1 {
+                panic!("program.statements does not contain {} statements. got={}",
+                       1, program.statements.len());
+            }
+
+            let stmt = match program.statements.get(0).unwrap() {
+                Statement::ExpressionStatement(expression_statement) => expression_statement,
+                _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                            type_name_of_val(program.statements.get(0).unwrap())),
+            };
+
+            let exp = match stmt.expression.clone() {
+                Some(Expression::PrefixExpression(prefix_expression)) => prefix_expression,
+                _ => panic!("exp not ast::PrefixExpression. got={:?}", type_name_of_val(&stmt.expression))
+            };
+
+            if exp.operator != tt.operator {
+                panic!("exp.operator is not '{}', got={}",
+                    tt.operator, exp.operator)
+            }
+
+            if !test_integer_literal(exp.right.unwrap(), tt.integer_value) {
+                panic!()
+            }
+        }
+    }
 }
