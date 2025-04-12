@@ -25,6 +25,8 @@ impl Parser {
 
         p.register_prefix(token::TokenType::IDENT, Parser::parse_identifier);
         p.register_prefix(token::TokenType::INT, Parser::parse_integer_literal);
+        p.register_prefix(token::TokenType::BANG, Parser::parse_prefix_expression);
+        p.register_prefix(token::TokenType::MINUS, Parser::parse_prefix_expression);
 
         // Read two tokens, so cur_token and peek_token are both set
         p.next_token();
@@ -195,6 +197,20 @@ impl Parser {
         lit.value = value;
 
         Some(ast::Expression::IntegerLiteral(lit))
+    }
+
+    fn parse_prefix_expression(&mut self) -> Option<ast::Expression> {
+        let mut expression = ast::PrefixExpression{
+            token: self.cur_token.clone(),
+            operator: self.cur_token.literal.to_string(),
+            right: Box::new(None),
+        };
+
+        self.next_token();
+
+        expression.right = Box::new(self.parse_expression(Precedence::Prefix));
+
+        Some(ast::Expression::PrefixExpression(expression))
     }
 }
 
