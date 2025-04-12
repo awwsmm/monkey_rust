@@ -225,6 +225,21 @@ impl Parser {
         Some(ast::Expression::PrefixExpression(expression))
     }
 
+    fn parse_infix_expression(&mut self, left: ast::Expression) -> Option<ast::Expression> {
+        let mut expression = ast::InfixExpression{
+            token: self.cur_token.clone(),
+            left: Box::new(Some(left)),
+            operator: self.cur_token.literal.clone(),
+            right: Box::new(None),
+        };
+
+        let precedence = self.cur_precedence();
+        self.next_token();
+        expression.right = Box::new(self.parse_expression(precedence));
+
+        Some(ast::Expression::InfixExpression(expression))
+    }
+
     fn peek_precedence(&self) -> Precedence {
         let thing = PRECEDENCES.iter().find_map(|(token_type, precedence)| {
             if token_type == &self.peek_token.token_type {
