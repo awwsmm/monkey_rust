@@ -37,6 +37,7 @@ impl Node for Statement {
 pub(crate) enum Expression {
     Identifier(Identifier),
     IntegerLiteral(IntegerLiteral),
+    PrefixExpression(PrefixExpression),
 }
 
 impl Display for Expression {
@@ -44,6 +45,7 @@ impl Display for Expression {
         let string = match self {
             Expression::Identifier(identifier) => identifier.to_string(),
             Expression::IntegerLiteral(integer_literal) => integer_literal.to_string(),
+            Expression::PrefixExpression(prefix_expression) => prefix_expression.to_string(),
         };
         write!(f, "{}", string)
     }
@@ -54,6 +56,7 @@ impl Node for Expression {
         match self {
             Expression::Identifier(identifier) => identifier.token_literal(),
             Expression::IntegerLiteral(integer_literal) => integer_literal.token_literal(),
+            Expression::PrefixExpression(prefix_expression) => prefix_expression.token_literal(),
         }
     }
 }
@@ -168,6 +171,25 @@ impl Display for IntegerLiteral {
 }
 
 impl Node for IntegerLiteral {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct PrefixExpression {
+    pub(crate) token: token::Token, // The prefix token, e.g. !
+    pub(crate) operator: String,
+    pub(crate) right: Box<Option<Expression>>,
+}
+
+impl Display for PrefixExpression {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}{})", self.operator, self.right.clone().map(|x| x.to_string()).unwrap_or(String::from("")))
+    }
+}
+
+impl Node for PrefixExpression {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
