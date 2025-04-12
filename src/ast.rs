@@ -38,6 +38,7 @@ pub(crate) enum Expression {
     Identifier(Identifier),
     IntegerLiteral(IntegerLiteral),
     PrefixExpression(PrefixExpression),
+    InfixExpression(InfixExpression),
 }
 
 impl Display for Expression {
@@ -46,6 +47,7 @@ impl Display for Expression {
             Expression::Identifier(identifier) => identifier.to_string(),
             Expression::IntegerLiteral(integer_literal) => integer_literal.to_string(),
             Expression::PrefixExpression(prefix_expression) => prefix_expression.to_string(),
+            Expression::InfixExpression(infix_expression) => infix_expression.to_string(),
         };
         write!(f, "{}", string)
     }
@@ -57,6 +59,7 @@ impl Node for Expression {
             Expression::Identifier(identifier) => identifier.token_literal(),
             Expression::IntegerLiteral(integer_literal) => integer_literal.token_literal(),
             Expression::PrefixExpression(prefix_expression) => prefix_expression.token_literal(),
+            Expression::InfixExpression(infix_expression) => infix_expression.token_literal(),
         }
     }
 }
@@ -190,6 +193,28 @@ impl Display for PrefixExpression {
 }
 
 impl Node for PrefixExpression {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct InfixExpression {
+    pub(crate) token: token::Token, // The operator token, e.g. +
+    pub(crate) left: Box<Option<Expression>>,
+    pub(crate) operator: String,
+    pub(crate) right: Box<Option<Expression>>,
+}
+
+impl Display for InfixExpression {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let left = self.left.clone().map(|x| x.to_string()).unwrap_or(String::from(""));
+        let right = self.right.clone().map(|x| x.to_string()).unwrap_or(String::from(""));
+        write!(f, "({} {} {})", left, self.operator, right)
+    }
+}
+
+impl Node for InfixExpression {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
