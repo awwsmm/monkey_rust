@@ -476,4 +476,26 @@ return 993322;
             }
         }
     }
+
+    fn test_integer_literal(il: ast::Expression, value: i32) -> bool {
+        let integ = match il {
+            Expression::IntegerLiteral(integer_literal) => integer_literal,
+            _ => {
+                eprint!("il not ast::IntegerLiteral. got={}", type_name_of_val(&il));
+                return false
+            }
+        };
+
+        if integ.value != value {
+            eprint!("integ.value not {}. got={}", value, integ.value);
+            return false
+        }
+
+        if integ.token_literal() != format!("{}", value) {
+            eprint!("integ.token_literal() not {}. got={}", value, integ.token_literal());
+            return false
+        }
+
+        true
+    }
 }
