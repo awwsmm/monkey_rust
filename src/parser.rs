@@ -667,8 +667,94 @@ return 993322;
                 panic!()
             }
         }
-
-
-
     }
+
+    #[test]
+    fn test_operator_precedence_parsing() {
+        struct Test {
+            input: String,
+            expected: String,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: &str) -> Self {
+                Self {
+                    input: input.to_string(),
+                    expected: expected.to_string(),
+                }
+            }
+        }
+
+        let tests = vec![
+            Test::new(
+                "-a * b",
+                "((-a) * b)"
+            ),
+            Test::new(
+                "!-a",
+                "(!(-a))"
+            ),
+            Test::new(
+                "a + b + c",
+                "((a + b) + c)"
+            ),
+            Test::new(
+                "a + b - c",
+                "((a + b) - c)"
+            ),
+            Test::new(
+                "a * b * c",
+                "((a * b) * c)"
+            ),
+            Test::new(
+                "a * b / c",
+                "((a * b) / c)"
+            ),
+            Test::new(
+                "a + b / c",
+                "(a + (b / c))"
+            ),
+            Test::new(
+                "a + b * c + d / e - f",
+                "(((a + (b * c)) + (d / e)) - f)"
+            ),
+            Test::new(
+                "3 + 4; -5 * 5;",
+                "(3 + 4)((-5) * 5)"
+            ),
+            Test::new(
+                "5 > 4 == 3 < 4",
+                "((5 > 4) == (3 < 4))"
+            ),
+            Test::new(
+                "5 < 4 != 3 > 4",
+                "((5 < 4) != (3 > 4))"
+            ),
+            Test::new(
+                "3 + 4 * 5 == 3 * 1 + 4 * 5",
+                "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"
+            )
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let l = lexer::Lexer::new(tt.input);
+            let mut p = Parser::new(l);
+            let program = p.parse_program();
+            check_parser_errors(p);
+
+            let actual = program.to_string();
+            if actual != tt.expected {
+                eprint!("expected={}, got={}", tt.expected, actual);
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+
 }
