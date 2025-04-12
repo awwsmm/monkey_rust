@@ -29,6 +29,15 @@ impl Parser {
         p.register_prefix(token::TokenType::BANG, Parser::parse_prefix_expression);
         p.register_prefix(token::TokenType::MINUS, Parser::parse_prefix_expression);
 
+        p.register_infix(token::TokenType::PLUS, Parser::parse_infix_expression);
+        p.register_infix(token::TokenType::MINUS, Parser::parse_infix_expression);
+        p.register_infix(token::TokenType::SLASH, Parser::parse_infix_expression);
+        p.register_infix(token::TokenType::ASTERISK, Parser::parse_infix_expression);
+        p.register_infix(token::TokenType::EQ, Parser::parse_infix_expression);
+        p.register_infix(token::TokenType::NEQ, Parser::parse_infix_expression);
+        p.register_infix(token::TokenType::LT, Parser::parse_infix_expression);
+        p.register_infix(token::TokenType::GT, Parser::parse_infix_expression);
+
         // Read two tokens, so cur_token and peek_token are both set
         p.next_token();
         p.next_token();
