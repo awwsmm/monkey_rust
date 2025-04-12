@@ -73,3 +73,11 @@ In the 1960s, a programming language called PL/I had become famous for (apparent
 https://en.wikipedia.org/wiki/Principle_of_least_astonishment
 
 Other than prefix, infix, and postfix, does anyone know of any other kinds of operators?
+
+### 2.7
+
+This GitHub repo seems to contain all the Golang source code
+
+https://github.com/andriisoldatenko/monkey-go
+
+It's where I found `parser/parser_tracing.go`.
