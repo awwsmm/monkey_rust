@@ -191,6 +191,17 @@ impl Parser {
 
         let mut left_exp = (*prefix.unwrap())(self);
 
+        while !self.peek_token_is(token::TokenType::SEMICOLON) && precedence < self.peek_precedence() {
+            let infix = match self.infix_parse_fns.get(&self.peek_token.token_type) {
+                None => return left_exp,
+                Some(infix_parse_fn) => infix_parse_fn,
+            }.clone();
+
+            self.next_token();
+
+            left_exp = left_exp.map(|l| infix(self, l)).flatten()
+        }
+
         left_exp
     }
 
