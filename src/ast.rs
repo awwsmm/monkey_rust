@@ -36,12 +36,14 @@ impl Node for Statement {
 #[derive(Clone, Debug)]
 pub(crate) enum Expression {
     Identifier(Identifier),
+    IntegerLiteral(IntegerLiteral),
 }
 
 impl Display for Expression {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let string = match self {
             Expression::Identifier(identifier) => identifier.to_string(),
+            Expression::IntegerLiteral(integer_literal) => integer_literal.to_string(),
         };
         write!(f, "{}", string)
     }
@@ -51,6 +53,7 @@ impl Node for Expression {
     fn token_literal(&self) -> String {
         match self {
             Expression::Identifier(identifier) => identifier.token_literal(),
+            Expression::IntegerLiteral(integer_literal) => integer_literal.token_literal(),
         }
     }
 }
@@ -147,6 +150,24 @@ impl Display for ExpressionStatement {
 }
 
 impl Node for ExpressionStatement {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct IntegerLiteral {
+    pub(crate) token: token::Token,
+    pub(crate) value: i32,
+}
+
+impl Display for IntegerLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.token.literal)
+    }
+}
+
+impl Node for IntegerLiteral {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
