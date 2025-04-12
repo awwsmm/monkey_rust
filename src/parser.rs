@@ -1,4 +1,5 @@
 use crate::{ast, lexer, token};
+use std::cmp::PartialOrd;
 use std::collections::HashMap;
 
 struct Parser {
@@ -179,7 +180,9 @@ impl Parser {
             return None
         }
 
-        (*prefix.unwrap())(self)
+        let mut left_exp = (*prefix.unwrap())(self);
+
+        left_exp
     }
 
     fn parse_integer_literal(&mut self) -> Option<ast::Expression> {
@@ -214,6 +217,7 @@ impl Parser {
     }
 }
 
+#[derive(Clone, Copy, PartialOrd, PartialEq)]
 enum Precedence {
     Lowest,
     Equals,      // ==
@@ -225,7 +229,7 @@ enum Precedence {
 }
 
 type PrefixParseFn = fn(&mut Parser) -> Option<ast::Expression>;
-type InfixParseFn = fn(&Parser, ast::Expression) -> ast::Expression;
+type InfixParseFn = fn(&mut Parser, ast::Expression) -> Option<ast::Expression>;
 
 #[cfg(test)]
 mod tests {
@@ -519,5 +523,76 @@ return 993322;
         }
 
         true
+    }
+
+    #[test]
+    fn test_parsing_infix_expressions() {
+        struct Test {
+            input: String,
+            left_value: i32,
+            operator: String,
+            right_value: i32,
+        }
+
+        impl Test {
+            fn new(input: &str, left_value: i32, operator: &str, right_value: i32) -> Self {
+                Self {
+                    input: input.to_string(),
+                    left_value,
+                    operator: operator.to_string(),
+                    right_value,
+                }
+            }
+        }
+
+        let infix_tests = vec![
+            Test::new("5 + 5", 5, "+", 5),
+            Test::new("5 - 5", 5, "-", 5),
+            Test::new("5 * 5", 5, "*", 5),
+            Test::new("5 / 5", 5, "/", 5),
+            Test::new("5 > 5", 5, ">", 5),
+            Test::new("5 < 5", 5, "<", 5),
+            Test::new("5 == 5", 5, "==", 5),
+            Test::new("5 != 5", 5, "!=", 5),
+        ];
+
+        for tt in infix_tests.into_iter() {
+            let l = lexer::Lexer::new(tt.input);
+            let mut p = Parser::new(l);
+            let program = p.parse_program();
+            check_parser_errors(p);
+
+            if program.statements.len() != 1 {
+                panic!("program.statements does not contain {} statements. got={}",
+                       1, program.statements.len());
+            }
+
+            let stmt = match program.statements.get(0).unwrap() {
+                Statement::ExpressionStatement(expression_statement) => expression_statement,
+                _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                            type_name_of_val(program.statements.get(0).unwrap())),
+            };
+
+            let exp = match stmt.expression.clone() {
+                Some(Expression::InfixExpression(infix_expression)) => infix_expression,
+                _ => panic!("exp not ast::InfixExpression. got={:?}", type_name_of_val(&stmt.expression))
+            };
+
+            if !test_integer_literal(exp.left.unwrap(), tt.left_value) {
+                panic!()
+            };
+
+            if exp.operator != tt.operator {
+                panic!("exp.operator is not '{}', got={}",
+                       tt.operator, exp.operator)
+            }
+
+            if !test_integer_literal(exp.right.unwrap(), tt.right_value) {
+                panic!()
+            }
+        }
+
+
+
     }
 }
