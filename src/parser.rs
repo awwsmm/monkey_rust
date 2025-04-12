@@ -172,6 +172,23 @@ impl Parser {
 
         (*prefix.unwrap())(self)
     }
+
+    fn parse_integer_literal(&mut self) -> Option<ast::Expression> {
+        let mut lit = ast::IntegerLiteral{ token: self.cur_token.clone(), value: 0 };
+
+        let value = match str::parse::<i32>(&*self.cur_token.literal) {
+            Ok(integer_value) => integer_value,
+            Err(_) => {
+                let msg = format!("could not parse {} as integer", self.cur_token.literal);
+                self.errors.push(msg);
+                return None
+            }
+        };
+
+        lit.value = value;
+
+        Some(ast::Expression::IntegerLiteral(lit))
+    }
 }
 
 enum Precedence {
