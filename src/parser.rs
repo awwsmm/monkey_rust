@@ -165,9 +165,15 @@ impl Parser {
         Some(stmt)
     }
 
+    fn no_prefix_parse_fn_error(&mut self, t: token::TokenType) {
+        let msg = format!("no prefix parse function for {} found", t);
+        self.errors.push(msg)
+    }
+
     fn parse_expression(&mut self, precedence: Precedence) -> Option<ast::Expression> {
         let prefix = self.prefix_parse_fns.get(&self.cur_token.token_type);
         if prefix.is_none() {
+            self.no_prefix_parse_fn_error(self.cur_token.token_type.clone());
             return None
         }
 
