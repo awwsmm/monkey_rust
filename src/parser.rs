@@ -538,24 +538,7 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        let ident = match stmt.expression.clone() {
-            Some(Expression::Identifier(identifier)) => identifier,
-            _ => panic!("exp not ast::Identifier. got={:?}", type_name_of_val(&stmt.expression))
-        };
-
-        let mut should_panic = false;
-
-        if ident.value != "foobar" {
-            should_panic = true;
-            eprint!("ident.value not {}. got={}\n", "foobar", ident.value)
-        }
-
-        if ident.token_literal() != "foobar" {
-            should_panic = true;
-            eprint!("ident.token_literal() not {}. got={}\n", "foobar", ident.token_literal())
-        }
-
-        if should_panic {
+        if !test_literal_expression(stmt.expression.unwrap(), Expected::Identifier("foobar")) {
             panic!()
         }
     }
@@ -580,24 +563,7 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        let literal = match stmt.expression.clone() {
-            Some(Expression::IntegerLiteral(integer_literal)) => integer_literal,
-            _ => panic!("exp not ast::IntegerLiteral. got={:?}", type_name_of_val(&stmt.expression))
-        };
-
-        let mut should_panic = false;
-
-        if literal.value != 5 {
-            should_panic = true;
-            eprint!("literal.value not {}. got={}\n", 5, literal.value)
-        }
-
-        if literal.token_literal() != "5" {
-            should_panic = true;
-            eprint!("literal.token_literal() not {}. got={}\n", "5", literal.token_literal())
-        }
-
-        if should_panic {
+        if !test_literal_expression(stmt.expression.unwrap(), Expected::IntegerLiteral(5)) {
             panic!()
         }
     }
@@ -706,21 +672,7 @@ return 993322;
                             type_name_of_val(&unexpected)),
             };
 
-            let exp = match stmt.expression.clone() {
-                Some(Expression::InfixExpression(infix_expression)) => infix_expression,
-                _ => panic!("exp not ast::InfixExpression. got={:?}", type_name_of_val(&stmt.expression))
-            };
-
-            if !test_integer_literal(exp.left.unwrap(), tt.left_value) {
-                panic!()
-            };
-
-            if exp.operator != tt.operator {
-                panic!("exp.operator is not '{}', got={}",
-                       tt.operator, exp.operator)
-            }
-
-            if !test_integer_literal(exp.right.unwrap(), tt.right_value) {
+            if !test_infix_expression(stmt.expression.unwrap(), Expected::IntegerLiteral(tt.left_value), tt.operator, Expected::IntegerLiteral(tt.right_value)) {
                 panic!()
             }
         }
