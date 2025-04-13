@@ -356,6 +356,42 @@ mod tests {
         true
     }
 
+    enum Expected {
+        IntegerLiteral(i32),
+        Identifier(&'static str),
+    }
+
+    fn test_literal_expression(exp: Expression, expected: Expected) -> bool {
+        match expected {
+            Expected::IntegerLiteral(v) => test_integer_literal(exp, v),
+            Expected::Identifier(v) => test_identifier(exp, v),
+        }
+    }
+
+    fn test_infix_expression(exp: Expression, left: Expected, operator: String, right: Expected) -> bool {
+        let exp = match exp {
+            Expression::InfixExpression(infix_expression) => infix_expression,
+            _ => {
+                eprint!("exp not ast::InfixExpression. got={}", type_name_of_val(&exp));
+                return false
+            }
+        };
+
+        if !test_literal_expression(exp.left.unwrap(), left) {
+            return false
+        };
+
+        if exp.operator != operator {
+            eprint!("exp.operator is not '{}', got={}", operator, exp.operator)
+        }
+
+        if !test_literal_expression(exp.right.unwrap(), right) {
+            return false
+        }
+
+        true
+    }
+
     fn check_parser_errors(p: Parser) {
         let errors = p.errors();
         if errors.len() == 0 {
