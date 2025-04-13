@@ -81,3 +81,7 @@ This GitHub repo seems to contain all the Golang source code
 https://github.com/andriisoldatenko/monkey-go
 
 It's where I found `parser/parser_tracing.go`.
+
+A few more visual examples explaining Pratt parsing:
+
+https://martin.janiczek.cz/2023/07/03/demystifying-pratt-parsers.html

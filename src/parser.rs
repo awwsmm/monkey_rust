@@ -1,3 +1,4 @@
+use crate::parser_tracing::{trace, untrace};
 use crate::{ast, lexer, token};
 use std::cmp::PartialOrd;
 use std::collections::HashMap;
@@ -165,6 +166,7 @@ impl Parser {
     }
 
     fn parse_expression_statement(&mut self) -> Option<ast::ExpressionStatement> {
+        trace("parse_expression_statement");
         let stmt = ast::ExpressionStatement{
             token: self.cur_token.clone(),
             expression: self.parse_expression(Precedence::Lowest),
@@ -174,6 +176,7 @@ impl Parser {
             self.next_token()
         }
 
+        untrace("parse_expression_statement");
         Some(stmt)
     }
 
@@ -183,9 +186,11 @@ impl Parser {
     }
 
     fn parse_expression(&mut self, precedence: Precedence) -> Option<ast::Expression> {
+        trace("parse_expression");
         let prefix = self.prefix_parse_fns.get(&self.cur_token.token_type);
         if prefix.is_none() {
             self.no_prefix_parse_fn_error(self.cur_token.token_type.clone());
+            untrace("parse_expression");
             return None
         }
 
@@ -193,7 +198,10 @@ impl Parser {
 
         while !self.peek_token_is(token::TokenType::SEMICOLON) && precedence < self.peek_precedence() {
             let infix = match self.infix_parse_fns.get(&self.peek_token.token_type) {
-                None => return left_exp,
+                None => {
+                    untrace("parse_expression");
+                    return left_exp
+                },
                 Some(infix_parse_fn) => infix_parse_fn,
             }.clone();
 
@@ -202,10 +210,12 @@ impl Parser {
             left_exp = left_exp.map(|l| infix(self, l)).flatten()
         }
 
+        untrace("parse_expression");
         left_exp
     }
 
     fn parse_integer_literal(&mut self) -> Option<ast::Expression> {
+        trace("parse_integer_literal");
         let mut lit = ast::IntegerLiteral{ token: self.cur_token.clone(), value: 0 };
 
         let value = match str::parse::<i32>(&*self.cur_token.literal) {
@@ -213,16 +223,19 @@ impl Parser {
             Err(_) => {
                 let msg = format!("could not parse {} as integer", self.cur_token.literal);
                 self.errors.push(msg);
+                untrace("parse_integer_literal");
                 return None
             }
         };
 
         lit.value = value;
 
+        untrace("parse_integer_literal");
         Some(ast::Expression::IntegerLiteral(lit))
     }
 
     fn parse_prefix_expression(&mut self) -> Option<ast::Expression> {
+        trace("parse_prefix_expression");
         let mut expression = ast::PrefixExpression{
             token: self.cur_token.clone(),
             operator: self.cur_token.literal.to_string(),
@@ -233,10 +246,12 @@ impl Parser {
 
         expression.right = Box::new(self.parse_expression(Precedence::Prefix));
 
+        untrace("parse_prefix_expression");
         Some(ast::Expression::PrefixExpression(expression))
     }
 
     fn parse_infix_expression(&mut self, left: ast::Expression) -> Option<ast::Expression> {
+        trace("parse_infix_expression");
         let mut expression = ast::InfixExpression{
             token: self.cur_token.clone(),
             left: Box::new(Some(left)),
@@ -248,6 +263,7 @@ impl Parser {
         self.next_token();
         expression.right = Box::new(self.parse_expression(precedence));
 
+        untrace("parse_infix_expression");
         Some(ast::Expression::InfixExpression(expression))
     }
 

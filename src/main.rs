@@ -6,6 +6,7 @@ mod lexer;
 mod repl;
 mod ast;
 mod parser;
+mod parser_tracing;
 
 fn main() {
     let mut stdout = io::stdout();
