@@ -313,47 +313,47 @@ mod tests {
     use crate::ast::*;
     use std::any::type_name_of_val;
 
-    #[test]
-    fn test_let_statements() {
-        let input = String::from("
-let x = 5;
-let y = 10;
-let foobar = 838383;
-");
-
-        let l = lexer::Lexer::new(input);
-        let mut p = Parser::new(l);
-
-        let program = p.parse_program();
-        check_parser_errors(p);
-
-        if program.statements.len() != 3 {
-            panic!("program.statements does not contain 3 statements. got={}",
-                program.statements.len());
-        }
-
-        struct Test {
-            expected_identifier: String
-        }
-
-        impl Test {
-            fn new(s: &str) -> Self {
-                Self { expected_identifier: String::from(s) }
+    fn test_integer_literal(il: Expression, value: i32) -> bool {
+        let integ = match il {
+            Expression::IntegerLiteral(integer_literal) => integer_literal,
+            _ => {
+                eprint!("il not ast::IntegerLiteral. got={}", type_name_of_val(&il));
+                return false
             }
+        };
+
+        if integ.value != value {
+            eprint!("integ.value not {}. got={}\n", value, integ.value);
+            return false
         }
 
-        let tests = vec![
-            Test::new("x"),
-            Test::new("y"),
-            Test::new("foobar"),
-        ];
+        if integ.token_literal() != format!("{}", value) {
+            eprint!("integ.token_literal() not {}. got={}\n", value, integ.token_literal());
+            return false
+        }
 
-        for (i, tt) in tests.iter().enumerate() {
-            let stmt = program.statements.get(i).unwrap();
-            if !test_let_statement(stmt.clone(), tt.expected_identifier.clone()) {
-                panic!()
+        true
+    }
+
+    fn test_identifier(exp: Expression, value: &str) -> bool {
+        let ident = match exp {
+            Expression::Identifier(identifier) => identifier,
+            _ => {
+                eprint!("exp not ast::Identifier. got={}", type_name_of_val(&exp));
+                return false
             }
+        };
+
+        if ident.value != value {
+            eprint!("ident.value not {}. got={}\n", value, ident.value);
+            return false
         }
+
+        if ident.token_literal() != format!("{}", value) {
+            eprint!("ident.token_literal() not {}. got={}\n", value, ident.token_literal())
+        }
+
+        true
     }
 
     fn check_parser_errors(p: Parser) {
@@ -395,6 +395,49 @@ let foobar = 838383;
         };
 
         true
+    }
+
+    #[test]
+    fn test_let_statements() {
+        let input = String::from("
+let x = 5;
+let y = 10;
+let foobar = 838383;
+");
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 3 {
+            panic!("program.statements does not contain 3 statements. got={}",
+                program.statements.len());
+        }
+
+        struct Test {
+            expected_identifier: String
+        }
+
+        impl Test {
+            fn new(s: &str) -> Self {
+                Self { expected_identifier: String::from(s) }
+            }
+        }
+
+        let tests = vec![
+            Test::new("x"),
+            Test::new("y"),
+            Test::new("foobar"),
+        ];
+
+        for (i, tt) in tests.iter().enumerate() {
+            let stmt = program.statements.get(i).unwrap();
+            if !test_let_statement(stmt.clone(), tt.expected_identifier.clone()) {
+                panic!()
+            }
+        }
     }
 
     #[test]
@@ -453,10 +496,10 @@ return 993322;
                    program.statements.len());
         }
 
-        let stmt = match program.statements.get(0).unwrap() {
+        let stmt = match program.statements.into_iter().next().unwrap() {
             Statement::ExpressionStatement(expression_statement) => expression_statement,
-            _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
-                        type_name_of_val(program.statements.get(0).unwrap())),
+            unexpected => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(&unexpected)),
         };
 
         let ident = match stmt.expression.clone() {
@@ -495,10 +538,10 @@ return 993322;
                    program.statements.len());
         }
 
-        let stmt = match program.statements.get(0).unwrap() {
+        let stmt = match program.statements.into_iter().next().unwrap() {
             Statement::ExpressionStatement(expression_statement) => expression_statement,
-            _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
-                        type_name_of_val(program.statements.get(0).unwrap())),
+            unexpected => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(&unexpected)),
         };
 
         let literal = match stmt.expression.clone() {
@@ -579,28 +622,6 @@ return 993322;
         }
     }
 
-    fn test_integer_literal(il: ast::Expression, value: i32) -> bool {
-        let integ = match il {
-            Expression::IntegerLiteral(integer_literal) => integer_literal,
-            _ => {
-                eprint!("il not ast::IntegerLiteral. got={}", type_name_of_val(&il));
-                return false
-            }
-        };
-
-        if integ.value != value {
-            eprint!("integ.value not {}. got={}", value, integ.value);
-            return false
-        }
-
-        if integ.token_literal() != format!("{}", value) {
-            eprint!("integ.token_literal() not {}. got={}", value, integ.token_literal());
-            return false
-        }
-
-        true
-    }
-
     #[test]
     fn test_parsing_infix_expressions() {
         struct Test {
@@ -643,10 +664,10 @@ return 993322;
                        1, program.statements.len());
             }
 
-            let stmt = match program.statements.get(0).unwrap() {
+            let stmt = match program.statements.into_iter().next().unwrap() {
                 Statement::ExpressionStatement(expression_statement) => expression_statement,
-                _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
-                            type_name_of_val(program.statements.get(0).unwrap())),
+                unexpected => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                            type_name_of_val(&unexpected)),
             };
 
             let exp = match stmt.expression.clone() {
