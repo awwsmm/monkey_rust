@@ -1,3 +1,4 @@
+#![allow(unused)]
 use std::sync::RwLock;
 
 static TRACE_LEVEL: RwLock<usize> = RwLock::new(0);

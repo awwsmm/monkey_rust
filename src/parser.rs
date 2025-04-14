@@ -46,18 +46,14 @@ impl Parser {
     }
 
     fn parse_identifier(&mut self) -> Option<ast::Expression> {
-        Some(
-           ast::Expression::Identifier(
-               ast::Identifier{
-                   token: self.cur_token.clone(),
-                   value: self.cur_token.literal.clone(),
-               }
-           )
-        )
+        Some(ast::Expression::Identifier(ast::Identifier{
+            token: self.cur_token.clone(),
+            value: self.cur_token.literal.clone(),
+        }))
     }
 
-    fn errors(&self) -> Vec<String> {
-        self.errors.clone()
+    fn errors(&self) -> &Vec<String> {
+        self.errors.as_ref()
     }
 
     fn peek_error(&mut self, t: token::TokenType) {
@@ -199,7 +195,7 @@ impl Parser {
 
             self.next_token();
 
-            left_exp = left_exp.map(|l| infix(self, l)).flatten()
+            left_exp = left_exp.map(|l| infix(self, l))
         }
 
         left_exp
@@ -226,29 +222,29 @@ impl Parser {
         let mut expression = ast::PrefixExpression{
             token: self.cur_token.clone(),
             operator: self.cur_token.literal.to_string(),
-            right: Box::new(None),
+            right: None,
         };
 
         self.next_token();
 
-        expression.right = Box::new(self.parse_expression(Precedence::Prefix));
+        expression.right = self.parse_expression(Precedence::Prefix).map(|x| Box::new(x));
 
         Some(ast::Expression::PrefixExpression(expression))
     }
 
-    fn parse_infix_expression(&mut self, left: ast::Expression) -> Option<ast::Expression> {
+    fn parse_infix_expression(&mut self, left: ast::Expression) -> ast::Expression {
         let mut expression = ast::InfixExpression{
             token: self.cur_token.clone(),
-            left: Box::new(Some(left)),
+            left: Some(Box::new(left)),
             operator: self.cur_token.literal.clone(),
-            right: Box::new(None),
+            right: None,
         };
 
         let precedence = self.cur_precedence();
         self.next_token();
-        expression.right = Box::new(self.parse_expression(precedence));
+        expression.right = self.parse_expression(precedence).map(|x| Box::new(x));
 
-        Some(ast::Expression::InfixExpression(expression))
+        ast::Expression::InfixExpression(expression)
     }
 
     fn peek_precedence(&self) -> Precedence {
@@ -305,7 +301,7 @@ const PRECEDENCES: [(token::TokenType, Precedence); 8] = [
 ];
 
 type PrefixParseFn = fn(&mut Parser) -> Option<ast::Expression>;
-type InfixParseFn = fn(&mut Parser, ast::Expression) -> Option<ast::Expression>;
+type InfixParseFn = fn(&mut Parser, ast::Expression) -> ast::Expression;
 
 #[cfg(test)]
 mod tests {
@@ -313,7 +309,7 @@ mod tests {
     use crate::ast::*;
     use std::any::type_name_of_val;
 
-    fn test_integer_literal(il: Expression, value: i32) -> bool {
+    fn test_integer_literal(il: &Expression, value: i32) -> bool {
         let integ = match il {
             Expression::IntegerLiteral(integer_literal) => integer_literal,
             _ => {
@@ -335,7 +331,7 @@ mod tests {
         true
     }
 
-    fn test_identifier(exp: Expression, value: &str) -> bool {
+    fn test_identifier(exp: &Expression, value: &str) -> bool {
         let ident = match exp {
             Expression::Identifier(identifier) => identifier,
             _ => {
@@ -361,14 +357,14 @@ mod tests {
         Identifier(&'static str),
     }
 
-    fn test_literal_expression(exp: Expression, expected: Expected) -> bool {
+    fn test_literal_expression(exp: &Expression, expected: Expected) -> bool {
         match expected {
             Expected::IntegerLiteral(v) => test_integer_literal(exp, v),
             Expected::Identifier(v) => test_identifier(exp, v),
         }
     }
 
-    fn test_infix_expression(exp: Expression, left: Expected, operator: String, right: Expected) -> bool {
+    fn test_infix_expression(exp: &Expression, left: Expected, operator: String, right: Expected) -> bool {
         let exp = match exp {
             Expression::InfixExpression(infix_expression) => infix_expression,
             _ => {
@@ -377,7 +373,7 @@ mod tests {
             }
         };
 
-        if !test_literal_expression(exp.left.unwrap(), left) {
+        if !test_literal_expression(exp.left.as_ref().unwrap(), left) {
             return false
         };
 
@@ -385,7 +381,7 @@ mod tests {
             eprint!("exp.operator is not '{}', got={}", operator, exp.operator)
         }
 
-        if !test_literal_expression(exp.right.unwrap(), right) {
+        if !test_literal_expression(exp.right.as_ref().unwrap(), right) {
             return false
         }
 
@@ -405,7 +401,7 @@ mod tests {
         panic!()
     }
 
-    fn test_let_statement(s: Statement, name: String) -> bool {
+    fn test_let_statement(s: &Statement, name: &str) -> bool {
         if s.token_literal() != "let" {
             eprint!("s.token_literal not 'let'. got={}", s.token_literal());
             return false
@@ -414,19 +410,21 @@ mod tests {
         let let_statement = match s {
             Statement::LetStatement(ls) => ls,
             _ => {
-                eprint!("s not ast::LetStatement. got={:?}", s.clone());
+                eprint!("s not ast::LetStatement. got={:?}", s);
                 return false
             },
         };
 
-        if let_statement.name.clone().unwrap().value != name {
-            eprint!("let_statement.name.value not '{}'. got={}", name, let_statement.name.unwrap().value);
+        let let_statement_name = let_statement.name.as_ref().unwrap();
+
+        if let_statement_name.value != name {
+            eprint!("let_statement.name.value not '{}'. got={}", name, let_statement_name.value);
             return false
         };
 
-        if let_statement.name.clone().unwrap().token_literal() != name {
+        if let_statement_name.token_literal() != name {
             eprint!("let_statement.name.token_literal() not '{}'. got={}",
-                    name, let_statement.name.unwrap().token_literal());
+                    name, let_statement_name.token_literal());
             return false
         };
 
@@ -470,7 +468,7 @@ let foobar = 838383;
 
         for (i, tt) in tests.iter().enumerate() {
             let stmt = program.statements.get(i).unwrap();
-            if !test_let_statement(stmt.clone(), tt.expected_identifier.clone()) {
+            if !test_let_statement(stmt, tt.expected_identifier.as_str()) {
                 panic!()
             }
         }
@@ -538,7 +536,7 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(stmt.expression.unwrap(), Expected::Identifier("foobar")) {
+        if !test_literal_expression(&stmt.expression.unwrap(), Expected::Identifier("foobar")) {
             panic!()
         }
     }
@@ -563,7 +561,7 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(stmt.expression.unwrap(), Expected::IntegerLiteral(5)) {
+        if !test_literal_expression(&stmt.expression.unwrap(), Expected::IntegerLiteral(5)) {
             panic!()
         }
     }
@@ -608,7 +606,7 @@ return 993322;
                             type_name_of_val(program.statements.get(0).unwrap())),
             };
 
-            let exp = match stmt.expression.clone() {
+            let exp = match stmt.expression.as_ref() {
                 Some(Expression::PrefixExpression(prefix_expression)) => prefix_expression,
                 _ => panic!("exp not ast::PrefixExpression. got={:?}", type_name_of_val(&stmt.expression))
             };
@@ -618,7 +616,7 @@ return 993322;
                     tt.operator, exp.operator)
             }
 
-            if !test_integer_literal(exp.right.unwrap(), tt.integer_value) {
+            if !test_integer_literal(exp.right.as_ref().unwrap(), tt.integer_value) {
                 panic!()
             }
         }
@@ -672,7 +670,7 @@ return 993322;
                             type_name_of_val(&unexpected)),
             };
 
-            if !test_infix_expression(stmt.expression.unwrap(), Expected::IntegerLiteral(tt.left_value), tt.operator, Expected::IntegerLiteral(tt.right_value)) {
+            if !test_infix_expression(&stmt.expression.unwrap(), Expected::IntegerLiteral(tt.left_value), tt.operator, Expected::IntegerLiteral(tt.right_value)) {
                 panic!()
             }
         }
