@@ -837,7 +837,27 @@ return 993322;
             Test::new(
                 "3 < 5 == true",
                 "((3 < 5) == true)"
-            )
+            ),
+            Test::new(
+                "1 + (2 + 3) + 4",
+                "((1 + (2 + 3)) + 4)"
+            ),
+            Test::new(
+                "(5 + 5) * 2",
+                "((5 + 5) * 2)"
+            ),
+            Test::new(
+                "2 / (5 + 5)",
+                "(2 / (5 + 5))"
+            ),
+            Test::new(
+                "-(5 + 5)",
+                "(-(5 + 5))"
+            ),
+            Test::new(
+                "!(true == true)",
+                "(!(true == true))"
+            ),
         ];
 
         let mut should_panic = false;
