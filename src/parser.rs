@@ -234,6 +234,13 @@ impl Parser {
         Some(ast::Expression::PrefixExpression(expression))
     }
 
+    fn parse_boolean(&mut self) -> Option<ast::Expression> {
+        Some(ast::Expression::Boolean(ast::Boolean {
+            token: self.cur_token.clone(),
+            value: self.cur_token_is(token::TokenType::TRUE)
+        }))
+    }
+
     fn parse_infix_expression(&mut self, left: ast::Expression) -> ast::Expression {
         let mut expression = ast::InfixExpression{
             token: self.cur_token.clone(),
