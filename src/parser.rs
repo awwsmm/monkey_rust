@@ -352,15 +352,39 @@ mod tests {
         true
     }
 
+    fn test_boolean(il: &Expression, value: bool) -> bool {
+        let boolean = match il {
+            Expression::Boolean(boolean) => boolean,
+            _ => {
+                eprint!("il not ast::Boolean. got={}", type_name_of_val(&il));
+                return false
+            }
+        };
+
+        if boolean.value != value {
+            eprint!("boolean.value not {}. got={}\n", value, boolean.value);
+            return false
+        }
+
+        if boolean.token_literal() != format!("{}", value) {
+            eprint!("boolean.token_literal() not {}. got={}\n", value, boolean.token_literal());
+            return false
+        }
+
+        true
+    }
+
     enum Expected {
         IntegerLiteral(i32),
         Identifier(&'static str),
+        Boolean(bool),
     }
 
     fn test_literal_expression(exp: &Expression, expected: Expected) -> bool {
         match expected {
             Expected::IntegerLiteral(v) => test_integer_literal(exp, v),
             Expected::Identifier(v) => test_identifier(exp, v),
+            Expected::Boolean(v) => test_boolean(exp, v),
         }
     }
 
@@ -562,6 +586,31 @@ return 993322;
         };
 
         if !test_literal_expression(&stmt.expression.unwrap(), Expected::IntegerLiteral(5)) {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_boolean_expression() {
+        let input = String::from("true;");
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 1 {
+            panic!("program has not enough statements. got={}",
+                   program.statements.len());
+        }
+
+        let stmt = match program.statements.into_iter().next().unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            unexpected => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                                 type_name_of_val(&unexpected)),
+        };
+
+        if !test_literal_expression(&stmt.expression.unwrap(), Expected::Boolean(true)) {
             panic!()
         }
     }
