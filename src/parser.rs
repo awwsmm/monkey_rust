@@ -798,6 +798,22 @@ return 993322;
             Test::new(
                 "3 + 4 * 5 == 3 * 1 + 4 * 5",
                 "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"
+            ),
+            Test::new(
+                "true",
+                "true"
+            ),
+            Test::new(
+                "false",
+                "false"
+            ),
+            Test::new(
+                "3 > 5 == false",
+                "((3 > 5) == false)"
+            ),
+            Test::new(
+                "3 < 5 == true",
+                "((3 < 5) == true)"
             )
         ];
 
