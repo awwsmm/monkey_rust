@@ -647,15 +647,15 @@ return 993322;
         struct Test {
             input: String,
             operator: String,
-            integer_value: i32,
+            value: Expected,
         }
 
         impl Test {
-            fn new(input: &str, operator: &str, integer_value: i32) -> Self {
+            fn new(input: &str, operator: &str, value: impl Into<Expected>) -> Self {
                 Self {
                     input: input.to_string(),
                     operator: operator.to_string(),
-                    integer_value,
+                    value: value.into(),
                 }
             }
         }
@@ -663,6 +663,8 @@ return 993322;
         let prefix_tests = vec![
             Test::new("!5", "!", 5),
             Test::new("-15", "-", 15),
+            Test::new("!true;", "!", true),
+            Test::new("!false;", "!", false),
         ];
 
         for tt in prefix_tests.into_iter() {
@@ -692,7 +694,7 @@ return 993322;
                     tt.operator, exp.operator)
             }
 
-            if !test_integer_literal(exp.right.as_ref().unwrap(), tt.integer_value) {
+            if !test_literal_expression(exp.right.as_ref().unwrap(), tt.value) {
                 panic!()
             }
         }
