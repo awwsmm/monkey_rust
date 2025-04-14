@@ -389,6 +389,24 @@ mod tests {
         BooleanLiteral(bool),
     }
 
+    impl From<i32> for Expected {
+        fn from(value: i32) -> Self {
+            Self::IntegerLiteral(value)
+        }
+    }
+
+    impl From<&'static str> for Expected {
+        fn from(value: &'static str) -> Self {
+            Self::Identifier(value)
+        }
+    }
+
+    impl From<bool> for Expected {
+        fn from(value: bool) -> Self {
+            Self::BooleanLiteral(value)
+        }
+    }
+
     fn test_literal_expression(exp: &Expression, expected: Expected) -> bool {
         match expected {
             Expected::IntegerLiteral(v) => test_integer_literal(exp, v),
@@ -569,7 +587,7 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), Expected::Identifier("foobar")) {
+        if !test_literal_expression(&stmt.expression.unwrap(), "foobar".into()) {
             panic!()
         }
     }
@@ -594,7 +612,7 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), Expected::IntegerLiteral(5)) {
+        if !test_literal_expression(&stmt.expression.unwrap(), 5.into()) {
             panic!()
         }
     }
@@ -619,7 +637,7 @@ return 993322;
                                  type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), Expected::BooleanLiteral(true)) {
+        if !test_literal_expression(&stmt.expression.unwrap(), true.into()) {
             panic!()
         }
     }
@@ -684,18 +702,18 @@ return 993322;
     fn test_parsing_infix_expressions() {
         struct Test {
             input: String,
-            left_value: i32,
+            left_value: Expected,
             operator: String,
-            right_value: i32,
+            right_value: Expected,
         }
 
         impl Test {
-            fn new(input: &str, left_value: i32, operator: &str, right_value: i32) -> Self {
+            fn new(input: &str, left_value: impl Into<Expected>, operator: &str, right_value: impl Into<Expected>) -> Self {
                 Self {
                     input: input.to_string(),
-                    left_value,
+                    left_value: left_value.into(),
                     operator: operator.to_string(),
-                    right_value,
+                    right_value: right_value.into(),
                 }
             }
         }
@@ -709,6 +727,9 @@ return 993322;
             Test::new("5 < 5", 5, "<", 5),
             Test::new("5 == 5", 5, "==", 5),
             Test::new("5 != 5", 5, "!=", 5),
+            Test::new("true == true", true, "==", true),
+            Test::new("true != false", true, "!=", false),
+            Test::new("false == false", false, "==", false),
         ];
 
         for tt in infix_tests.into_iter() {
@@ -728,7 +749,7 @@ return 993322;
                             type_name_of_val(&unexpected)),
             };
 
-            if !test_infix_expression(&stmt.expression.unwrap(), Expected::IntegerLiteral(tt.left_value), tt.operator, Expected::IntegerLiteral(tt.right_value)) {
+            if !test_infix_expression(&stmt.expression.unwrap(), tt.left_value.into(), tt.operator, tt.right_value.into()) {
                 panic!()
             }
         }
