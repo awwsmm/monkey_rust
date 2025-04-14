@@ -361,22 +361,22 @@ mod tests {
         true
     }
 
-    fn test_boolean(il: &Expression, value: bool) -> bool {
-        let boolean = match il {
+    fn test_boolean_literal(exp: &Expression, value: bool) -> bool {
+        let bo = match exp {
             Expression::Boolean(boolean) => boolean,
             _ => {
-                eprint!("il not ast::Boolean. got={}", type_name_of_val(&il));
+                eprint!("exp not ast::Boolean. got={}", type_name_of_val(&exp));
                 return false
             }
         };
 
-        if boolean.value != value {
-            eprint!("boolean.value not {}. got={}\n", value, boolean.value);
+        if bo.value != value {
+            eprint!("bo.value not {}. got={}\n", value, bo.value);
             return false
         }
 
-        if boolean.token_literal() != format!("{}", value) {
-            eprint!("boolean.token_literal() not {}. got={}\n", value, boolean.token_literal());
+        if bo.token_literal() != format!("{}", value) {
+            eprint!("bo.token_literal() not {}. got={}\n", value, bo.token_literal());
             return false
         }
 
@@ -386,14 +386,14 @@ mod tests {
     enum Expected {
         IntegerLiteral(i32),
         Identifier(&'static str),
-        Boolean(bool),
+        BooleanLiteral(bool),
     }
 
     fn test_literal_expression(exp: &Expression, expected: Expected) -> bool {
         match expected {
             Expected::IntegerLiteral(v) => test_integer_literal(exp, v),
             Expected::Identifier(v) => test_identifier(exp, v),
-            Expected::Boolean(v) => test_boolean(exp, v),
+            Expected::BooleanLiteral(v) => test_boolean_literal(exp, v),
         }
     }
 
@@ -619,7 +619,7 @@ return 993322;
                                  type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), Expected::Boolean(true)) {
+        if !test_literal_expression(&stmt.expression.unwrap(), Expected::BooleanLiteral(true)) {
             panic!()
         }
     }
