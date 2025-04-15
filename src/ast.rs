@@ -48,6 +48,7 @@ pub(crate) enum Expression {
     Boolean(Boolean),
     IfExpression(IfExpression),
     FunctionLiteral(FunctionLiteral),
+    CallExpression(CallExpression),
 }
 
 impl Expression {
@@ -60,6 +61,7 @@ impl Expression {
             Expression::Boolean(inner) => Box::new(inner),
             Expression::IfExpression(inner) => Box::new(inner),
             Expression::FunctionLiteral(inner) => Box::new(inner),
+            Expression::CallExpression(inner) => Box::new(inner),
         }
     }
 }
@@ -317,6 +319,31 @@ impl Display for FunctionLiteral {
 }
 
 impl Node for FunctionLiteral {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct CallExpression {
+    pub(crate) token: token::Token, // The '(' token
+    pub(crate) function: Box<Expression>, // Identifier or FunctionLiteral
+    pub(crate) arguments: Vec<Expression>,
+}
+
+impl Display for CallExpression {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut args = vec![];
+
+        for a in self.arguments.iter() {
+            args.push(a.to_string())
+        }
+
+        write!(f, "{}({})", self.function, args.join(", "))
+    }
+}
+
+impl Node for CallExpression {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
