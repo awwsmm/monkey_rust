@@ -893,5 +893,129 @@ return 993322;
         }
     }
 
+    #[test]
+    fn test_if_expression() {
+        let input = String::from("if (x < y) { x }");
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 1 {
+            panic!("program.statements does not contain {} statements. got={}",
+                   1, program.statements.len());
+        }
+
+        let stmt = match program.statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(program.statements.get(0).unwrap())),
+        };
+
+        let exp = match stmt.expression.as_ref() {
+            Some(Expression::IfExpression(if_expression)) => if_expression,
+            _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
+        };
+
+        if !test_infix_expression(&exp.condition, "x".into(), "<".into(), "y".into()) {
+            panic!()
+        }
+
+        let mut should_panic = false;
+
+        if exp.consequence.statements.len() != 1 {
+            should_panic = true;
+            eprint!("consequence is not 1 statements. got={}\n",
+                exp.consequence.statements.len())
+        }
+
+        let consequence = match exp.consequence.statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(exp.consequence.statements.get(0).unwrap())),
+        };
+
+        if !test_identifier(consequence.expression.as_ref().unwrap(), "x") {
+            panic!()
+        }
+
+        if exp.alternative.is_some() {
+            should_panic = true;
+            eprint!("exp.alternative was not None. got={:?}", exp.alternative)
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_if_else_expression() {
+        let input = String::from("if (x < y) { x } else { y }");
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 1 {
+            panic!("program.statements does not contain {} statements. got={}",
+                   1, program.statements.len());
+        }
+
+        let stmt = match program.statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(program.statements.get(0).unwrap())),
+        };
+
+        let exp = match stmt.expression.as_ref() {
+            Some(Expression::IfExpression(if_expression)) => if_expression,
+            _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
+        };
+
+        if !test_infix_expression(&exp.condition, "x".into(), "<".into(), "y".into()) {
+            panic!()
+        }
+
+        let mut should_panic = false;
+
+        if exp.consequence.statements.len() != 1 {
+            should_panic = true;
+            eprint!("consequence is not 1 statements. got={}\n",
+                    exp.consequence.statements.len())
+        }
+
+        let consequence = match exp.consequence.statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(exp.consequence.statements.get(0).unwrap())),
+        };
+
+        if !test_identifier(consequence.expression.as_ref().unwrap(), "x") {
+            panic!()
+        }
+
+        if exp.alternative.as_ref().unwrap().statements.len() != 1 {
+            should_panic = true;
+            eprint!("alternative is not 1 statements. got={}\n",
+                    exp.alternative.as_ref().unwrap().statements.len())
+        }
+
+        let alternative = match exp.alternative.as_ref().unwrap().statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(exp.alternative.as_ref().unwrap().statements.get(0).unwrap())),
+        };
+
+        if !test_identifier(alternative.expression.as_ref().unwrap(), "y") {
+            panic!()
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 
 }

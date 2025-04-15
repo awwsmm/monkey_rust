@@ -270,15 +270,15 @@ impl Node for IfExpression {
 
 #[derive(Clone, Debug)]
 pub(crate) struct BlockStatement {
-    token: token::Token, // the { token
-    statements: Vec<Statement>,
+    pub(crate) token: token::Token, // the { token
+    pub(crate) statements: Vec<Statement>,
 }
 
 impl Display for BlockStatement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut string = String::new();
 
-        for s in self.statements {
+        for s in self.statements.iter() {
             string.push_str(&s.to_string())
         }
 
