@@ -90,6 +90,16 @@ impl Parser {
 
         expression.consequence = Some(self.parse_block_statement());
 
+        if self.peek_token_is(token::TokenType::ELSE) {
+            self.next_token();
+
+            if !self.expect_peek(token::TokenType::LBRACE) {
+                return None
+            }
+
+            expression.alternative = Some(self.parse_block_statement())
+        }
+
         Some(ast::Expression::IfExpression(expression))
     }
 
