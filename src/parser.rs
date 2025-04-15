@@ -1228,4 +1228,120 @@ return 993322;
         }
     }
 
+    #[test]
+    fn test_call_expression_parsing() {
+        let input = "add(1, 2 * 3, 4 + 5)";
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 1 {
+            panic!("program.statements does not contain {} statements. got={}\n",
+                   1, program.statements.len());
+        }
+
+        let stmt = match program.statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("stmt is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(program.statements.get(0).unwrap())),
+        };
+
+        let exp = match stmt.expression.as_ref() {
+            Some(Expression::CallExpression(inner)) => inner,
+            _ => panic!("stmt.expression not ast::CallExpression. got={:?}", type_name_of_val(&stmt.expression))
+        };
+
+        if !test_identifier(exp.function.as_ref(), "add") {
+            return
+        }
+
+        if exp.arguments.len() != 3 {
+            panic!("wrong length of arguments. got={}", exp.arguments.len())
+        }
+
+        test_literal_expression(exp.arguments.get(0).unwrap(), 1);
+        test_infix_expression(exp.arguments.get(1).unwrap(), 2, "*", 3);
+        test_infix_expression(exp.arguments.get(2).unwrap(), 4, "+", 5);
+    }
+
+    #[test]
+    fn test_call_expression_parameter_parsing() {
+        struct Test {
+            input: String,
+            expected_ident: String,
+            expected_args: Vec<String>,
+        }
+
+        impl Test {
+            fn new(input: &str, expected_ident: &str, expected_args: Vec<&str>) -> Self {
+                Self {
+                    input: input.to_owned(),
+                    expected_ident: expected_ident.to_owned(),
+                    expected_args: expected_args.into_iter().map(|s| s.to_owned()).collect()
+                }
+            }
+        }
+
+        let tests = vec![
+            Test::new(
+                "add();",
+                "add",
+                vec![]
+            ),
+            Test::new(
+                "add(1);",
+                "add",
+                vec!["1"]
+            ),
+            Test::new(
+                "add(1, 2 * 3, 4 + 5);",
+                "add",
+                vec!["1", "(2 * 3)", "(4 + 5)"]
+            ),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.iter() {
+            let l = lexer::Lexer::new(tt.input.as_str());
+            let mut p = Parser::new(l);
+            let program = p.parse_program();
+            check_parser_errors(p);
+
+            let stmt = match program.statements.get(0) {
+                Some(Statement::ExpressionStatement(inner)) => inner,
+                _ => panic!(),
+            };
+
+            let exp = match stmt.expression.as_ref() {
+                Some(Expression::CallExpression(inner)) => inner,
+                _ => panic!("stmt.expression is not ast::Expression::CallExpression. got={}",
+                        type_name_of_val(stmt.expression.as_ref().unwrap())),
+            };
+
+            if !test_identifier(exp.function.as_ref(), tt.expected_ident.as_str()) {
+                panic!()
+            }
+
+            if exp.arguments.len() != tt.expected_args.len() {
+                panic!("wrong number of arguments. want={}, got={}",
+                       tt.expected_args.len(), exp.arguments.len()
+                )
+            }
+
+            for (i, arg) in tt.expected_args.iter().enumerate() {
+                if exp.arguments.get(i).unwrap().to_string() != arg.to_owned() {
+                    should_panic = true;
+                    eprint!("argument {} wrong. want={}, got={}", i, arg, exp.arguments.get(i).unwrap().to_string())
+                }
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
 }
