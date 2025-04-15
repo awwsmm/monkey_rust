@@ -292,6 +292,33 @@ impl Node for BlockStatement {
     }
 }
 
+#[derive(Clone, Debug)]
+pub(crate) struct FunctionLiteral {
+    pub(crate) token: token::Token, // the 'fn' token
+    pub(crate) parameters: Vec<Identifier>,
+    pub(crate) body: Option<BlockStatement>
+}
+
+impl Display for FunctionLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut params = vec![];
+
+        for s in self.parameters.iter() {
+            params.push(s.to_string())
+        }
+
+        let body = self.body.as_ref().map(|b| b.to_string()).unwrap_or_else(|| String::from(""));
+
+        write!(f, "{}( {}) {}", self.token_literal(), params.join(", "), body)
+    }
+}
+
+impl Node for FunctionLiteral {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
