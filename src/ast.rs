@@ -40,6 +40,7 @@ pub(crate) enum Expression {
     PrefixExpression(PrefixExpression),
     InfixExpression(InfixExpression),
     Boolean(Boolean),
+    IfExpression(IfExpression),
 }
 
 impl Display for Expression {
@@ -50,6 +51,7 @@ impl Display for Expression {
             Expression::PrefixExpression(inner) => inner.to_string(),
             Expression::InfixExpression(inner) => inner.to_string(),
             Expression::Boolean(inner) => inner.to_string(),
+            Expression::IfExpression(inner) => inner.to_string(),
         };
         write!(f, "{}", string)
     }
@@ -63,6 +65,7 @@ impl Node for Expression {
             Expression::PrefixExpression(inner) => inner.token_literal(),
             Expression::InfixExpression(inner) => inner.token_literal(),
             Expression::Boolean(inner) => inner.token_literal(),
+            Expression::IfExpression(inner) => inner.token_literal(),
         }
     }
 }
@@ -238,6 +241,27 @@ impl Display for Boolean {
 impl Node for Boolean {
     fn token_literal(&self) -> &str {
         &*self.token.literal
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct IfExpression {
+    pub(crate) token: token::Token, // The 'if' token
+    pub(crate) condition: Box<Expression>,
+    pub(crate) consequence: BlockStatement,
+    pub(crate) alternative: Option<BlockStatement>,
+}
+
+impl Display for IfExpression {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let else_branch = self.alternative.as_ref().map(|e| format!("else {}", e.to_string())).unwrap_or_else(|| String::new());
+        write!(f, "if {} {}{}", self.condition.to_string(), self.consequence.to_string(), else_branch)
+    }
+}
+
+impl Node for IfExpression {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
     }
 }
 
