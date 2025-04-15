@@ -15,7 +15,7 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
             return;
         }
 
-        let mut l = lexer::Lexer::new(line);
+        let mut l = lexer::Lexer::new(line.as_str());
 
         loop {
             let tok = l.next_token();

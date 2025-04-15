@@ -9,9 +9,9 @@ pub(crate) struct Lexer {
 }
 
 impl Lexer {
-    pub(crate) fn new(input: String) -> Self {
+    pub(crate) fn new(input: &str) -> Self {
         let mut l = Self {
-            input,
+            input: String::from(input),
             ..Default::default()
         };
         l.read_char();
@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_next_token() {
-        let input = String::from("let five = 5;
+        let input = "let five = 5;
 let ten = 10;
 
 let add = fn(x, y) {
@@ -155,7 +155,7 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
-");
+";
 
         struct Test {
             expected_type: token::TokenType,

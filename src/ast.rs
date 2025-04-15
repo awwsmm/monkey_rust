@@ -5,6 +5,9 @@ pub(crate) trait Node : Display {
     fn token_literal(&self) -> &str;
 }
 
+trait DisplayableNode: Display + Node {}
+impl<T: Display + Node> DisplayableNode for T {}
+
 #[derive(Clone, Debug)]
 pub(crate) enum Statement {
     LetStatement(LetStatement),
@@ -13,26 +16,26 @@ pub(crate) enum Statement {
     BlockStatement(BlockStatement),
 }
 
+impl Statement {
+    fn inner(&self) -> Box<&dyn DisplayableNode> {
+        match self {
+            Statement::LetStatement(inner) => Box::new(inner),
+            Statement::ReturnStatement(inner) => Box::new(inner),
+            Statement::ExpressionStatement(inner) => Box::new(inner),
+            Statement::BlockStatement(inner) => Box::new(inner),
+        }
+    }
+}
+
 impl Display for Statement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let string = match self {
-            Statement::LetStatement(inner) => inner.to_string(),
-            Statement::ReturnStatement(inner) => inner.to_string(),
-            Statement::ExpressionStatement(inner) => inner.to_string(),
-            Statement::BlockStatement(inner) => inner.to_string(),
-        };
-        write!(f, "{}", string)
+        write!(f, "{}", self.inner())
     }
 }
 
 impl Node for Statement {
     fn token_literal(&self) -> &str {
-        match self {
-            Statement::LetStatement(inner) => inner.token_literal(),
-            Statement::ReturnStatement(inner) => inner.token_literal(),
-            Statement::ExpressionStatement(inner) => inner.token_literal(),
-            Statement::BlockStatement(inner) => inner.token_literal(),
-        }
+        self.inner().token_literal()
     }
 }
 
@@ -44,32 +47,32 @@ pub(crate) enum Expression {
     InfixExpression(InfixExpression),
     Boolean(Boolean),
     IfExpression(IfExpression),
+    FunctionLiteral(FunctionLiteral),
+}
+
+impl Expression {
+    fn inner(&self) -> Box<&dyn DisplayableNode> {
+        match self {
+            Expression::Identifier(inner) => Box::new(inner),
+            Expression::IntegerLiteral(inner) => Box::new(inner),
+            Expression::PrefixExpression(inner) => Box::new(inner),
+            Expression::InfixExpression(inner) => Box::new(inner),
+            Expression::Boolean(inner) => Box::new(inner),
+            Expression::IfExpression(inner) => Box::new(inner),
+            Expression::FunctionLiteral(inner) => Box::new(inner),
+        }
+    }
 }
 
 impl Display for Expression {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let string = match self {
-            Expression::Identifier(inner) => inner.to_string(),
-            Expression::IntegerLiteral(inner) => inner.to_string(),
-            Expression::PrefixExpression(inner) => inner.to_string(),
-            Expression::InfixExpression(inner) => inner.to_string(),
-            Expression::Boolean(inner) => inner.to_string(),
-            Expression::IfExpression(inner) => inner.to_string(),
-        };
-        write!(f, "{}", string)
+        write!(f, "{}", self.inner())
     }
 }
 
 impl Node for Expression {
     fn token_literal(&self) -> &str {
-        match self {
-            Expression::Identifier(inner) => inner.token_literal(),
-            Expression::IntegerLiteral(inner) => inner.token_literal(),
-            Expression::PrefixExpression(inner) => inner.token_literal(),
-            Expression::InfixExpression(inner) => inner.token_literal(),
-            Expression::Boolean(inner) => inner.token_literal(),
-            Expression::IfExpression(inner) => inner.token_literal(),
-        }
+        self.inner().token_literal()
     }
 }
 
@@ -295,7 +298,7 @@ impl Node for BlockStatement {
 #[derive(Clone, Debug)]
 pub(crate) struct FunctionLiteral {
     pub(crate) token: token::Token, // the 'fn' token
-    pub(crate) parameters: Vec<Identifier>,
+    pub(crate) parameters: Vec<Expression>,
     pub(crate) body: Option<BlockStatement>
 }
 

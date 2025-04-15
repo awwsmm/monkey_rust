@@ -475,15 +475,15 @@ mod tests {
         }
     }
 
-    fn test_literal_expression(exp: &Expression, expected: Expected) -> bool {
-        match expected {
+    fn test_literal_expression(exp: &Expression, expected: impl Into<Expected>) -> bool {
+        match expected.into() {
             Expected::IntegerLiteral(v) => test_integer_literal(exp, v),
             Expected::Identifier(v) => test_identifier(exp, v),
             Expected::BooleanLiteral(v) => test_boolean_literal(exp, v),
         }
     }
 
-    fn test_infix_expression(exp: &Expression, left: Expected, operator: String, right: Expected) -> bool {
+    fn test_infix_expression(exp: &Expression, left: impl Into<Expected>, operator: &str, right: impl Into<Expected>) -> bool {
         let exp = match exp {
             Expression::InfixExpression(infix_expression) => infix_expression,
             _ => {
@@ -552,11 +552,11 @@ mod tests {
 
     #[test]
     fn test_let_statements() {
-        let input = String::from("
+        let input = "
 let x = 5;
 let y = 10;
 let foobar = 838383;
-");
+";
 
         let l = lexer::Lexer::new(input);
         let mut p = Parser::new(l);
@@ -595,11 +595,11 @@ let foobar = 838383;
 
     #[test]
     fn test_return_statements() {
-        let input = String::from("
+        let input = "
 return 5;
 return 10;
 return 993322;
-");
+";
 
         let l = lexer::Lexer::new(input);
         let mut p = Parser::new(l);
@@ -637,7 +637,7 @@ return 993322;
 
     #[test]
     fn test_identifier_expression() {
-        let input = String::from("foobar;");
+        let input = "foobar;";
 
         let l = lexer::Lexer::new(input);
         let mut p = Parser::new(l);
@@ -655,14 +655,14 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), "foobar".into()) {
+        if !test_literal_expression(&stmt.expression.unwrap(), "foobar") {
             panic!()
         }
     }
 
     #[test]
     fn test_integer_literal_expression() {
-        let input = String::from("5;");
+        let input = "5;";
 
         let l = lexer::Lexer::new(input);
         let mut p = Parser::new(l);
@@ -680,14 +680,14 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), 5.into()) {
+        if !test_literal_expression(&stmt.expression.unwrap(), 5) {
             panic!()
         }
     }
 
     #[test]
     fn test_boolean_expression() {
-        let input = String::from("true;");
+        let input = "true;";
 
         let l = lexer::Lexer::new(input);
         let mut p = Parser::new(l);
@@ -705,7 +705,7 @@ return 993322;
                                  type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), true.into()) {
+        if !test_literal_expression(&stmt.expression.unwrap(), true) {
             panic!()
         }
     }
@@ -721,7 +721,7 @@ return 993322;
         impl Test {
             fn new(input: &str, operator: &str, value: impl Into<Expected>) -> Self {
                 Self {
-                    input: input.to_string(),
+                    input: input.to_owned(),
                     operator: operator.to_string(),
                     value: value.into(),
                 }
@@ -736,7 +736,7 @@ return 993322;
         ];
 
         for tt in prefix_tests.into_iter() {
-            let l = lexer::Lexer::new(tt.input);
+            let l = lexer::Lexer::new(tt.input.as_str());
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -780,9 +780,9 @@ return 993322;
         impl Test {
             fn new(input: &str, left_value: impl Into<Expected>, operator: &str, right_value: impl Into<Expected>) -> Self {
                 Self {
-                    input: input.to_string(),
+                    input: input.to_owned(),
                     left_value: left_value.into(),
-                    operator: operator.to_string(),
+                    operator: operator.to_owned(),
                     right_value: right_value.into(),
                 }
             }
@@ -803,7 +803,7 @@ return 993322;
         ];
 
         for tt in infix_tests.into_iter() {
-            let l = lexer::Lexer::new(tt.input);
+            let l = lexer::Lexer::new(tt.input.as_str());
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -819,7 +819,7 @@ return 993322;
                             type_name_of_val(&unexpected)),
             };
 
-            if !test_infix_expression(&stmt.expression.unwrap(), tt.left_value.into(), tt.operator, tt.right_value.into()) {
+            if !test_infix_expression(&stmt.expression.unwrap(), tt.left_value, tt.operator.as_str(), tt.right_value) {
                 panic!()
             }
         }
@@ -835,8 +835,8 @@ return 993322;
         impl Test {
             fn new(input: &str, expected: &str) -> Self {
                 Self {
-                    input: input.to_string(),
-                    expected: expected.to_string(),
+                    input: input.to_owned(),
+                    expected: expected.to_owned(),
                 }
             }
         }
@@ -931,7 +931,7 @@ return 993322;
         let mut should_panic = false;
 
         for tt in tests.into_iter() {
-            let l = lexer::Lexer::new(tt.input);
+            let l = lexer::Lexer::new(tt.input.as_str());
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -950,7 +950,7 @@ return 993322;
 
     #[test]
     fn test_if_expression() {
-        let input = String::from("if (x < y) { x }");
+        let input = "if (x < y) { x }";
 
         let l = lexer::Lexer::new(input);
         let mut p = Parser::new(l);
@@ -973,7 +973,7 @@ return 993322;
             _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
         };
 
-        if !test_infix_expression(exp.condition.as_ref().unwrap(), "x".into(), "<".into(), "y".into()) {
+        if !test_infix_expression(exp.condition.as_ref().unwrap(), "x", "<", "y") {
             panic!()
         }
 
@@ -1007,7 +1007,7 @@ return 993322;
 
     #[test]
     fn test_if_else_expression() {
-        let input = String::from("if (x < y) { x } else { y }");
+        let input = "if (x < y) { x } else { y }";
 
         let l = lexer::Lexer::new(input);
         let mut p = Parser::new(l);
@@ -1030,7 +1030,7 @@ return 993322;
             _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
         };
 
-        if !test_infix_expression(&exp.condition.as_ref().unwrap(), "x".into(), "<".into(), "y".into()) {
+        if !test_infix_expression(&exp.condition.as_ref().unwrap(), "x", "<", "y") {
             panic!()
         }
 
@@ -1071,6 +1071,53 @@ return 993322;
         if should_panic {
             panic!()
         }
+    }
+
+    #[test]
+    fn test_function_literal_parsing() {
+        let input = "fn(x, y) { x + y; }";
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 1 {
+            panic!("program.statements does not contain {} statements. got={}",
+                   1, program.statements.len());
+        }
+
+        let stmt = match program.statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("program.statements.get(0) is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(program.statements.get(0).unwrap())),
+        };
+
+        let function = match stmt.expression.as_ref() {
+            Some(Expression::FunctionLiteral(if_expression)) => if_expression,
+            _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
+        };
+
+        if function.parameters.len() != 2 {
+            panic!("function literal parameters wrong. want 2, got={}\n",
+            function.parameters.len())
+        }
+
+        test_literal_expression(function.parameters.get(0).unwrap(), "x");
+        test_literal_expression(function.parameters.get(1).unwrap(), "y");
+
+        if function.body.as_ref().unwrap().statements.len() != 1 {
+            panic!("function.body.statements has not 1 statements. got={}\n",
+                   function.body.as_ref().unwrap().statements.len())
+        }
+
+        let bodyStmt = match function.body.as_ref().unwrap().statements.get(0).unwrap() {
+            Statement::ExpressionStatement(expression_statement) => expression_statement,
+            _ => panic!("function body stmt is not ast::ExpressionStatement. got={}",
+                        type_name_of_val(function.body.as_ref().unwrap().statements.get(0).unwrap())),
+        };
+
+        test_infix_expression(bodyStmt.expression.as_ref().unwrap(), "x", "=", "y");
     }
 
 }
