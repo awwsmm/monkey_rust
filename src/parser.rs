@@ -31,6 +31,7 @@ impl Parser {
         p.register_prefix(token::TokenType::TRUE, Parser::parse_boolean);
         p.register_prefix(token::TokenType::FALSE, Parser::parse_boolean);
         p.register_prefix(token::TokenType::LPAREN, Parser::parse_grouped_expression);
+        p.register_prefix(token::TokenType::IF, Parser::parse_if_expression);
 
         p.register_infix(token::TokenType::PLUS, Parser::parse_infix_expression);
         p.register_infix(token::TokenType::MINUS, Parser::parse_infix_expression);
@@ -46,6 +47,34 @@ impl Parser {
         p.next_token();
 
         p
+    }
+
+    fn parse_if_expression(&mut self) -> Option<ast::Expression> {
+        let mut expression = ast::IfExpression{
+            token: self.cur_token.clone(),
+            condition: None,
+            consequence: None,
+            alternative: None,
+        };
+
+        if !self.expect_peek(token::TokenType::LPAREN) {
+            return None
+        }
+
+        self.next_token();
+        expression.condition = self.parse_expression(Precedence::Lowest).map(|e| Box::new(e));
+
+        if !self.expect_peek(token::TokenType::RPAREN) {
+            return None
+        }
+
+        if !self.expect_peek(token::TokenType::LBRACE) {
+            return None
+        }
+
+        expression.consequence = Some(self.parse_block_statement());
+
+        Some(ast::Expression::IfExpression(expression))
     }
 
     fn parse_grouped_expression(&mut self) -> Option<ast::Expression> {
@@ -918,22 +947,22 @@ return 993322;
             _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
         };
 
-        if !test_infix_expression(&exp.condition, "x".into(), "<".into(), "y".into()) {
+        if !test_infix_expression(exp.condition.as_ref().unwrap(), "x".into(), "<".into(), "y".into()) {
             panic!()
         }
 
         let mut should_panic = false;
 
-        if exp.consequence.statements.len() != 1 {
+        if exp.consequence.as_ref().unwrap().statements.len() != 1 {
             should_panic = true;
             eprint!("consequence is not 1 statements. got={}\n",
-                exp.consequence.statements.len())
+                exp.consequence.as_ref().unwrap().statements.len())
         }
 
-        let consequence = match exp.consequence.statements.get(0).unwrap() {
+        let consequence = match exp.consequence.as_ref().unwrap().statements.get(0).unwrap() {
             Statement::ExpressionStatement(expression_statement) => expression_statement,
             _ => panic!("statements.get(0) is not ast::ExpressionStatement. got={}",
-                        type_name_of_val(exp.consequence.statements.get(0).unwrap())),
+                        type_name_of_val(exp.consequence.as_ref().unwrap().statements.get(0).unwrap())),
         };
 
         if !test_identifier(consequence.expression.as_ref().unwrap(), "x") {
@@ -975,22 +1004,22 @@ return 993322;
             _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
         };
 
-        if !test_infix_expression(&exp.condition, "x".into(), "<".into(), "y".into()) {
+        if !test_infix_expression(&exp.condition.as_ref().unwrap(), "x".into(), "<".into(), "y".into()) {
             panic!()
         }
 
         let mut should_panic = false;
 
-        if exp.consequence.statements.len() != 1 {
+        if exp.consequence.as_ref().unwrap().statements.len() != 1 {
             should_panic = true;
             eprint!("consequence is not 1 statements. got={}\n",
-                    exp.consequence.statements.len())
+                    exp.consequence.as_ref().unwrap().statements.len())
         }
 
-        let consequence = match exp.consequence.statements.get(0).unwrap() {
+        let consequence = match exp.consequence.as_ref().unwrap().statements.get(0).unwrap() {
             Statement::ExpressionStatement(expression_statement) => expression_statement,
             _ => panic!("statements.get(0) is not ast::ExpressionStatement. got={}",
-                        type_name_of_val(exp.consequence.statements.get(0).unwrap())),
+                        type_name_of_val(exp.consequence.as_ref().unwrap().statements.get(0).unwrap())),
         };
 
         if !test_identifier(consequence.expression.as_ref().unwrap(), "x") {

@@ -250,15 +250,15 @@ impl Node for Boolean {
 #[derive(Clone, Debug)]
 pub(crate) struct IfExpression {
     pub(crate) token: token::Token, // The 'if' token
-    pub(crate) condition: Box<Expression>,
-    pub(crate) consequence: BlockStatement,
+    pub(crate) condition: Option<Box<Expression>>,
+    pub(crate) consequence: Option<BlockStatement>,
     pub(crate) alternative: Option<BlockStatement>,
 }
 
 impl Display for IfExpression {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let else_branch = self.alternative.as_ref().map(|e| format!("else {}", e.to_string())).unwrap_or_else(|| String::new());
-        write!(f, "if {} {}{}", self.condition.to_string(), self.consequence.to_string(), else_branch)
+        write!(f, "if {} {}{}", self.condition.as_ref().unwrap().to_string(), self.consequence.as_ref().unwrap().to_string(), else_branch)
     }
 }
 
