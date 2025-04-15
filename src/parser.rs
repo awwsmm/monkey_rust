@@ -50,6 +50,33 @@ impl Parser {
         p
     }
 
+    fn parse_function_parameters(&mut self) -> Vec<ast::Identifier> {
+        let mut identifiers = vec![];
+
+        if self.peek_token_is(token::TokenType::RPAREN) {
+            self.next_token();
+            return identifiers
+        }
+
+        self.next_token();
+
+        let ident = ast::Identifier{ token: self.cur_token.clone(), value: self.cur_token.literal.clone() };
+        identifiers.push(ident);
+
+        while self.peek_token_is(token::TokenType::COMMA) {
+            self.next_token();
+            self.next_token();
+            let ident = ast::Identifier{ token: self.cur_token.clone(), value: self.cur_token.literal.clone() };
+            identifiers.push(ident)
+        }
+
+        if !self.expect_peek(token::TokenType::RPAREN) {
+            return vec![]
+        }
+
+        identifiers
+    }
+
     fn parse_function_literal(&mut self) -> Option<ast::Expression> {
         let mut lit = ast::FunctionLiteral{
             token: self.cur_token.clone(),
