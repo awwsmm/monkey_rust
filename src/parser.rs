@@ -32,6 +32,7 @@ impl Parser {
         p.register_prefix(token::TokenType::FALSE, Parser::parse_boolean);
         p.register_prefix(token::TokenType::LPAREN, Parser::parse_grouped_expression);
         p.register_prefix(token::TokenType::IF, Parser::parse_if_expression);
+        p.register_prefix(token::TokenType::FUNCTION, Parser::parse_function_literal);
 
         p.register_infix(token::TokenType::PLUS, Parser::parse_infix_expression);
         p.register_infix(token::TokenType::MINUS, Parser::parse_infix_expression);
@@ -47,6 +48,28 @@ impl Parser {
         p.next_token();
 
         p
+    }
+
+    fn parse_function_literal(&mut self) -> Option<ast::Expression> {
+        let mut lit = ast::FunctionLiteral{
+            token: self.cur_token.clone(),
+            parameters: vec![],
+            body: None,
+        };
+
+        if !self.expect_peek(token::TokenType::LPAREN) {
+            return None
+        }
+
+        lit.parameters = self.parse_function_parameters();
+
+        if !self.expect_peek(token::TokenType::LBRACE) {
+            return None
+        }
+
+        lit.body = Some(self.parse_block_statement());
+
+        Some(ast::Expression::FunctionLiteral(lit))
     }
 
     fn parse_block_statement(&mut self) -> ast::BlockStatement {
@@ -1103,8 +1126,8 @@ return 993322;
             function.parameters.len())
         }
 
-        test_literal_expression(function.parameters.get(0).unwrap(), "x");
-        test_literal_expression(function.parameters.get(1).unwrap(), "y");
+        test_literal_expression(&Expression::Identifier(function.parameters.get(0).unwrap().clone()), "x");
+        test_literal_expression(&Expression::Identifier(function.parameters.get(1).unwrap().clone()), "y");
 
         if function.body.as_ref().unwrap().statements.len() != 1 {
             panic!("function.body.statements has not 1 statements. got={}\n",

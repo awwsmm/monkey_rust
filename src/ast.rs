@@ -298,7 +298,7 @@ impl Node for BlockStatement {
 #[derive(Clone, Debug)]
 pub(crate) struct FunctionLiteral {
     pub(crate) token: token::Token, // the 'fn' token
-    pub(crate) parameters: Vec<Expression>,
+    pub(crate) parameters: Vec<Identifier>,
     pub(crate) body: Option<BlockStatement>
 }
 
