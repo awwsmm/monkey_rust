@@ -503,7 +503,7 @@ mod tests {
 
     enum Expected {
         IntegerLiteral(i32),
-        Identifier(&'static str),
+        Identifier(String),
         BooleanLiteral(bool),
     }
 
@@ -513,8 +513,8 @@ mod tests {
         }
     }
 
-    impl From<&'static str> for Expected {
-        fn from(value: &'static str) -> Self {
+    impl From<String> for Expected {
+        fn from(value: String) -> Self {
             Self::Identifier(value)
         }
     }
@@ -528,7 +528,7 @@ mod tests {
     fn test_literal_expression(exp: &Expression, expected: impl Into<Expected>) -> bool {
         match expected.into() {
             Expected::IntegerLiteral(v) => test_integer_literal(exp, v),
-            Expected::Identifier(v) => test_identifier(exp, v),
+            Expected::Identifier(v) => test_identifier(exp, v.as_str()),
             Expected::BooleanLiteral(v) => test_boolean_literal(exp, v),
         }
     }
@@ -705,7 +705,7 @@ return 993322;
                         type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), "foobar") {
+        if !test_literal_expression(&stmt.expression.unwrap(), "foobar".to_string()) {
             panic!()
         }
     }
@@ -1023,7 +1023,7 @@ return 993322;
             _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
         };
 
-        if !test_infix_expression(exp.condition.as_ref().unwrap(), "x", "<", "y") {
+        if !test_infix_expression(exp.condition.as_ref().unwrap(), "x".to_string(), "<", "y".to_string()) {
             panic!()
         }
 
@@ -1080,7 +1080,7 @@ return 993322;
             _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
         };
 
-        if !test_infix_expression(&exp.condition.as_ref().unwrap(), "x", "<", "y") {
+        if !test_infix_expression(&exp.condition.as_ref().unwrap(), "x".to_string(), "<", "y".to_string()) {
             panic!()
         }
 
@@ -1153,8 +1153,8 @@ return 993322;
             function.parameters.len())
         }
 
-        test_literal_expression(&Expression::Identifier(function.parameters.get(0).unwrap().clone()), "x");
-        test_literal_expression(&Expression::Identifier(function.parameters.get(1).unwrap().clone()), "y");
+        test_literal_expression(&Expression::Identifier(function.parameters.get(0).unwrap().clone()), "x".to_string());
+        test_literal_expression(&Expression::Identifier(function.parameters.get(1).unwrap().clone()), "y".to_string());
 
         if function.body.as_ref().unwrap().statements.len() != 1 {
             panic!("function.body.statements has not 1 statements. got={}\n",
@@ -1167,7 +1167,65 @@ return 993322;
                         type_name_of_val(function.body.as_ref().unwrap().statements.get(0).unwrap())),
         };
 
-        test_infix_expression(bodyStmt.expression.as_ref().unwrap(), "x", "=", "y");
+        test_infix_expression(bodyStmt.expression.as_ref().unwrap(), "x".to_string(), "=", "y".to_string());
+    }
+
+    #[test]
+    fn test_function_parameter_parsing() {
+        struct Test {
+            input: String,
+            expected_params: Vec<String>,
+        }
+
+        impl Test {
+            fn new(input: &str, expected_params: Vec<&str>) -> Self {
+                Self {
+                    input: input.to_owned(),
+                    expected_params: expected_params.into_iter().map(|s| s.to_owned()).collect(),
+                }
+            }
+        }
+
+        let tests = vec![
+            Test::new("fn() {};", vec![]),
+            Test::new("fn(x) {};", vec!["x"]),
+            Test::new("fn(x, y, z) {};", vec!["x", "y", "z"]),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.iter() {
+            let l = lexer::Lexer::new(tt.input.as_str());
+            let mut p = Parser::new(l);
+            let program = p.parse_program();
+            check_parser_errors(p);
+
+            let stmt = match program.statements.get(0) {
+                Some(Statement::ExpressionStatement(inner)) => inner,
+                _ => panic!(),
+            };
+
+            let function = match stmt.expression.as_ref() {
+                Some(Expression::FunctionLiteral(inner)) => inner,
+                _ => panic!(),
+            };
+
+            if function.parameters.len() != tt.expected_params.len() {
+                should_panic = true;
+                eprint!("length parameters wrong. want {}, got={}\n",
+                        tt.expected_params.len(), function.parameters.len())
+            }
+
+            for (i, ident) in tt.expected_params.iter().enumerate() {
+                if !test_literal_expression(&Expression::Identifier(function.parameters.get(i).unwrap().to_owned()), ident.to_owned()) {
+                    should_panic = true
+                }
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
     }
 
 }
