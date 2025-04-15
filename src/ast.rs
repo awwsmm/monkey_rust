@@ -10,14 +10,16 @@ pub(crate) enum Statement {
     LetStatement(LetStatement),
     ReturnStatement(ReturnStatement),
     ExpressionStatement(ExpressionStatement),
+    BlockStatement(BlockStatement),
 }
 
 impl Display for Statement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let string = match self {
-            Statement::LetStatement(let_statement) => let_statement.to_string(),
-            Statement::ReturnStatement(return_statement) => return_statement.to_string(),
-            Statement::ExpressionStatement(expression_statement) => expression_statement.to_string(),
+            Statement::LetStatement(inner) => inner.to_string(),
+            Statement::ReturnStatement(inner) => inner.to_string(),
+            Statement::ExpressionStatement(inner) => inner.to_string(),
+            Statement::BlockStatement(inner) => inner.to_string(),
         };
         write!(f, "{}", string)
     }
@@ -26,9 +28,10 @@ impl Display for Statement {
 impl Node for Statement {
     fn token_literal(&self) -> &str {
         match self {
-            Statement::LetStatement(let_statement) => let_statement.token_literal(),
-            Statement::ReturnStatement(return_statement) => return_statement.token_literal(),
-            Statement::ExpressionStatement(expression_statement) => expression_statement.token_literal(),
+            Statement::LetStatement(inner) => inner.token_literal(),
+            Statement::ReturnStatement(inner) => inner.token_literal(),
+            Statement::ExpressionStatement(inner) => inner.token_literal(),
+            Statement::BlockStatement(inner) => inner.token_literal(),
         }
     }
 }
@@ -260,6 +263,30 @@ impl Display for IfExpression {
 }
 
 impl Node for IfExpression {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct BlockStatement {
+    token: token::Token, // the { token
+    statements: Vec<Statement>,
+}
+
+impl Display for BlockStatement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut string = String::new();
+
+        for s in self.statements {
+            string.push_str(&s.to_string())
+        }
+
+        write!(f, "{}", string)
+    }
+}
+
+impl Node for BlockStatement {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
