@@ -49,6 +49,22 @@ impl Parser {
         p
     }
 
+    fn parse_block_statement(&mut self) -> ast::BlockStatement {
+        let mut block = ast::BlockStatement{ token: self.cur_token.clone(), statements: vec![] };
+
+        self.next_token();
+
+        while !self.cur_token_is(token::TokenType::RBRACE) && !self.cur_token_is(token::TokenType::EOF) {
+            let stmt = self.parse_statement();
+            if let Some(stmt) = stmt {
+                block.statements.push(stmt)
+            }
+            self.next_token()
+        }
+
+        block
+    }
+
     fn parse_if_expression(&mut self) -> Option<ast::Expression> {
         let mut expression = ast::IfExpression{
             token: self.cur_token.clone(),
