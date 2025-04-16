@@ -200,6 +200,14 @@ mod tests {
         let tests = vec![
             Test::new("true", true),
             Test::new("false", false),
+		    Test::new("1 < 2", true),
+		    Test::new("1 > 2", false),
+		    Test::new("1 < 1", false),
+		    Test::new("1 > 1", false),
+		    Test::new("1 == 1", true),
+		    Test::new("1 != 1", false),
+		    Test::new("1 == 2", false),
+		    Test::new("1 != 2", true),
         ];
 
         let mut should_panic = false;
