@@ -21,6 +21,12 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
             eval_prefix_expression(node.operator.as_str(), right)
         }
 
+        Some(ast::Node::Expression(ast::Expression::InfixExpression(node))) => {
+            let left = eval(node.left.map(|e| ast::Node::Expression(*e)));
+            let right = eval(node.right.map(|e| ast::Node::Expression(*e)));
+            eval_infix_expression(node.operator.as_str(), left, right)
+        }
+
         Some(ast::Node::Expression(ast::Expression::IntegerLiteral(node))) =>
             Some(object::Object::Integer(object::Integer{ value: node.value })),
 
