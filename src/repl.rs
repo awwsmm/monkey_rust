@@ -29,7 +29,23 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
     }
 }
 
+const MONKEY_FACE: &'static str = r#"            __,__
+   .--.  .-"     "-.  .--.
+  / .. \/  .-. .-.  \/ .. \
+ | |  '|  /   Y   \  |'  | |
+ | \   \  \ 0 | 0 /  /   / |
+  \ '- ,\.-"""""""-./, -' /
+   ''-' /_   ^ ^   _\ '-''
+       |  \._    _./ |
+       \   \ '~' /   /
+        '._ '-=-' _.'
+           '-----'
+"#;
+
 fn print_parser_errors(writer: &mut impl Write, errors: Vec<String>) {
+    write!(writer, "{}", MONKEY_FACE).unwrap();
+    write!(writer, "{}", "Woops! We ran into some monkey business here!\n").unwrap();
+    write!(writer, "{}", " parser errors:\n").unwrap();
     for msg in errors.iter() {
         write!(writer, "\t{}\n", msg).unwrap();
     }
