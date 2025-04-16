@@ -1,6 +1,6 @@
 use crate::{ast, object};
 
-fn eval(node: Option<ast::Node>) -> Option<object::Object> {
+pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
     match node {
 
         // Statements

@@ -11,13 +11,13 @@ pub(crate) enum Object {
     Null(Null),
 }
 
-trait ObjectLike {
+pub(crate) trait ObjectLike {
     fn object_type(&self) -> ObjectType;
     fn inspect(&self) -> String;
 }
 
 impl Object {
-    fn inner(&self) -> Box<&dyn ObjectLike> {
+    pub(crate) fn inner(&self) -> Box<&dyn ObjectLike> {
         match self {
             Object::Integer(inner) => Box::new(inner),
             Object::Boolean(inner) => Box::new(inner),

@@ -1,4 +1,4 @@
-use crate::{lexer, parser};
+use crate::{ast, evaluator, lexer, parser};
 use std::io::{BufRead, Write};
 
 const PROMPT: &'static [u8] = ">> ".as_bytes();
@@ -19,13 +19,15 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
         let mut p = parser::Parser::new(l);
 
         let program = p.parse_program();
-
         if p.errors.len() != 0 {
             print_parser_errors(writer, p.errors);
             continue
         }
 
-        write!(writer, "{}\n", program.to_string());
+        let evaluated = evaluator::eval(Some(ast::Node::Program(program)));
+        if let Some(evaluated) = evaluated {
+            write!(writer, "{}\n", evaluated.inner().inspect()).unwrap();
+        }
     }
 }
 
