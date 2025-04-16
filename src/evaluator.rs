@@ -90,6 +90,25 @@ fn eval_infix_expression(operator: &str, left: Option<object::Object>, right: Op
     NULL
 }
 
+fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, right: Option<object::Object>) -> Option<object::Object> {
+    let left_val = match left {
+        Some(object::Object::Integer(inner)) => inner.value,
+        _ => panic!()
+    };
+    let right_val = match right {
+        Some(object::Object::Integer(inner)) => inner.value,
+        _ => panic!()
+    };
+
+    match operator {
+        "+" => Some(object::Object::Integer(object::Integer{ value: left_val + right_val })),
+        "-" => Some(object::Object::Integer(object::Integer{ value: left_val - right_val })),
+        "*" => Some(object::Object::Integer(object::Integer{ value: left_val * right_val })),
+        "/" => Some(object::Object::Integer(object::Integer{ value: left_val / right_val })),
+        _ => None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
