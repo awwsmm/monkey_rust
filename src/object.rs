@@ -1,4 +1,6 @@
-type ObjectType = String;
+enum ObjectType {
+    IntegerObj
+}
 
 trait Object {
     fn object_type() -> ObjectType;
