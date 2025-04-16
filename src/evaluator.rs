@@ -1,5 +1,8 @@
 use crate::{ast, object};
 
+const TRUE: object::Boolean = object::Boolean{ value: true };
+const FALSE: object::Boolean = object::Boolean{ value: false };
+
 pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
     match node {
 
@@ -15,11 +18,17 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
             Some(object::Object::Integer(object::Integer{ value: node.value })),
 
         Some(ast::Node::Expression(ast::Expression::Boolean(node))) =>
-            Some(object::Object::Boolean(object::Boolean{ value: node.value })),
+            Some(object::Object::Boolean(native_bool_to_boolean_object(node.value))),
 
         _ => None
     }
+}
 
+fn native_bool_to_boolean_object(input: bool) -> object::Boolean {
+    if input {
+        return TRUE
+    }
+    FALSE
 }
 
 fn eval_statements(stmts: Vec<ast::Statement>) -> Option<object::Object> {
