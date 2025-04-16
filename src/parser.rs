@@ -451,7 +451,7 @@ enum Precedence {
     Call,        // myFunction(X)
 }
 
-const PRECEDENCES: [(token::TokenType, Precedence); 8] = [
+const PRECEDENCES: [(token::TokenType, Precedence); 9] = [
     (token::TokenType::EQ, Precedence::Equals),
     (token::TokenType::NEQ, Precedence::Equals),
     (token::TokenType::LT, Precedence::LessGreater),
@@ -460,6 +460,7 @@ const PRECEDENCES: [(token::TokenType, Precedence); 8] = [
     (token::TokenType::MINUS, Precedence::Sum),
     (token::TokenType::SLASH, Precedence::Product),
     (token::TokenType::ASTERISK, Precedence::Product),
+    (token::TokenType::LPAREN, Precedence::Call),
 ];
 
 type PrefixParseFn = fn(&mut Parser) -> Option<ast::Expression>;
