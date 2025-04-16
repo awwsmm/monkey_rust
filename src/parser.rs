@@ -1012,6 +1012,18 @@ return 993322;
                 "!(true == true)",
                 "(!(true == true))"
             ),
+            Test::new(
+                "a + add(b * c) + d",
+                "((a + add((b * c))) + d)",
+            ),
+            Test::new(
+                "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+                "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+            ),
+            Test::new(
+                "add(a + b + c * d / f + g)",
+                "add((((a + b) + ((c * d) / f)) + g))",
+            ),
         ];
 
         let mut should_panic = false;
