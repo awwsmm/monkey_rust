@@ -4,7 +4,7 @@ enum ObjectType {
     NullObj,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) enum Object {
     Integer(Integer),
     Boolean(Boolean),
@@ -36,7 +36,7 @@ impl ObjectLike for Object {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct Integer {
     pub(crate) value: i32,
 }
@@ -51,7 +51,7 @@ impl ObjectLike for Integer {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct Boolean {
     pub(crate) value: bool,
 }
@@ -66,7 +66,7 @@ impl ObjectLike for Boolean {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct Null{}
 
 impl ObjectLike for Null {
