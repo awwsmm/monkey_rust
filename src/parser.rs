@@ -42,12 +42,47 @@ impl Parser {
         p.register_infix(token::TokenType::NEQ, Parser::parse_infix_expression);
         p.register_infix(token::TokenType::LT, Parser::parse_infix_expression);
         p.register_infix(token::TokenType::GT, Parser::parse_infix_expression);
+        p.register_infix(token::TokenType::LPAREN, Parser::parse_call_expression);
 
         // Read two tokens, so cur_token and peek_token are both set
         p.next_token();
         p.next_token();
 
         p
+    }
+
+    fn parse_call_expression(&mut self, function: ast::Expression) -> ast::Expression {
+        let mut exp = ast::CallExpression{
+            token: self.cur_token.clone(),
+            function: Box::new(function),
+            arguments: vec![],
+        };
+        exp.arguments = self.parse_call_arguments();
+        ast::Expression::CallExpression(exp)
+    }
+
+    fn parse_call_arguments(&mut self) -> Vec<ast::Expression> {
+        let mut args = vec![];
+
+        if self.peek_token_is(token::TokenType::RPAREN) {
+            self.next_token();
+            return args
+        }
+
+        self.next_token();
+        args.push(self.parse_expression(Precedence::Lowest).unwrap());
+
+        while self.peek_token_is(token::TokenType::COMMA) {
+            self.next_token();
+            self.next_token();
+            args.push(self.parse_expression(Precedence::Lowest).unwrap())
+        }
+
+        if !self.expect_peek(token::TokenType::RPAREN) {
+            return vec![]
+        }
+
+        args
     }
 
     fn parse_function_parameters(&mut self) -> Vec<ast::Identifier> {
