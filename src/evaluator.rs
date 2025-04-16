@@ -50,6 +50,7 @@ fn eval_statements(stmts: Vec<ast::Statement>) -> Option<object::Object> {
 fn eval_prefix_expression(operator: &str, right: Option<object::Object>) -> Option<object::Object> {
     match operator {
         "!" => eval_bang_operator_expression(right),
+        "-" => eval_minus_prefix_operator_expression(right),
         _ => NULL
     }
 }
