@@ -86,6 +86,10 @@ fn eval_minus_prefix_operator_expression(right: Option<object::Object>) -> Optio
 fn eval_infix_expression(operator: &str, left: Option<object::Object>, right: Option<object::Object>) -> Option<object::Object> {
     if left.as_ref()?.object_type() == object::ObjectType::IntegerObj && right.as_ref()?.object_type() == object::ObjectType::IntegerObj {
         return eval_integer_infix_expression(operator, left, right)
+    } else if operator == "==" {
+        return native_bool_to_boolean_object(left == right)
+    } else if operator == "!=" {
+        return native_bool_to_boolean_object(left != right)
     }
     NULL
 }
