@@ -13,7 +13,7 @@ struct Integer {
 
 impl Object for Integer {
     fn object_type() -> ObjectType {
-        todo!()
+        ObjectType::IntegerObj
     }
 
     fn inspect(&self) -> String {
