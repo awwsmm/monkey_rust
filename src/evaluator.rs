@@ -1,3 +1,4 @@
+use crate::object::ObjectLike;
 use crate::{ast, object};
 
 const NULL: Option<object::Object> = Some(object::Object::Null(object::Null{}));
@@ -62,6 +63,18 @@ fn eval_bang_operator_expression(right: Option<object::Object>) -> Option<object
         NULL => TRUE,
         _ => FALSE,
     }
+}
+
+fn eval_minus_prefix_operator_expression(right: Option<object::Object>) -> Option<object::Object> {
+    if right.as_ref().map(|r| r.object_type()) != Some(object::ObjectType::IntegerObj) {
+        return NULL
+    }
+
+    let value = match right? {
+        object::Object::Integer(inner) => inner.value,
+        _ => panic!()
+    };
+    Some(object::Object::Integer(object::Integer{ value: -value }))
 }
 
 #[cfg(test)]

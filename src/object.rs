@@ -1,4 +1,5 @@
-enum ObjectType {
+#[derive(PartialEq)]
+pub(crate) enum ObjectType {
     IntegerObj,
     BooleanObj,
     NullObj,
