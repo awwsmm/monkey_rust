@@ -83,6 +83,13 @@ fn eval_minus_prefix_operator_expression(right: Option<object::Object>) -> Optio
     Some(object::Object::Integer(object::Integer{ value: -value }))
 }
 
+fn eval_infix_expression(operator: &str, left: Option<object::Object>, right: Option<object::Object>) -> Option<object::Object> {
+    if left.as_ref()?.object_type() == object::ObjectType::IntegerObj && right.as_ref()?.object_type() == object::ObjectType::IntegerObj {
+        return eval_integer_infix_expression(operator, left, right)
+    }
+    NULL
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
