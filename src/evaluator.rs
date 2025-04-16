@@ -140,7 +140,7 @@ mod tests {
         let result = match obj {
             Some(object::Object::Boolean(inner)) => inner,
             _ => {
-                eprint!("object is not Boolean. got={:?}", obj);
+                eprint!("object is not Boolean. got={:?}\n", obj);
                 return false
             }
         };
@@ -151,5 +151,41 @@ mod tests {
         }
 
         true
+    }
+
+    #[test]
+    fn test_bang_operator() {
+        struct Test {
+            input: String,
+            expected: bool,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: bool) -> Self {
+                Self { input: input.to_owned(), expected }
+            }
+        }
+
+        let tests = vec![
+            Test::new("!true", false),
+            Test::new("!false", true),
+            Test::new("!5", false),
+            Test::new("!!true", true),
+            Test::new("!!false", false),
+            Test::new("!!5", true),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input.as_str());
+            if !test_boolean_object(evaluated, tt.expected) {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
     }
 }
