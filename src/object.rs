@@ -4,17 +4,45 @@ enum ObjectType {
     NullObj,
 }
 
-trait Object {
-    fn object_type() -> ObjectType;
+#[derive(Debug)]
+pub(crate) enum Object {
+    Integer(Integer),
+    Boolean(Boolean),
+    Null(Null),
+}
+
+trait ObjectLike {
+    fn object_type(&self) -> ObjectType;
     fn inspect(&self) -> String;
 }
 
-struct Integer {
-    value: i32,
+impl Object {
+    fn inner(&self) -> Box<&dyn ObjectLike> {
+        match self {
+            Object::Integer(inner) => Box::new(inner),
+            Object::Boolean(inner) => Box::new(inner),
+            Object::Null(inner) => Box::new(inner),
+        }
+    }
 }
 
-impl Object for Integer {
-    fn object_type() -> ObjectType {
+impl ObjectLike for Object {
+    fn object_type(&self) -> ObjectType {
+        self.inner().object_type()
+    }
+
+    fn inspect(&self) -> String {
+        self.inner().inspect()
+    }
+}
+
+#[derive(Debug)]
+struct Integer {
+    pub(crate) value: i32,
+}
+
+impl ObjectLike for Integer {
+    fn object_type(&self) -> ObjectType {
         ObjectType::IntegerObj
     }
 
@@ -23,12 +51,13 @@ impl Object for Integer {
     }
 }
 
+#[derive(Debug)]
 struct Boolean {
     value: bool,
 }
 
-impl Object for Boolean {
-    fn object_type() -> ObjectType {
+impl ObjectLike for Boolean {
+    fn object_type(&self) -> ObjectType {
         ObjectType::BooleanObj
     }
 
@@ -37,10 +66,11 @@ impl Object for Boolean {
     }
 }
 
+#[derive(Debug)]
 struct Null{}
 
-impl Object for Null {
-    fn object_type() -> ObjectType {
+impl ObjectLike for Null {
+    fn object_type(&self) -> ObjectType {
         ObjectType::NullObj
     }
 

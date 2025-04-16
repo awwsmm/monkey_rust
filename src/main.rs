@@ -8,6 +8,7 @@ mod ast;
 mod parser;
 mod parser_tracing;
 mod object;
+mod evaluator;
 
 fn main() {
     let mut stdout = io::stdout();
