@@ -1,13 +1,31 @@
 use crate::{ast, object};
 
-fn eval(node: ast::Node) -> Option<object::Object> {
+fn eval(node: Option<ast::Node>) -> Option<object::Object> {
     match node {
-        ast::Node::Expression(ast::Expression::IntegerLiteral(inner)) => {
-            Some(object::Object::Integer(object::Integer{ value: inner.value }))
-        }
+
+        // Statements
+        Some(ast::Node::Program(node)) =>
+            eval_statements(node.statements),
+
+        Some(ast::Node::Statement(ast::Statement::ExpressionStatement(node))) =>
+            eval(node.expression.map(|e| ast::Node::Expression(e))),
+
+        Some(ast::Node::Expression(ast::Expression::IntegerLiteral(node))) =>
+            Some(object::Object::Integer(object::Integer{ value: node.value })),
+
         _ => None
     }
 
+}
+
+fn eval_statements(stmts: Vec<ast::Statement>) -> Option<object::Object> {
+    let mut result = None;
+
+    for statement in stmts.into_iter() {
+        result = eval(Some(ast::Node::Statement(statement)))
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -52,7 +70,7 @@ mod tests {
         let mut p = parser::Parser::new(l);
         let program = p.parse_program();
 
-        eval(ast::Node::Program(program))
+        eval(Some(ast::Node::Program(program)))
     }
 
     fn test_integer_object(obj: Option<object::Object>, expected: i32) -> bool {
