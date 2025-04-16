@@ -7,6 +7,7 @@ mod repl;
 mod ast;
 mod parser;
 mod parser_tracing;
+mod object;
 
 fn main() {
     let mut stdout = io::stdout();
