@@ -10,8 +10,12 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
         Some(ast::Node::Statement(ast::Statement::ExpressionStatement(node))) =>
             eval(node.expression.map(|e| ast::Node::Expression(e))),
 
+        // Expressions
         Some(ast::Node::Expression(ast::Expression::IntegerLiteral(node))) =>
             Some(object::Object::Integer(object::Integer{ value: node.value })),
+
+        Some(ast::Node::Expression(ast::Expression::Boolean(node))) =>
+            Some(object::Object::Boolean(object::Boolean{ value: node.value })),
 
         _ => None
     }
