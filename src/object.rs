@@ -67,7 +67,7 @@ impl ObjectLike for Boolean {
 }
 
 #[derive(Debug)]
-struct Null{}
+pub(crate) struct Null{}
 
 impl ObjectLike for Null {
     fn object_type(&self) -> ObjectType {
