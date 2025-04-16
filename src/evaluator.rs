@@ -89,4 +89,53 @@ mod tests {
 
         true
     }
+
+    #[test]
+    fn test_eval_boolean_expression() {
+        struct Test {
+            input: String,
+            expected: bool,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: bool) -> Self {
+                Self { input: input.to_owned(), expected }
+            }
+        }
+
+        let tests = vec![
+            Test::new("true", true),
+            Test::new("false", false),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.iter() {
+            let evaluated = test_eval(tt.input.as_str());
+            if !test_boolean_object(evaluated, tt.expected) {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    fn test_boolean_object(obj: Option<object::Object>, expected: bool) -> bool {
+        let result = match obj {
+            Some(object::Object::Boolean(inner)) => inner,
+            _ => {
+                eprint!("object is not Boolean. got={:?}", obj);
+                return false
+            }
+        };
+        if result.value != expected {
+            eprint!("object has wrong value. got={}, want={}",
+                    result.value, expected);
+            return false
+        }
+
+        true
+    }
 }

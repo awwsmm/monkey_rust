@@ -52,8 +52,8 @@ impl ObjectLike for Integer {
 }
 
 #[derive(Debug)]
-struct Boolean {
-    value: bool,
+pub(crate) struct Boolean {
+    pub(crate) value: bool,
 }
 
 impl ObjectLike for Boolean {
