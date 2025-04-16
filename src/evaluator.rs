@@ -105,6 +105,10 @@ fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, r
         "-" => Some(object::Object::Integer(object::Integer{ value: left_val - right_val })),
         "*" => Some(object::Object::Integer(object::Integer{ value: left_val * right_val })),
         "/" => Some(object::Object::Integer(object::Integer{ value: left_val / right_val })),
+        "<" => native_bool_to_boolean_object(left_val < right_val),
+        ">" => native_bool_to_boolean_object(left_val > right_val),
+        "==" => native_bool_to_boolean_object(left_val == right_val),
+        "!=" => native_bool_to_boolean_object(left_val != right_val),
         _ => None
     }
 }
