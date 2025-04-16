@@ -84,6 +84,8 @@ mod tests {
         let tests = vec![
             Test::new("5", 5),
             Test::new("10", 10),
+            Test::new("-5", -5),
+            Test::new("-10", -10),
         ];
 
         let mut should_panic = false;
