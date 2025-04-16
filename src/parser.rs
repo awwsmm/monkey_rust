@@ -263,9 +263,11 @@ impl Parser {
             return None
         }
 
-        // TODO: We're skipping the expressions until we
-        // encounter a semicolon
-        while !self.cur_token_is(token::TokenType::SEMICOLON) {
+        self.next_token();
+
+        stmt.value = self.parse_expression(Precedence::Lowest);
+
+        if self.peek_token_is(token::TokenType::SEMICOLON) {
             self.next_token()
         }
 
@@ -291,15 +293,15 @@ impl Parser {
     }
 
     fn parse_return_statement(&mut self) -> Option<ast::ReturnStatement> {
-        let stmt = ast::ReturnStatement{
+        let mut stmt = ast::ReturnStatement{
             token: self.cur_token.clone(),
             return_value: None,
         };
 
         self.next_token();
 
-        // TODO we're skipping the expressions until we
-        // encounter a semicolon
+        stmt.return_value = self.parse_expression(Precedence::Lowest);
+
         while !self.cur_token_is(token::TokenType::SEMICOLON) {
             self.next_token()
         }
