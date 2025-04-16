@@ -638,42 +638,49 @@ mod tests {
 
     #[test]
     fn test_let_statements() {
-        let input = "
-let x = 5;
-let y = 10;
-let foobar = 838383;
-";
-
-        let l = lexer::Lexer::new(input);
-        let mut p = Parser::new(l);
-
-        let program = p.parse_program();
-        check_parser_errors(p);
-
-        if program.statements.len() != 3 {
-            panic!("program.statements does not contain 3 statements. got={}",
-                program.statements.len());
-        }
-
         struct Test {
-            expected_identifier: String
+            input: String,
+            expected_identifier: String,
+            expected_value: Expected,
         }
 
         impl Test {
-            fn new(s: &str) -> Self {
-                Self { expected_identifier: String::from(s) }
+            fn new(input: &str, expected_identifier: &str, expected_value: impl Into<Expected>) -> Self {
+                Self {
+                    input: input.to_owned(),
+                    expected_identifier: expected_identifier.to_owned(),
+                    expected_value: expected_value.into(),
+                }
             }
         }
 
         let tests = vec![
-            Test::new("x"),
-            Test::new("y"),
-            Test::new("foobar"),
+            Test::new("let x = 5;", "x", 5),
+            Test::new("let y = true;", "y", true),
+            Test::new("let foobar = y;", "foobar", "y".to_string()),
         ];
 
-        for (i, tt) in tests.iter().enumerate() {
-            let stmt = program.statements.get(i).unwrap();
+        for tt in tests.into_iter() {
+            let l = lexer::Lexer::new(tt.input.as_str());
+            let mut p = Parser::new(l);
+            let program = p.parse_program();
+            check_parser_errors(p);
+
+            if program.statements.len() != 1 {
+                panic!("program.statements does not contain 1 statements. got={}",
+                       program.statements.len());
+            }
+
+            let stmt = program.statements.get(0).unwrap();
             if !test_let_statement(stmt, tt.expected_identifier.as_str()) {
+                panic!()
+            }
+
+            let val = match stmt {
+                Statement::LetStatement(inner) => inner.value.as_ref().unwrap(),
+                _ => panic!(),
+            };
+            if !test_literal_expression(val, tt.expected_value) {
                 panic!()
             }
         }
@@ -681,43 +688,51 @@ let foobar = 838383;
 
     #[test]
     fn test_return_statements() {
-        let input = "
-return 5;
-return 10;
-return 993322;
-";
-
-        let l = lexer::Lexer::new(input);
-        let mut p = Parser::new(l);
-
-        let program = p.parse_program();
-        check_parser_errors(p);
-
-        if program.statements.len() != 3 {
-            panic!("program.statements does not contain 3 statements. got={}",
-                   program.statements.len());
+        struct Test {
+            input: String,
+            expected_value: Expected,
         }
 
-        let mut should_panic = false;
-
-        for stmt in program.statements.iter() {
-            let return_statement = match stmt {
-                Statement::ReturnStatement(rs) => rs,
-                _ => {
-                    eprint!("s not ast::ReturnStatement. got={}", type_name_of_val(stmt));
-                    should_panic = true;
-                    continue
-                },
-            };
-            if return_statement.token_literal() != "return" {
-                eprint!("return_statement.token_literal() not 'return', got {}",
-                    return_statement.token_literal());
-                should_panic = true;
+        impl Test {
+            fn new(input: &str, expected_value: impl Into<Expected>) -> Self {
+                Self {
+                    input: input.to_owned(),
+                    expected_value: expected_value.into(),
+                }
             }
         }
 
-        if should_panic {
-            panic!()
+        let tests = vec![
+            Test::new("return 5;", 5),
+            Test::new("return true;", true),
+            Test::new("return foobar;", "foobar".to_string()),
+        ];
+
+        for tt in tests.into_iter() {
+            let l = lexer::Lexer::new(tt.input.as_str());
+            let mut p = Parser::new(l);
+            let program = p.parse_program();
+            check_parser_errors(p);
+
+            if program.statements.len() != 1 {
+                panic!("program.statements does not contain 1 statements. got={}",
+                       program.statements.len());
+            }
+
+            let stmt = program.statements.get(0).unwrap();
+            let return_stmt = match stmt {
+                Statement::ReturnStatement(inner) => inner,
+                _ => panic!("stmt not ast::ReturnStatement. got={}", stmt)
+            };
+
+            if return_stmt.token_literal() != "return" {
+                panic!("return_stmt.token_literal() not 'return', got {}",
+                return_stmt.token_literal())
+            }
+
+            if !test_literal_expression(return_stmt.return_value.as_ref().unwrap(), tt.expected_value) {
+                panic!()
+            }
         }
     }
 
