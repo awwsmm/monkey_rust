@@ -1,4 +1,4 @@
-use crate::{lexer, token};
+use crate::{lexer, parser};
 use std::io::{BufRead, Write};
 
 const PROMPT: &'static [u8] = ">> ".as_bytes();
@@ -15,17 +15,22 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
             return;
         }
 
-        let mut l = lexer::Lexer::new(line.as_str());
+        let l = lexer::Lexer::new(line.as_str());
+        let mut p = parser::Parser::new(l);
 
-        loop {
-            let tok = l.next_token();
+        let program = p.parse_program();
 
-            if tok.token_type == token::TokenType::EOF {
-                break;
-            }
-
-            write!(writer, "{}\n", tok).unwrap();
-            writer.flush().unwrap();
+        if p.errors.len() != 0 {
+            print_parser_errors(writer, p.errors);
+            continue
         }
+
+        write!(writer, "{}\n", program.to_string());
+    }
+}
+
+fn print_parser_errors(writer: &mut impl Write, errors: Vec<String>) {
+    for msg in errors.iter() {
+        write!(writer, "\t{}\n", msg).unwrap();
     }
 }
