@@ -1,12 +1,18 @@
 use crate::token;
 use std::fmt::{Display, Formatter};
 
-pub(crate) trait Node : Display {
+pub(crate) enum Node {
+    Program(Program),
+    Statement(Statement),
+    Expression(Expression),
+}
+
+pub(crate) trait NodeLike: Display {
     fn token_literal(&self) -> &str;
 }
 
-trait DisplayableNode: Display + Node {}
-impl<T: Display + Node> DisplayableNode for T {}
+trait DisplayableNode: Display + NodeLike {}
+impl<T: Display + NodeLike> DisplayableNode for T {}
 
 #[derive(Clone, Debug)]
 pub(crate) enum Statement {
@@ -33,7 +39,7 @@ impl Display for Statement {
     }
 }
 
-impl Node for Statement {
+impl NodeLike for Statement {
     fn token_literal(&self) -> &str {
         self.inner().token_literal()
     }
@@ -72,7 +78,7 @@ impl Display for Expression {
     }
 }
 
-impl Node for Expression {
+impl NodeLike for Expression {
     fn token_literal(&self) -> &str {
         self.inner().token_literal()
     }
@@ -89,7 +95,7 @@ impl Display for Program {
     }
 }
 
-impl Node for Program {
+impl NodeLike for Program {
     fn token_literal(&self) -> &str {
         if let [head, ..] = &*self.statements {
             head.token_literal()
@@ -114,7 +120,7 @@ impl Display for LetStatement {
     }
 }
 
-impl Node for LetStatement {
+impl NodeLike for LetStatement {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
@@ -132,7 +138,7 @@ impl Display for Identifier {
     }
 }
 
-impl Node for Identifier {
+impl NodeLike for Identifier {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
@@ -151,7 +157,7 @@ impl Display for ReturnStatement {
     }
 }
 
-impl Node for ReturnStatement {
+impl NodeLike for ReturnStatement {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
@@ -169,7 +175,7 @@ impl Display for ExpressionStatement {
     }
 }
 
-impl Node for ExpressionStatement {
+impl NodeLike for ExpressionStatement {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
@@ -187,7 +193,7 @@ impl Display for IntegerLiteral {
     }
 }
 
-impl Node for IntegerLiteral {
+impl NodeLike for IntegerLiteral {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
@@ -206,7 +212,7 @@ impl Display for PrefixExpression {
     }
 }
 
-impl Node for PrefixExpression {
+impl NodeLike for PrefixExpression {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
@@ -228,7 +234,7 @@ impl Display for InfixExpression {
     }
 }
 
-impl Node for InfixExpression {
+impl NodeLike for InfixExpression {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
@@ -246,7 +252,7 @@ impl Display for Boolean {
     }
 }
 
-impl Node for Boolean {
+impl NodeLike for Boolean {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
@@ -267,7 +273,7 @@ impl Display for IfExpression {
     }
 }
 
-impl Node for IfExpression {
+impl NodeLike for IfExpression {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
@@ -291,7 +297,7 @@ impl Display for BlockStatement {
     }
 }
 
-impl Node for BlockStatement {
+impl NodeLike for BlockStatement {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
@@ -318,7 +324,7 @@ impl Display for FunctionLiteral {
     }
 }
 
-impl Node for FunctionLiteral {
+impl NodeLike for FunctionLiteral {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
@@ -343,7 +349,7 @@ impl Display for CallExpression {
     }
 }
 
-impl Node for CallExpression {
+impl NodeLike for CallExpression {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }

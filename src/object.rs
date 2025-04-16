@@ -37,7 +37,7 @@ impl ObjectLike for Object {
 }
 
 #[derive(Debug)]
-struct Integer {
+pub(crate) struct Integer {
     pub(crate) value: i32,
 }
 

@@ -1,6 +1,18 @@
+use crate::{ast, object};
+
+fn eval(node: ast::Node) -> Option<object::Object> {
+    match node {
+        ast::Node::Expression(ast::Expression::IntegerLiteral(inner)) => {
+            Some(object::Object::Integer(object::Integer{ value: inner.value }))
+        }
+        _ => None
+    }
+
+}
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::{lexer, object, parser};
 
     #[test]
@@ -35,17 +47,17 @@ mod tests {
         }
     }
 
-    fn test_eval(input: &str) -> object::Object {
+    fn test_eval(input: &str) -> Option<object::Object> {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
         let program = p.parse_program();
 
-        eval(program)
+        eval(ast::Node::Program(program))
     }
 
-    fn test_integer_object(obj: object::Object, expected: i32) -> bool {
+    fn test_integer_object(obj: Option<object::Object>, expected: i32) -> bool {
         let result = match obj {
-            object::Object::Integer(inner) => inner,
+            Some(object::Object::Integer(inner)) => inner,
             _ => {
                 eprint!("object is not Integer. got={:?}", obj);
                 return false
