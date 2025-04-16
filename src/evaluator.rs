@@ -17,7 +17,7 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
         // Expressions
         Some(ast::Node::Expression(ast::Expression::PrefixExpression(node))) => {
             let right = eval(node.right.map(|e| ast::Node::Expression(*e)));
-            eval_prefix_expression(node.operator, right)
+            eval_prefix_expression(node.operator.as_str(), right)
         }
 
         Some(ast::Node::Expression(ast::Expression::IntegerLiteral(node))) =>
@@ -45,6 +45,13 @@ fn eval_statements(stmts: Vec<ast::Statement>) -> Option<object::Object> {
     }
 
     result
+}
+
+fn eval_prefix_expression(operator: &str, right: object::Object) -> Option<object::Object> {
+    match operator {
+        "!" => eval_bang_operator_expression(right),
+        _ => NULL
+    }
 }
 
 #[cfg(test)]
