@@ -10,7 +10,7 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
 
         // Statements
         Some(ast::Node::Program(node)) =>
-            eval_statements(node.statements),
+            eval_program(node),
 
         Some(ast::Node::Statement(ast::Statement::ExpressionStatement(node))) =>
             eval(node.expression.map(|e| ast::Node::Expression(e))),
@@ -46,6 +46,20 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
 
         _ => None
     }
+}
+
+fn eval_program(program: ast::Program) -> Option<object::Object> {
+    let mut result: Option<object::Object> = None;
+
+    for statement in program.statements.into_iter() {
+        result = eval(Some(ast::Node::Statement(statement)));
+
+        if let Some(object::Object::ReturnValue(return_value)) = result {
+            return return_value.value.map(|x| *x)
+        }
+    }
+
+    result
 }
 
 fn eval_if_expression(ie: ast::IfExpression) -> Option<object::Object> {
