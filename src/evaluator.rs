@@ -15,6 +15,9 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
         Some(ast::Node::Statement(ast::Statement::ExpressionStatement(node))) =>
             eval(node.expression.map(|e| ast::Node::Expression(e))),
 
+        Some(ast::Node::Statement(ast::Statement::BlockStatement(node))) =>
+            eval_statements(node.statements),
+
         // Expressions
         Some(ast::Node::Expression(ast::Expression::PrefixExpression(node))) => {
             let right = eval(node.right.map(|e| ast::Node::Expression(*e)));
@@ -27,6 +30,9 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
             eval_infix_expression(node.operator.as_str(), left, right)
         }
 
+        Some(ast::Node::Expression(ast::Expression::IfExpression(node))) =>
+            eval_if_expression(node),
+
         Some(ast::Node::Expression(ast::Expression::IntegerLiteral(node))) =>
             Some(object::Object::Integer(object::Integer{ value: node.value })),
 
@@ -34,6 +40,27 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
             native_bool_to_boolean_object(node.value),
 
         _ => None
+    }
+}
+
+fn eval_if_expression(ie: ast::IfExpression) -> Option<object::Object> {
+    let condition = eval(ie.condition.map(|e| ast::Node::Expression(*e)));
+
+    if is_truthy(condition) {
+        eval(ie.consequence.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))))
+    } else if ie.alternative.is_some() {
+        eval(ie.alternative.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))))
+    } else {
+        NULL
+    }
+}
+
+fn is_truthy(obj: Option<object::Object>) -> bool {
+    match obj {
+        NULL => false,
+        TRUE => true,
+        FALSE => false,
+        _ => true,
     }
 }
 
