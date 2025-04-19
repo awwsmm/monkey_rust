@@ -400,6 +400,17 @@ mod tests {
             Test::new("return 10; 9;", 10),
             Test::new("return 2 * 5; 9;", 10),
             Test::new("9; return 2 * 5; 9;", 10),
+            Test::new("
+                            if (10 > 1) {
+                                if (10 > 1) {
+                                    return 10;
+                                }
+
+                                return 1;
+                            }
+                            ",
+                      10
+            )
         ];
 
         let mut should_panic = false;
