@@ -3,6 +3,7 @@ pub(crate) enum ObjectType {
     IntegerObj,
     BooleanObj,
     NullObj,
+    ReturnValueObj,
 }
 
 #[derive(Debug, PartialEq)]
@@ -10,6 +11,7 @@ pub(crate) enum Object {
     Integer(Integer),
     Boolean(Boolean),
     Null(Null),
+    ReturnValue(ReturnValue),
 }
 
 pub(crate) trait ObjectLike {
@@ -23,6 +25,7 @@ impl Object {
             Object::Integer(inner) => Box::new(inner),
             Object::Boolean(inner) => Box::new(inner),
             Object::Null(inner) => Box::new(inner),
+            Object::ReturnValue(inner) => Box::new(inner),
         }
     }
 }
@@ -77,5 +80,20 @@ impl ObjectLike for Null {
 
     fn inspect(&self) -> String {
         String::from("null")
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub(crate) struct ReturnValue {
+    value: Box<Object>
+}
+
+impl ObjectLike for ReturnValue {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::ReturnValueObj
+    }
+
+    fn inspect(&self) -> String {
+        self.value.inspect()
     }
 }
