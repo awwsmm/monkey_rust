@@ -85,7 +85,7 @@ impl ObjectLike for Null {
 
 #[derive(Debug, PartialEq)]
 pub(crate) struct ReturnValue {
-    value: Box<Object>
+    pub(crate) value: Option<Box<Object>>
 }
 
 impl ObjectLike for ReturnValue {
@@ -94,6 +94,6 @@ impl ObjectLike for ReturnValue {
     }
 
     fn inspect(&self) -> String {
-        self.value.inspect()
+        self.value.as_ref().unwrap().inspect()
     }
 }

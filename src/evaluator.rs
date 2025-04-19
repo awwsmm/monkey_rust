@@ -18,6 +18,11 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
         Some(ast::Node::Statement(ast::Statement::BlockStatement(node))) =>
             eval_statements(node.statements),
 
+        Some(ast::Node::Statement(ast::Statement::ReturnStatement(node))) => {
+            let value = eval(node.return_value.map(|x| ast::Node::Expression(x)));
+            Some(object::Object::ReturnValue(object::ReturnValue{ value: value.map(|x| Box::new(x)) }))
+        }
+
         // Expressions
         Some(ast::Node::Expression(ast::Expression::PrefixExpression(node))) => {
             let right = eval(node.right.map(|e| ast::Node::Expression(*e)));
@@ -75,7 +80,11 @@ fn eval_statements(stmts: Vec<ast::Statement>) -> Option<object::Object> {
     let mut result = None;
 
     for statement in stmts.into_iter() {
-        result = eval(Some(ast::Node::Statement(statement)))
+        result = eval(Some(ast::Node::Statement(statement)));
+
+        if let Some(object::Object::ReturnValue(return_value)) = result {
+            return return_value.value.map(|x| *x)
+        }
     }
 
     result
@@ -211,7 +220,7 @@ mod tests {
             }
         };
         if result.value != expected {
-            eprint!("object has wrong value. got={}, want={}",
+            eprint!("object has wrong value. got={}, want={}\n",
                     result.value, expected);
             return false
         }
@@ -277,7 +286,7 @@ mod tests {
             }
         };
         if result.value != expected {
-            eprint!("object has wrong value. got={}, want={}",
+            eprint!("object has wrong value. got={}, want={}\n",
                     result.value, expected);
             return false
         }
