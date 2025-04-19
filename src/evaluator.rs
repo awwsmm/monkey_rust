@@ -1,4 +1,4 @@
-use crate::object::ObjectLike;
+use crate::object::{ObjectLike, ObjectType};
 use crate::{ast, object};
 
 const NULL: Option<object::Object> = Some(object::Object::Null(object::Null{}));
@@ -16,7 +16,7 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
             eval(node.expression.map(|e| ast::Node::Expression(e))),
 
         Some(ast::Node::Statement(ast::Statement::BlockStatement(node))) =>
-            eval_statements(node.statements),
+            eval_block_statement(node),
 
         Some(ast::Node::Statement(ast::Statement::ReturnStatement(node))) => {
             let value = eval(node.return_value.map(|x| ast::Node::Expression(x)));
@@ -90,14 +90,14 @@ fn native_bool_to_boolean_object(input: bool) -> Option<object::Object> {
     FALSE
 }
 
-fn eval_statements(stmts: Vec<ast::Statement>) -> Option<object::Object> {
-    let mut result = None;
+fn eval_block_statement(block: ast::BlockStatement) -> Option<object::Object> {
+    let mut result: Option<object::Object> = None;
 
-    for statement in stmts.into_iter() {
+    for statement in block.statements.into_iter() {
         result = eval(Some(ast::Node::Statement(statement)));
 
-        if let Some(object::Object::ReturnValue(return_value)) = result {
-            return return_value.value.map(|x| *x)
+        if matches!(result.as_ref()?.inner().object_type(), ObjectType::ReturnValueObj) {
+            return result
         }
     }
 
