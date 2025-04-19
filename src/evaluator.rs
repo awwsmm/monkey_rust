@@ -372,4 +372,38 @@ mod tests {
         }
         true
     }
+
+    #[test]
+    fn test_return_statements() {
+        struct Test {
+            input: String,
+            expected: i32,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: i32) -> Self {
+                Self { input: input.to_owned(), expected }
+            }
+        }
+
+        let tests = vec![
+            Test::new("return 10;", 10),
+            Test::new("return 10; 9;", 10),
+            Test::new("return 2 * 5; 9;", 10),
+            Test::new("9; return 2 * 5; 9;", 10),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input);
+            if !test_integer_object(evaluated, tt.expected) {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
