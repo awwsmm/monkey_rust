@@ -4,6 +4,7 @@ pub(crate) enum ObjectType {
     BooleanObj,
     NullObj,
     ReturnValueObj,
+    ErrorObj,
 }
 
 #[derive(Debug, PartialEq)]
@@ -12,6 +13,7 @@ pub(crate) enum Object {
     Boolean(Boolean),
     Null(Null),
     ReturnValue(ReturnValue),
+    Error(Error),
 }
 
 pub(crate) trait ObjectLike {
@@ -26,6 +28,7 @@ impl Object {
             Object::Boolean(inner) => Box::new(inner),
             Object::Null(inner) => Box::new(inner),
             Object::ReturnValue(inner) => Box::new(inner),
+            Object::Error(inner) => Box::new(inner),
         }
     }
 }
@@ -95,5 +98,20 @@ impl ObjectLike for ReturnValue {
 
     fn inspect(&self) -> String {
         self.value.as_ref().unwrap().inspect()
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub(crate) struct Error {
+    pub(crate) message: String
+}
+
+impl ObjectLike for Error {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::ErrorObj
+    }
+
+    fn inspect(&self) -> String {
+        format!("ERROR: {}", self.message)
     }
 }
