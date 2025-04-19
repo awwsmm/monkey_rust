@@ -155,8 +155,8 @@ mod tests {
 
         let mut should_panic = false;
 
-        for tt in tests.iter() {
-            let evaluated = test_eval(tt.input.as_str());
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input);
             if !test_integer_object(evaluated, tt.expected) {
                 should_panic = true
             }
@@ -167,7 +167,7 @@ mod tests {
         }
     }
 
-    fn test_eval(input: &str) -> Option<object::Object> {
+    fn test_eval(input: String) -> Option<object::Object> {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
         let program = p.parse_program();
@@ -179,7 +179,7 @@ mod tests {
         let result = match obj {
             Some(object::Object::Integer(inner)) => inner,
             _ => {
-                eprint!("object is not Integer. got={:?}", obj);
+                eprint!("object is not Integer. got={:?}\n", obj);
                 return false
             }
         };
@@ -229,8 +229,8 @@ mod tests {
 
         let mut should_panic = false;
 
-        for tt in tests.iter() {
-            let evaluated = test_eval(tt.input.as_str());
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input);
             if !test_boolean_object(evaluated, tt.expected) {
                 should_panic = true
             }
@@ -283,7 +283,7 @@ mod tests {
         let mut should_panic = false;
 
         for tt in tests.into_iter() {
-            let evaluated = test_eval(tt.input.as_str());
+            let evaluated = test_eval(tt.input);
             if !test_boolean_object(evaluated, tt.expected) {
                 should_panic = true
             }
@@ -292,5 +292,57 @@ mod tests {
         if should_panic {
             panic!()
         }
+    }
+
+    #[test]
+    fn test_if_else_expressions() {
+        struct Test {
+            input: String,
+            expected: Option<i32>,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: Option<i32>) -> Self {
+                Self { input: input.to_owned(), expected }
+            }
+        }
+
+        let tests = vec![
+            Test::new("if (true) { 10 }", Some(10)),
+            Test::new("if (false) { 10 }", None),
+            Test::new("if (1) { 10 }", Some(10)),
+            Test::new("if (1 < 2) { 10 }", Some(10)),
+            Test::new("if (1 > 2) { 10 }", None),
+            Test::new("if (1 > 2) { 10 } else { 20 }", Some(20)),
+            Test::new("if (1 < 2) { 10 } else { 20 }", Some(10)),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input);
+            match tt.expected {
+                Some(integer) =>
+                    if !test_integer_object(evaluated, integer) {
+                        should_panic = true
+                    }
+                None =>
+                    if !test_null_object(evaluated) {
+                        should_panic = true
+                }
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    fn test_null_object(obj: Option<object::Object>) -> bool {
+        if !matches!(obj, NULL) {
+            eprint!("object is not NULL. got={:?}\n", obj);
+            return false
+        }
+        true
     }
 }

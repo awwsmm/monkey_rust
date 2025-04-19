@@ -15,7 +15,7 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
             return;
         }
 
-        let l = lexer::Lexer::new(line.as_str());
+        let l = lexer::Lexer::new(line);
         let mut p = parser::Parser::new(l);
 
         let program = p.parse_program();

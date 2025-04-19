@@ -9,9 +9,9 @@ pub(crate) struct Lexer {
 }
 
 impl Lexer {
-    pub(crate) fn new(input: &str) -> Self {
+    pub(crate) fn new(input: impl Into<String>) -> Self {
         let mut l = Self {
-            input: String::from(input),
+            input: input.into(),
             ..Default::default()
         };
         l.read_char();

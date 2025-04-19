@@ -663,7 +663,7 @@ mod tests {
         ];
 
         for tt in tests.into_iter() {
-            let l = lexer::Lexer::new(tt.input.as_str());
+            let l = lexer::Lexer::new(tt.input);
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -711,7 +711,7 @@ mod tests {
         ];
 
         for tt in tests.into_iter() {
-            let l = lexer::Lexer::new(tt.input.as_str());
+            let l = lexer::Lexer::new(tt.input);
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -839,7 +839,7 @@ mod tests {
         ];
 
         for tt in prefix_tests.into_iter() {
-            let l = lexer::Lexer::new(tt.input.as_str());
+            let l = lexer::Lexer::new(tt.input);
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -906,7 +906,7 @@ mod tests {
         ];
 
         for tt in infix_tests.into_iter() {
-            let l = lexer::Lexer::new(tt.input.as_str());
+            let l = lexer::Lexer::new(tt.input);
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -1046,7 +1046,7 @@ mod tests {
         let mut should_panic = false;
 
         for tt in tests.into_iter() {
-            let l = lexer::Lexer::new(tt.input.as_str());
+            let l = lexer::Lexer::new(tt.input);
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -1259,8 +1259,8 @@ mod tests {
 
         let mut should_panic = false;
 
-        for tt in tests.iter() {
-            let l = lexer::Lexer::new(tt.input.as_str());
+        for tt in tests.into_iter() {
+            let l = lexer::Lexer::new(tt.input);
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
@@ -1369,8 +1369,8 @@ mod tests {
 
         let mut should_panic = false;
 
-        for tt in tests.iter() {
-            let l = lexer::Lexer::new(tt.input.as_str());
+        for tt in tests.into_iter() {
+            let l = lexer::Lexer::new(tt.input);
             let mut p = Parser::new(l);
             let program = p.parse_program();
             check_parser_errors(p);
