@@ -170,6 +170,7 @@ fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, r
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::object::Object;
     use crate::{lexer, object, parser};
 
     #[test]
@@ -432,6 +433,84 @@ mod tests {
         for tt in tests.into_iter() {
             let evaluated = test_eval(tt.input);
             if !test_integer_object(evaluated, tt.expected) {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_error_handling() {
+        struct Test {
+            input: String,
+            expected_message: String,
+        }
+
+        impl Test {
+            fn new(input: &str, expected_message: &str) -> Self {
+                Self { input: input.to_owned(), expected_message: expected_message.to_owned() }
+            }
+        }
+
+        let tests = vec![
+            Test::new(
+                "5 + true;",
+                "type mismatch: INTEGER + BOOLEAN"
+            ),
+            Test::new(
+                "5 + true; 5;",
+                "type mismatch: INTEGER + BOOLEAN"
+            ),
+            Test::new(
+                "-true",
+                "unknown operator: -BOOLEAN"
+            ),
+            Test::new(
+                "true + false;",
+                "unknown operator: BOOLEAN + BOOLEAN"
+            ),
+            Test::new(
+                "5; true + false; 5",
+                "unknown operator: BOOLEAN + BOOLEAN"
+            ),
+            Test::new(
+                "if (10 > 1) { true + false; }",
+                "unknown operator: BOOLEAN + BOOLEAN"
+            ),
+            Test::new(
+                "
+                if (10 > 1) {
+                    if (10 > 1) {
+                        return true + false;
+                    }
+
+                    return 1;
+                }
+                ",
+                "unknown operator: BOOLEAN + BOOLEAN"
+            ),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input);
+
+            let err_obj = match evaluated {
+                Some(Object::Error(inner)) => inner,
+                _ => {
+                    eprint!("no error object returned. got={:?}\n", evaluated);
+                    should_panic = true;
+                    continue
+                }
+            };
+
+            if err_obj.message != tt.expected_message {
+                eprint!("wrong error message. expected={}, got={}\n",
+                    tt.expected_message, err_obj.message);
                 should_panic = true
             }
         }
