@@ -85,12 +85,34 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             if function.is_error() {
                 return function
             }
+            let args = eval_expressions(node.arguments, env);
+
+            if args.len() == 1 {
+                let args_0 = args.get(0).cloned();
+                if args_0.is_error() {
+                    return args_0
+                }
+            }
 
             todo!()
         }
 
         _ => None
     }
+}
+
+fn eval_expressions(exps: Vec<ast::Expression>, env: &mut object::environment::Environment) -> Vec<object::Object> {
+    let mut result = vec![];
+
+    for e in exps.into_iter() {
+        let evaluated = eval(Some(ast::Node::Expression(e)), env);
+        if evaluated.is_error() {
+            return vec![evaluated].iter().flatten().collect()
+        }
+        result.push(evaluated)
+    }
+
+    result.iter().flatten().collect()
 }
 
 fn eval_identifier(node: ast::Identifier, env: &object::environment::Environment) -> Option<object::Object> {
