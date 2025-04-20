@@ -1,3 +1,5 @@
+mod environment;
+
 #[derive(PartialEq, Debug)]
 pub(crate) enum ObjectType {
     IntegerObj,
