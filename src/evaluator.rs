@@ -19,11 +19,21 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
             eval_block_statement(node),
 
         Some(ast::Node::Statement(ast::Statement::ReturnStatement(node))) => {
-            let value = eval(node.return_value.map(|x| ast::Node::Expression(x)));
-            if value.is_error() {
-                return value
+            let val = eval(node.return_value.map(|x| ast::Node::Expression(x)));
+            if val.is_error() {
+                return val
             }
-            Some(object::Object::ReturnValue(object::ReturnValue{ value: value.map(|x| Box::new(x)) }))
+            Some(object::Object::ReturnValue(object::ReturnValue{ value: val.map(|x| Box::new(x)) }))
+        }
+
+        Some(ast::Node::Statement(ast::Statement::LetStatement(node))) => {
+            let val = eval(node.value.map(|x| ast::Node::Expression(x)));
+            if val.is_error() {
+                return val
+            }
+
+            // Huh? Now what?
+            unimplemented!()
         }
 
         // Expressions
