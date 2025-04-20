@@ -145,8 +145,8 @@ impl Error {
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Function {
-    parameters: Vec<ast::Identifier>,
-    body: ast::BlockStatement,
+    pub(crate) parameters: Vec<ast::Identifier>,
+    pub(crate) body: ast::BlockStatement,
     env: environment::Environment,
 }
 

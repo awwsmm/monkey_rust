@@ -226,6 +226,7 @@ fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, r
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::object::Object;
     use crate::{lexer, object, parser};
 
     #[test]
@@ -273,7 +274,7 @@ mod tests {
         }
     }
 
-    fn test_eval(input: String) -> Option<object::Object> {
+    fn test_eval(input: impl Into<String>) -> Option<object::Object> {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
         let program = p.parse_program();
@@ -610,6 +611,33 @@ mod tests {
 
         if should_panic {
             panic!()
+        }
+    }
+
+    #[test]
+    fn test_function_object() {
+        let input = "fn(x) { x + 2; };";
+
+        let evaluated = test_eval(input);
+
+        let func = match evaluated {
+            Some(Object::Function(inner)) => inner,
+            _ => panic!("object is not Function. got={:?}", evaluated)
+        };
+
+        if func.parameters.len() != 1 {
+            panic!("function has wrong parameters. parameters={:?}",
+                func.parameters)
+        }
+
+        if func.parameters.get(0).map(|x| x.to_string()) != Some(String::from("x")) {
+            panic!("parameter is not 'x'. got={:?}", func.parameters.get(0))
+        }
+
+        let expected_body = "(x + 2)";
+
+        if func.body.to_string() != expected_body {
+            panic!("body is not {}. got={}", expected_body, func.body.to_string())
         }
     }
 }
