@@ -80,6 +80,15 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             }))
         }
 
+        Some(ast::Node::Expression(ast::Expression::CallExpression(node))) => {
+            let function = eval(Some(ast::Node::Expression(*node.function)), env);
+            if function.is_error() {
+                return function
+            }
+
+            todo!()
+        }
+
         _ => None
     }
 }
