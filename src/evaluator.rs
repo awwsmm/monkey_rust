@@ -556,4 +556,37 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_let_statements() {
+        struct Test {
+            input: String,
+            expected: i32,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: i32) -> Self {
+                Self { input: input.to_owned(), expected }
+            }
+        }
+
+        let tests = vec![
+            Test::new("let a = 5; a", 5),
+            Test::new("let a = 5 * 5; a", 25),
+            Test::new("let a = 5; let b = a; b;", 5),
+            Test::new("let a = 5; let b = a; let c = a + b + 5; c;", 15),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            if !test_integer_object(test_eval(tt.input), tt.expected) {
+                should_panic = true;
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
