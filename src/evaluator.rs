@@ -10,16 +10,16 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environme
 
         // Statements
         Some(ast::Node::Program(node)) =>
-            eval_program(node),
+            eval_program(node, env),
 
         Some(ast::Node::Statement(ast::Statement::ExpressionStatement(node))) =>
-            eval(node.expression.map(|e| ast::Node::Expression(e))),
+            eval(node.expression.map(|e| ast::Node::Expression(e)), env),
 
         Some(ast::Node::Statement(ast::Statement::BlockStatement(node))) =>
-            eval_block_statement(node),
+            eval_block_statement(node, env),
 
         Some(ast::Node::Statement(ast::Statement::ReturnStatement(node))) => {
-            let val = eval(node.return_value.map(|x| ast::Node::Expression(x)));
+            let val = eval(node.return_value.map(|x| ast::Node::Expression(x)), env);
             if val.is_error() {
                 return val
             }
@@ -27,7 +27,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environme
         }
 
         Some(ast::Node::Statement(ast::Statement::LetStatement(node))) => {
-            let val = eval(node.value.map(|x| ast::Node::Expression(x)));
+            let val = eval(node.value.map(|x| ast::Node::Expression(x)), env);
             if val.is_error() {
                 return val
             }
@@ -38,7 +38,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environme
 
         // Expressions
         Some(ast::Node::Expression(ast::Expression::PrefixExpression(node))) => {
-            let right = eval(node.right.map(|e| ast::Node::Expression(*e)));
+            let right = eval(node.right.map(|e| ast::Node::Expression(*e)), env);
             if right.is_error() {
                 return right
             }
@@ -46,12 +46,12 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environme
         }
 
         Some(ast::Node::Expression(ast::Expression::InfixExpression(node))) => {
-            let left = eval(node.left.map(|e| ast::Node::Expression(*e)));
+            let left = eval(node.left.map(|e| ast::Node::Expression(*e)), env);
             if left.is_error() {
                 return left
             }
 
-            let right = eval(node.right.map(|e| ast::Node::Expression(*e)));
+            let right = eval(node.right.map(|e| ast::Node::Expression(*e)), env);
             if right.is_error() {
                 return right
             }
@@ -60,7 +60,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environme
         }
 
         Some(ast::Node::Expression(ast::Expression::IfExpression(node))) =>
-            eval_if_expression(node),
+            eval_if_expression(node, env),
 
         Some(ast::Node::Expression(ast::Expression::IntegerLiteral(node))) =>
             Some(object::Object::Integer(object::Integer{ value: node.value })),
@@ -72,11 +72,11 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environme
     }
 }
 
-fn eval_program(program: ast::Program) -> Option<object::Object> {
+fn eval_program(program: ast::Program, env: &object::environment::Environment) -> Option<object::Object> {
     let mut result: Option<object::Object> = None;
 
     for statement in program.statements.into_iter() {
-        result = eval(Some(ast::Node::Statement(statement)));
+        result = eval(Some(ast::Node::Statement(statement)), env);
 
         if let Some(object::Object::ReturnValue(return_value)) = result {
             return return_value.value.map(|x| *x)
@@ -89,16 +89,16 @@ fn eval_program(program: ast::Program) -> Option<object::Object> {
     result
 }
 
-fn eval_if_expression(ie: ast::IfExpression) -> Option<object::Object> {
-    let condition = eval(ie.condition.map(|e| ast::Node::Expression(*e)));
+fn eval_if_expression(ie: ast::IfExpression, env: &object::environment::Environment) -> Option<object::Object> {
+    let condition = eval(ie.condition.map(|e| ast::Node::Expression(*e)) ,env);
     if condition.is_error() {
         return condition
     }
 
     if is_truthy(condition) {
-        eval(ie.consequence.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))))
+        eval(ie.consequence.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))), env)
     } else if ie.alternative.is_some() {
-        eval(ie.alternative.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))))
+        eval(ie.alternative.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))), env)
     } else {
         NULL
     }
@@ -120,11 +120,11 @@ fn native_bool_to_boolean_object(input: bool) -> Option<object::Object> {
     FALSE
 }
 
-fn eval_block_statement(block: ast::BlockStatement) -> Option<object::Object> {
+fn eval_block_statement(block: ast::BlockStatement, env: &object::environment::Environment) -> Option<object::Object> {
     let mut result: Option<object::Object> = None;
 
     for statement in block.statements.into_iter() {
-        result = eval(Some(ast::Node::Statement(statement)));
+        result = eval(Some(ast::Node::Statement(statement)), env);
 
         if result.is_some() {
             let rt = result.as_ref()?.object_type();
