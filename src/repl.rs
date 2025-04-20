@@ -4,7 +4,7 @@ use std::io::{BufRead, Write};
 const PROMPT: &'static [u8] = ">> ".as_bytes();
 
 pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
-    let mut env = object::environment::Environment::new();
+    let mut env = object::environment::Environment::new(None);
 
     loop {
         writer.write(PROMPT).unwrap();

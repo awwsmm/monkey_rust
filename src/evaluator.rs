@@ -107,12 +107,12 @@ fn eval_expressions(exps: Vec<ast::Expression>, env: &mut object::environment::E
     for e in exps.into_iter() {
         let evaluated = eval(Some(ast::Node::Expression(e)), env);
         if evaluated.is_error() {
-            return vec![evaluated].iter().flatten().collect()
+            return vec![evaluated].into_iter().flatten().collect()
         }
         result.push(evaluated)
     }
 
-    result.iter().flatten().collect()
+    result.into_iter().flatten().collect()
 }
 
 fn eval_identifier(node: ast::Identifier, env: &object::environment::Environment) -> Option<object::Object> {
