@@ -1,4 +1,4 @@
-use crate::object::{ObjectLike, ObjectType};
+use crate::object::ObjectLike;
 use crate::{ast, object};
 
 const NULL: Option<object::Object> = Some(object::Object::Null(object::Null{}));
@@ -96,7 +96,7 @@ fn eval_block_statement(block: ast::BlockStatement) -> Option<object::Object> {
     for statement in block.statements.into_iter() {
         result = eval(Some(ast::Node::Statement(statement)));
 
-        if matches!(result.as_ref()?.inner().object_type(), ObjectType::ReturnValueObj) {
+        if matches!(result.as_ref().map(|x| x.inner().object_type()), Some(object::ObjectType::ReturnValueObj)) {
             return result
         }
     }
@@ -108,7 +108,7 @@ fn eval_prefix_expression(operator: &str, right: Option<object::Object>) -> Opti
     match operator {
         "!" => eval_bang_operator_expression(right),
         "-" => eval_minus_prefix_operator_expression(right),
-        _ => NULL
+        _ => object::Error::new(format!("unknown operator: {}{:?}", operator, right.as_ref().map(|x| x.object_type())))
     }
 }
 
@@ -122,8 +122,9 @@ fn eval_bang_operator_expression(right: Option<object::Object>) -> Option<object
 }
 
 fn eval_minus_prefix_operator_expression(right: Option<object::Object>) -> Option<object::Object> {
-    if right.as_ref().map(|r| r.object_type()) != Some(object::ObjectType::IntegerObj) {
-        return NULL
+    let right_type = right.as_ref().map(|x| x.object_type());
+    if right_type != Some(object::ObjectType::IntegerObj) {
+        return object::Error::new(format!("unknown operator: -{:?}", right_type))
     }
 
     let value = match right? {
@@ -134,17 +135,30 @@ fn eval_minus_prefix_operator_expression(right: Option<object::Object>) -> Optio
 }
 
 fn eval_infix_expression(operator: &str, left: Option<object::Object>, right: Option<object::Object>) -> Option<object::Object> {
-    if left.as_ref()?.object_type() == object::ObjectType::IntegerObj && right.as_ref()?.object_type() == object::ObjectType::IntegerObj {
-        return eval_integer_infix_expression(operator, left, right)
+    let left_type = left.as_ref().map(|x| x.object_type());
+    let right_type = right.as_ref().map(|x| x.object_type());
+
+    if left_type == Some(object::ObjectType::IntegerObj) && right_type == Some(object::ObjectType::IntegerObj) {
+        eval_integer_infix_expression(operator, left, right)
+
     } else if operator == "==" {
-        return native_bool_to_boolean_object(left == right)
+        native_bool_to_boolean_object(left == right)
+
     } else if operator == "!=" {
-        return native_bool_to_boolean_object(left != right)
+        native_bool_to_boolean_object(left != right)
+
+    } else if left_type != right_type {
+        object::Error::new(format!("type mismatch: {:?} {} {:?}", left_type, operator, right_type))
+
+    } else {
+        object::Error::new(format!("unknown operator: {:?} {} {:?}", left_type, operator, right_type))
     }
-    NULL
 }
 
 fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, right: Option<object::Object>) -> Option<object::Object> {
+    let left_type = left.as_ref().map(|x| x.object_type());
+    let right_type = right.as_ref().map(|x| x.object_type());
+
     let left_val = match left {
         Some(object::Object::Integer(inner)) => inner.value,
         _ => panic!()
@@ -163,7 +177,7 @@ fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, r
         ">" => native_bool_to_boolean_object(left_val > right_val),
         "==" => native_bool_to_boolean_object(left_val == right_val),
         "!=" => native_bool_to_boolean_object(left_val != right_val),
-        _ => None
+        _ => object::Error::new(format!("unknown operator: {:?} {} {:?}", left_type, operator, right_type))
     }
 }
 
@@ -458,27 +472,27 @@ mod tests {
         let tests = vec![
             Test::new(
                 "5 + true;",
-                "type mismatch: INTEGER + BOOLEAN"
+                "type mismatch: Some(IntegerObj) + Some(BooleanObj)"
             ),
             Test::new(
                 "5 + true; 5;",
-                "type mismatch: INTEGER + BOOLEAN"
+                "type mismatch: Some(IntegerObj) + Some(BooleanObj)"
             ),
             Test::new(
                 "-true",
-                "unknown operator: -BOOLEAN"
+                "unknown operator: -Some(BooleanObj)"
             ),
             Test::new(
                 "true + false;",
-                "unknown operator: BOOLEAN + BOOLEAN"
+                "unknown operator: Some(BooleanObj) + Some(BooleanObj)"
             ),
             Test::new(
                 "5; true + false; 5",
-                "unknown operator: BOOLEAN + BOOLEAN"
+                "unknown operator: Some(BooleanObj) + Some(BooleanObj)"
             ),
             Test::new(
                 "if (10 > 1) { true + false; }",
-                "unknown operator: BOOLEAN + BOOLEAN"
+                "unknown operator: Some(BooleanObj) + Some(BooleanObj)"
             ),
             Test::new(
                 "
@@ -490,7 +504,7 @@ mod tests {
                     return 1;
                 }
                 ",
-                "unknown operator: BOOLEAN + BOOLEAN"
+                "unknown operator: Some(BooleanObj) + Some(BooleanObj)"
             ),
         ];
 

@@ -1,4 +1,4 @@
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub(crate) enum ObjectType {
     IntegerObj,
     BooleanObj,
@@ -117,7 +117,7 @@ impl ObjectLike for Error {
 }
 
 impl Error {
-    fn new(message: String) -> Self {
-        Self { message }
+    pub(crate) fn new(message: String) -> Option<Object> {
+        Some(Object::Error(Self { message }))
     }
 }
