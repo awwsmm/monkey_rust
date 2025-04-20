@@ -6,7 +6,7 @@ pub(crate) struct Environment {
 }
 
 impl Environment {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self { store: Default::default() }
     }
 

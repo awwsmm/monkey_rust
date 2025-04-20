@@ -1,9 +1,11 @@
-use crate::{ast, evaluator, lexer, parser};
+use crate::{ast, evaluator, lexer, object, parser};
 use std::io::{BufRead, Write};
 
 const PROMPT: &'static [u8] = ">> ".as_bytes();
 
 pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
+    let env = object::environment::Environment::new();
+
     loop {
         writer.write(PROMPT).unwrap();
         writer.flush().unwrap();
@@ -24,7 +26,7 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
             continue
         }
 
-        let evaluated = evaluator::eval(Some(ast::Node::Program(program)));
+        let evaluated = evaluator::eval(Some(ast::Node::Program(program)), &env);
         if let Some(evaluated) = evaluated {
             write!(writer, "{}\n", evaluated.inner().inspect()).unwrap();
         }
