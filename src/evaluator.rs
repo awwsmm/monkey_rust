@@ -650,4 +650,40 @@ mod tests {
             panic!("body is not {}. got={}", expected_body, func.body.to_string())
         }
     }
+
+    #[test]
+    fn test_function_application() {
+        struct Test {
+            input: String,
+            expected: i32,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: i32) -> Self {
+                Self { input: input.to_owned(), expected }
+            }
+        }
+
+        let tests = vec![
+            Test::new("let a = 5; a", 5),
+		    Test::new("let identity = fn(x) { x; }; identity(5);", 5),
+		    Test::new("let identity = fn(x) { return x; }; identity(5);", 5),
+		    Test::new("let double = fn(x) { x * 2; }; double(5);", 10),
+		    Test::new("let add = fn(x, y) { x + y; }; add(5, 5);", 10),
+		    Test::new("let add = fn(x, y) { x + y; } add(5 + 5, add(5 + 5));", 20),
+		    Test::new("fn(x) { x; }(5)", 5),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            if !test_integer_object(test_eval(tt.input), tt.expected) {
+                should_panic = true;
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
