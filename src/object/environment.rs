@@ -10,8 +10,8 @@ impl Environment {
         Self { store: Default::default() }
     }
 
-    fn get(&self, name: &str) -> Option<&object::Object> {
-        self.store.get(name)
+    pub(crate) fn get(&self, name: &str) -> Option<object::Object> {
+        self.store.get(name).cloned()
     }
 
     pub(crate) fn set(&mut self, name: &str, val: object::Object) -> Option<object::Object> {

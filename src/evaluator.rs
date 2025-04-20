@@ -31,7 +31,8 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             if val.is_error() {
                 return val
             }
-            env.set(node.name?.value.as_str(), val?)
+            env.set(node.name?.value.as_str(), val?);
+            None
         }
 
         // Expressions
@@ -66,7 +67,17 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
         Some(ast::Node::Expression(ast::Expression::Boolean(node))) =>
             native_bool_to_boolean_object(node.value),
 
+        Some(ast::Node::Expression(ast::Expression::Identifier(node))) =>
+            eval_identifier(node, env),
+
         _ => None
+    }
+}
+
+fn eval_identifier(node: ast::Identifier, env: &object::environment::Environment) -> Option<object::Object> {
+    match env.get(node.value.as_str()) {
+        None => object::Error::new(format!("identifier not found: {}", node.value)),
+        Some(val) => Some(val)
     }
 }
 
