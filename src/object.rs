@@ -33,6 +33,19 @@ impl Object {
     }
 }
 
+pub(crate) trait IsError {
+    fn is_error(&self) -> bool;
+}
+
+impl IsError for Option<Object> {
+    fn is_error(&self) -> bool {
+        match self {
+            Some(object) => object.inner().object_type() == ObjectType::ErrorObj,
+            _ => false,
+        }
+    }
+}
+
 impl ObjectLike for Object {
     fn object_type(&self) -> ObjectType {
         self.inner().object_type()

@@ -1,4 +1,4 @@
-use crate::object::ObjectLike;
+use crate::object::{IsError, ObjectLike};
 use crate::{ast, object};
 
 const NULL: Option<object::Object> = Some(object::Object::Null(object::Null{}));
@@ -20,18 +20,32 @@ pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
 
         Some(ast::Node::Statement(ast::Statement::ReturnStatement(node))) => {
             let value = eval(node.return_value.map(|x| ast::Node::Expression(x)));
+            if value.is_error() {
+                return value
+            }
             Some(object::Object::ReturnValue(object::ReturnValue{ value: value.map(|x| Box::new(x)) }))
         }
 
         // Expressions
         Some(ast::Node::Expression(ast::Expression::PrefixExpression(node))) => {
             let right = eval(node.right.map(|e| ast::Node::Expression(*e)));
+            if right.is_error() {
+                return right
+            }
             eval_prefix_expression(node.operator.as_str(), right)
         }
 
         Some(ast::Node::Expression(ast::Expression::InfixExpression(node))) => {
             let left = eval(node.left.map(|e| ast::Node::Expression(*e)));
+            if left.is_error() {
+                return left
+            }
+
             let right = eval(node.right.map(|e| ast::Node::Expression(*e)));
+            if right.is_error() {
+                return right
+            }
+
             eval_infix_expression(node.operator.as_str(), left, right)
         }
 
@@ -67,6 +81,9 @@ fn eval_program(program: ast::Program) -> Option<object::Object> {
 
 fn eval_if_expression(ie: ast::IfExpression) -> Option<object::Object> {
     let condition = eval(ie.condition.map(|e| ast::Node::Expression(*e)));
+    if condition.is_error() {
+        return condition
+    }
 
     if is_truthy(condition) {
         eval(ie.consequence.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))))
