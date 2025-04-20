@@ -115,3 +115,9 @@ impl ObjectLike for Error {
         format!("ERROR: {}", self.message)
     }
 }
+
+impl Error {
+    fn new(message: String) -> Self {
+        Self { message }
+    }
+}
