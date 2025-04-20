@@ -56,6 +56,9 @@ fn eval_program(program: ast::Program) -> Option<object::Object> {
 
         if let Some(object::Object::ReturnValue(return_value)) = result {
             return return_value.value.map(|x| *x)
+
+        } else if matches!(result, Some(object::Object::Error(_))) {
+            return result
         }
     }
 
@@ -96,8 +99,11 @@ fn eval_block_statement(block: ast::BlockStatement) -> Option<object::Object> {
     for statement in block.statements.into_iter() {
         result = eval(Some(ast::Node::Statement(statement)));
 
-        if matches!(result.as_ref().map(|x| x.inner().object_type()), Some(object::ObjectType::ReturnValueObj)) {
-            return result
+        if result.is_some() {
+            let rt = result.as_ref()?.object_type();
+            if rt == object::ObjectType::ReturnValueObj || rt == object::ObjectType::ErrorObj {
+                return result
+            }
         }
     }
 
