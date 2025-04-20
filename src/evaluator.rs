@@ -217,7 +217,6 @@ fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, r
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::object::Object;
     use crate::{lexer, object, parser};
 
     #[test]
@@ -269,8 +268,9 @@ mod tests {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
         let program = p.parse_program();
+        let env = object::environment::Environment::new();
 
-        eval(Some(ast::Node::Program(program)))
+        eval(Some(ast::Node::Program(program)), &env)
     }
 
     fn test_integer_object(obj: Option<object::Object>, expected: i32) -> bool {
@@ -551,7 +551,7 @@ mod tests {
             let evaluated = test_eval(tt.input);
 
             let err_obj = match evaluated {
-                Some(Object::Error(inner)) => inner,
+                Some(object::Object::Error(inner)) => inner,
                 _ => {
                     eprint!("no error object returned. got={:?}\n", evaluated);
                     should_panic = true;
