@@ -5,7 +5,7 @@ const NULL: Option<object::Object> = Some(object::Object::Null(object::Null{}));
 const TRUE: Option<object::Object> = Some(object::Object::Boolean(object::Boolean{ value: true }));
 const FALSE: Option<object::Object> = Some(object::Object::Boolean(object::Boolean{ value: false }));
 
-pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environment) -> Option<object::Object> {
+pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Environment) -> Option<object::Object> {
     match node {
 
         // Statements
@@ -31,9 +31,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environme
             if val.is_error() {
                 return val
             }
-
-            // Huh? Now what?
-            unimplemented!()
+            env.set(node.name?.value.as_str(), val?)
         }
 
         // Expressions
@@ -72,7 +70,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environme
     }
 }
 
-fn eval_program(program: ast::Program, env: &object::environment::Environment) -> Option<object::Object> {
+fn eval_program(program: ast::Program, env: &mut object::environment::Environment) -> Option<object::Object> {
     let mut result: Option<object::Object> = None;
 
     for statement in program.statements.into_iter() {
@@ -89,7 +87,7 @@ fn eval_program(program: ast::Program, env: &object::environment::Environment) -
     result
 }
 
-fn eval_if_expression(ie: ast::IfExpression, env: &object::environment::Environment) -> Option<object::Object> {
+fn eval_if_expression(ie: ast::IfExpression, env: &mut object::environment::Environment) -> Option<object::Object> {
     let condition = eval(ie.condition.map(|e| ast::Node::Expression(*e)) ,env);
     if condition.is_error() {
         return condition
@@ -120,7 +118,7 @@ fn native_bool_to_boolean_object(input: bool) -> Option<object::Object> {
     FALSE
 }
 
-fn eval_block_statement(block: ast::BlockStatement, env: &object::environment::Environment) -> Option<object::Object> {
+fn eval_block_statement(block: ast::BlockStatement, env: &mut object::environment::Environment) -> Option<object::Object> {
     let mut result: Option<object::Object> = None;
 
     for statement in block.statements.into_iter() {
@@ -268,9 +266,9 @@ mod tests {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
         let program = p.parse_program();
-        let env = object::environment::Environment::new();
+        let mut env = object::environment::Environment::new();
 
-        eval(Some(ast::Node::Program(program)), &env)
+        eval(Some(ast::Node::Program(program)), &mut env)
     }
 
     fn test_integer_object(obj: Option<object::Object>, expected: i32) -> bool {

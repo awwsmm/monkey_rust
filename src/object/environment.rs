@@ -14,7 +14,8 @@ impl Environment {
         self.store.get(name)
     }
 
-    fn set(&mut self, name: &str, val: object::Object) {
-        self.store.insert(name.to_owned(), val);
+    pub(crate) fn set(&mut self, name: &str, val: object::Object) -> Option<object::Object> {
+        self.store.insert(name.to_owned(), val.clone());
+        Some(val)
     }
 }

@@ -9,7 +9,7 @@ pub(crate) enum ObjectType {
     ErrorObj,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) enum Object {
     Integer(Integer),
     Boolean(Boolean),
@@ -58,7 +58,7 @@ impl ObjectLike for Object {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Integer {
     pub(crate) value: i32,
 }
@@ -73,7 +73,7 @@ impl ObjectLike for Integer {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Boolean {
     pub(crate) value: bool,
 }
@@ -88,7 +88,7 @@ impl ObjectLike for Boolean {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Null{}
 
 impl ObjectLike for Null {
@@ -101,7 +101,7 @@ impl ObjectLike for Null {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) struct ReturnValue {
     pub(crate) value: Option<Box<Object>>
 }
@@ -116,7 +116,7 @@ impl ObjectLike for ReturnValue {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Error {
     pub(crate) message: String
 }
