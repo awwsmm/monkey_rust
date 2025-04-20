@@ -1,3 +1,6 @@
+use crate::ast;
+use std::cmp::PartialEq;
+
 pub(crate) mod environment;
 
 #[derive(PartialEq, Debug)]
@@ -7,6 +10,7 @@ pub(crate) enum ObjectType {
     NullObj,
     ReturnValueObj,
     ErrorObj,
+    FunctionObj,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -16,6 +20,7 @@ pub(crate) enum Object {
     Null(Null),
     ReturnValue(ReturnValue),
     Error(Error),
+    Function(Function),
 }
 
 pub(crate) trait ObjectLike {
@@ -31,6 +36,7 @@ impl Object {
             Object::Null(inner) => Box::new(inner),
             Object::ReturnValue(inner) => Box::new(inner),
             Object::Error(inner) => Box::new(inner),
+            Object::Function(inner) => Box::new(inner),
         }
     }
 }
@@ -134,5 +140,31 @@ impl ObjectLike for Error {
 impl Error {
     pub(crate) fn new(message: String) -> Option<Object> {
         Some(Object::Error(Self { message }))
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub(crate) struct Function {
+    parameters: Vec<ast::Identifier>,
+    body: ast::BlockStatement,
+    env: environment::Environment,
+}
+
+impl ObjectLike for Function {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::FunctionObj
+    }
+
+    fn inspect(&self) -> String {
+        let mut params = vec![];
+
+        for p in self.parameters.iter() {
+            params.push(p.to_string())
+        }
+
+        let params = params.join(", ");
+        let body = self.body.to_string();
+
+        format!("fn({}) {{\n{}\n}}", params, body)
     }
 }
