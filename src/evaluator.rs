@@ -70,6 +70,16 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
         Some(ast::Node::Expression(ast::Expression::Identifier(node))) =>
             eval_identifier(node, env),
 
+        Some(ast::Node::Expression(ast::Expression::FunctionLiteral(node))) => {
+            let params = node.parameters;
+            let body = node.body;
+            Some(object::Object::Function(object::Function{
+                parameters: params,
+                body: body?,
+                env: env.clone(),
+            }))
+        }
+
         _ => None
     }
 }

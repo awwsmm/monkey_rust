@@ -147,7 +147,7 @@ impl Error {
 pub(crate) struct Function {
     pub(crate) parameters: Vec<ast::Identifier>,
     pub(crate) body: ast::BlockStatement,
-    env: environment::Environment,
+    pub(crate) env: environment::Environment,
 }
 
 impl ObjectLike for Function {
