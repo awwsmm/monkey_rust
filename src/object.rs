@@ -1,4 +1,4 @@
-mod environment;
+pub(crate) mod environment;
 
 #[derive(PartialEq, Debug)]
 pub(crate) enum ObjectType {

@@ -5,7 +5,7 @@ const NULL: Option<object::Object> = Some(object::Object::Null(object::Null{}));
 const TRUE: Option<object::Object> = Some(object::Object::Boolean(object::Boolean{ value: true }));
 const FALSE: Option<object::Object> = Some(object::Object::Boolean(object::Boolean{ value: false }));
 
-pub(crate) fn eval(node: Option<ast::Node>) -> Option<object::Object> {
+pub(crate) fn eval(node: Option<ast::Node>, env: &object::environment::Environment) -> Option<object::Object> {
     match node {
 
         // Statements
