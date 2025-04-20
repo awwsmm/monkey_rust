@@ -529,6 +529,10 @@ mod tests {
                 ",
                 "unknown operator: Some(BooleanObj) + Some(BooleanObj)"
             ),
+            Test::new(
+                "foobar",
+                "identifier not found: foobar",
+            ),
         ];
 
         let mut should_panic = false;
