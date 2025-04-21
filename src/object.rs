@@ -11,16 +11,18 @@ pub(crate) enum ObjectType {
     ReturnValueObj,
     ErrorObj,
     FunctionObj,
+    StringObj,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) enum Object {
-    Integer(Integer),
-    Boolean(Boolean),
-    Null(Null),
-    ReturnValue(ReturnValue),
-    Error(Error),
-    Function(Function),
+    IntegerObj(IntegerObj),
+    BooleanObj(BooleanObj),
+    NullObj(NullObj),
+    ReturnValueObj(ReturnValueObj),
+    ErrorObj(ErrorObj),
+    FunctionObj(FunctionObj),
+    StringObj(StringObj),
 }
 
 pub(crate) trait ObjectLike {
@@ -31,12 +33,13 @@ pub(crate) trait ObjectLike {
 impl Object {
     pub(crate) fn inner(&self) -> Box<&dyn ObjectLike> {
         match self {
-            Object::Integer(inner) => Box::new(inner),
-            Object::Boolean(inner) => Box::new(inner),
-            Object::Null(inner) => Box::new(inner),
-            Object::ReturnValue(inner) => Box::new(inner),
-            Object::Error(inner) => Box::new(inner),
-            Object::Function(inner) => Box::new(inner),
+            Object::IntegerObj(inner) => Box::new(inner),
+            Object::BooleanObj(inner) => Box::new(inner),
+            Object::NullObj(inner) => Box::new(inner),
+            Object::ReturnValueObj(inner) => Box::new(inner),
+            Object::ErrorObj(inner) => Box::new(inner),
+            Object::FunctionObj(inner) => Box::new(inner),
+            Object::StringObj(inner) => Box::new(inner),
         }
     }
 }
@@ -65,11 +68,11 @@ impl ObjectLike for Object {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct Integer {
+pub(crate) struct IntegerObj {
     pub(crate) value: i32,
 }
 
-impl ObjectLike for Integer {
+impl ObjectLike for IntegerObj {
     fn object_type(&self) -> ObjectType {
         ObjectType::IntegerObj
     }
@@ -80,11 +83,11 @@ impl ObjectLike for Integer {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct Boolean {
+pub(crate) struct BooleanObj {
     pub(crate) value: bool,
 }
 
-impl ObjectLike for Boolean {
+impl ObjectLike for BooleanObj {
     fn object_type(&self) -> ObjectType {
         ObjectType::BooleanObj
     }
@@ -95,9 +98,9 @@ impl ObjectLike for Boolean {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct Null{}
+pub(crate) struct NullObj {}
 
-impl ObjectLike for Null {
+impl ObjectLike for NullObj {
     fn object_type(&self) -> ObjectType {
         ObjectType::NullObj
     }
@@ -108,11 +111,11 @@ impl ObjectLike for Null {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct ReturnValue {
+pub(crate) struct ReturnValueObj {
     pub(crate) value: Option<Box<Object>>
 }
 
-impl ObjectLike for ReturnValue {
+impl ObjectLike for ReturnValueObj {
     fn object_type(&self) -> ObjectType {
         ObjectType::ReturnValueObj
     }
@@ -123,11 +126,11 @@ impl ObjectLike for ReturnValue {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct Error {
+pub(crate) struct ErrorObj {
     pub(crate) message: String
 }
 
-impl ObjectLike for Error {
+impl ObjectLike for ErrorObj {
     fn object_type(&self) -> ObjectType {
         ObjectType::ErrorObj
     }
@@ -137,20 +140,20 @@ impl ObjectLike for Error {
     }
 }
 
-impl Error {
+impl ErrorObj {
     pub(crate) fn new(message: String) -> Option<Object> {
-        Some(Object::Error(Self { message }))
+        Some(Object::ErrorObj(Self { message }))
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct Function {
+pub(crate) struct FunctionObj {
     pub(crate) parameters: Vec<ast::Identifier>,
     pub(crate) body: ast::BlockStatement,
     pub(crate) env: environment::Environment,
 }
 
-impl ObjectLike for Function {
+impl ObjectLike for FunctionObj {
     fn object_type(&self) -> ObjectType {
         ObjectType::FunctionObj
     }
@@ -166,5 +169,20 @@ impl ObjectLike for Function {
         let body = self.body.to_string();
 
         format!("fn({}) {{\n{}\n}}", params, body)
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub(crate) struct StringObj {
+    pub(crate) value: String,
+}
+
+impl ObjectLike for StringObj {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::StringObj
+    }
+
+    fn inspect(&self) -> String {
+        self.value.to_string()
     }
 }

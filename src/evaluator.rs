@@ -1,9 +1,9 @@
 use crate::object::{IsError, ObjectLike};
 use crate::{ast, object};
 
-const NULL: Option<object::Object> = Some(object::Object::Null(object::Null{}));
-const TRUE: Option<object::Object> = Some(object::Object::Boolean(object::Boolean{ value: true }));
-const FALSE: Option<object::Object> = Some(object::Object::Boolean(object::Boolean{ value: false }));
+const NULL: Option<object::Object> = Some(object::Object::NullObj(object::NullObj {}));
+const TRUE: Option<object::Object> = Some(object::Object::BooleanObj(object::BooleanObj { value: true }));
+const FALSE: Option<object::Object> = Some(object::Object::BooleanObj(object::BooleanObj { value: false }));
 
 pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Environment) -> Option<object::Object> {
     match node {
@@ -23,7 +23,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             if val.is_error() {
                 return val
             }
-            Some(object::Object::ReturnValue(object::ReturnValue{ value: val.map(|x| Box::new(x)) }))
+            Some(object::Object::ReturnValueObj(object::ReturnValueObj { value: val.map(|x| Box::new(x)) }))
         }
 
         Some(ast::Node::Statement(ast::Statement::LetStatement(node))) => {
@@ -62,7 +62,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             eval_if_expression(node, env),
 
         Some(ast::Node::Expression(ast::Expression::IntegerLiteral(node))) =>
-            Some(object::Object::Integer(object::Integer{ value: node.value })),
+            Some(object::Object::IntegerObj(object::IntegerObj { value: node.value })),
 
         Some(ast::Node::Expression(ast::Expression::Boolean(node))) =>
             native_bool_to_boolean_object(node.value),
@@ -73,7 +73,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
         Some(ast::Node::Expression(ast::Expression::FunctionLiteral(node))) => {
             let params = node.parameters;
             let body = node.body;
-            Some(object::Object::Function(object::Function{
+            Some(object::Object::FunctionObj(object::FunctionObj {
                 parameters: params,
                 body: body?,
                 env: env.clone(),
@@ -103,8 +103,8 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
 
 fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<object::Object> {
     let function = match func {
-        object::Object::Function(inner) => inner,
-        _ => return object::Error::new(format!("not a function: {:?}", func.object_type()))
+        object::Object::FunctionObj(inner) => inner,
+        _ => return object::ErrorObj::new(format!("not a function: {:?}", func.object_type()))
     };
 
     let mut extended_env = extend_function_env(function.clone(), args);
@@ -115,7 +115,7 @@ fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<obj
     unwrap_return_value(evaluated.unwrap()).map(|x| *x)
 }
 
-fn extend_function_env(func: object::Function, args: Vec<object::Object>) -> object::environment::Environment {
+fn extend_function_env(func: object::FunctionObj, args: Vec<object::Object>) -> object::environment::Environment {
     let mut env = object::environment::Environment::new(Some(Box::new(func.env)));
 
     for (param_idx, param) in func.parameters.iter().enumerate() {
@@ -126,7 +126,7 @@ fn extend_function_env(func: object::Function, args: Vec<object::Object>) -> obj
 }
 
 fn unwrap_return_value(obj: object::Object) -> Option<Box<object::Object>> {
-    if let object::Object::ReturnValue(return_value) = obj {
+    if let object::Object::ReturnValueObj(return_value) = obj {
         return return_value.value
     }
 
@@ -149,7 +149,7 @@ fn eval_expressions(exps: Vec<ast::Expression>, env: &mut object::environment::E
 
 fn eval_identifier(node: ast::Identifier, env: &object::environment::Environment) -> Option<object::Object> {
     match env.get(node.value.as_str()) {
-        None => object::Error::new(format!("identifier not found: {}", node.value)),
+        None => object::ErrorObj::new(format!("identifier not found: {}", node.value)),
         Some(val) => Some(val)
     }
 }
@@ -160,10 +160,10 @@ fn eval_program(program: ast::Program, env: &mut object::environment::Environmen
     for statement in program.statements.into_iter() {
         result = eval(Some(ast::Node::Statement(statement)), env);
 
-        if let Some(object::Object::ReturnValue(return_value)) = result {
+        if let Some(object::Object::ReturnValueObj(return_value)) = result {
             return return_value.value.map(|x| *x)
 
-        } else if matches!(result, Some(object::Object::Error(_))) {
+        } else if matches!(result, Some(object::Object::ErrorObj(_))) {
             return result
         }
     }
@@ -223,7 +223,7 @@ fn eval_prefix_expression(operator: &str, right: Option<object::Object>) -> Opti
     match operator {
         "!" => eval_bang_operator_expression(right),
         "-" => eval_minus_prefix_operator_expression(right),
-        _ => object::Error::new(format!("unknown operator: {}{:?}", operator, right.as_ref().map(|x| x.object_type())))
+        _ => object::ErrorObj::new(format!("unknown operator: {}{:?}", operator, right.as_ref().map(|x| x.object_type())))
     }
 }
 
@@ -239,14 +239,14 @@ fn eval_bang_operator_expression(right: Option<object::Object>) -> Option<object
 fn eval_minus_prefix_operator_expression(right: Option<object::Object>) -> Option<object::Object> {
     let right_type = right.as_ref().map(|x| x.object_type());
     if right_type != Some(object::ObjectType::IntegerObj) {
-        return object::Error::new(format!("unknown operator: -{:?}", right_type))
+        return object::ErrorObj::new(format!("unknown operator: -{:?}", right_type))
     }
 
     let value = match right? {
-        object::Object::Integer(inner) => inner.value,
+        object::Object::IntegerObj(inner) => inner.value,
         _ => panic!()
     };
-    Some(object::Object::Integer(object::Integer{ value: -value }))
+    Some(object::Object::IntegerObj(object::IntegerObj { value: -value }))
 }
 
 fn eval_infix_expression(operator: &str, left: Option<object::Object>, right: Option<object::Object>) -> Option<object::Object> {
@@ -263,10 +263,10 @@ fn eval_infix_expression(operator: &str, left: Option<object::Object>, right: Op
         native_bool_to_boolean_object(left != right)
 
     } else if left_type != right_type {
-        object::Error::new(format!("type mismatch: {:?} {} {:?}", left_type, operator, right_type))
+        object::ErrorObj::new(format!("type mismatch: {:?} {} {:?}", left_type, operator, right_type))
 
     } else {
-        object::Error::new(format!("unknown operator: {:?} {} {:?}", left_type, operator, right_type))
+        object::ErrorObj::new(format!("unknown operator: {:?} {} {:?}", left_type, operator, right_type))
     }
 }
 
@@ -275,24 +275,24 @@ fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, r
     let right_type = right.as_ref().map(|x| x.object_type());
 
     let left_val = match left {
-        Some(object::Object::Integer(inner)) => inner.value,
+        Some(object::Object::IntegerObj(inner)) => inner.value,
         _ => panic!()
     };
     let right_val = match right {
-        Some(object::Object::Integer(inner)) => inner.value,
+        Some(object::Object::IntegerObj(inner)) => inner.value,
         _ => panic!()
     };
 
     match operator {
-        "+" => Some(object::Object::Integer(object::Integer{ value: left_val + right_val })),
-        "-" => Some(object::Object::Integer(object::Integer{ value: left_val - right_val })),
-        "*" => Some(object::Object::Integer(object::Integer{ value: left_val * right_val })),
-        "/" => Some(object::Object::Integer(object::Integer{ value: left_val / right_val })),
+        "+" => Some(object::Object::IntegerObj(object::IntegerObj { value: left_val + right_val })),
+        "-" => Some(object::Object::IntegerObj(object::IntegerObj { value: left_val - right_val })),
+        "*" => Some(object::Object::IntegerObj(object::IntegerObj { value: left_val * right_val })),
+        "/" => Some(object::Object::IntegerObj(object::IntegerObj { value: left_val / right_val })),
         "<" => native_bool_to_boolean_object(left_val < right_val),
         ">" => native_bool_to_boolean_object(left_val > right_val),
         "==" => native_bool_to_boolean_object(left_val == right_val),
         "!=" => native_bool_to_boolean_object(left_val != right_val),
-        _ => object::Error::new(format!("unknown operator: {:?} {} {:?}", left_type, operator, right_type))
+        _ => object::ErrorObj::new(format!("unknown operator: {:?} {} {:?}", left_type, operator, right_type))
     }
 }
 
@@ -357,7 +357,7 @@ mod tests {
 
     fn test_integer_object(obj: Option<object::Object>, expected: i32) -> bool {
         let result = match obj {
-            Some(object::Object::Integer(inner)) => inner,
+            Some(object::Object::IntegerObj(inner)) => inner,
             _ => {
                 eprint!("object is not Integer. got={:?}\n", obj);
                 return false
@@ -423,7 +423,7 @@ mod tests {
 
     fn test_boolean_object(obj: Option<object::Object>, expected: bool) -> bool {
         let result = match obj {
-            Some(object::Object::Boolean(inner)) => inner,
+            Some(object::Object::BooleanObj(inner)) => inner,
             _ => {
                 eprint!("object is not Boolean. got={:?}\n", obj);
                 return false
@@ -633,7 +633,7 @@ mod tests {
             let evaluated = test_eval(tt.input);
 
             let err_obj = match evaluated {
-                Some(object::Object::Error(inner)) => inner,
+                Some(object::Object::ErrorObj(inner)) => inner,
                 _ => {
                     eprint!("no error object returned. got={:?}\n", evaluated);
                     should_panic = true;
@@ -693,7 +693,7 @@ mod tests {
         let evaluated = test_eval(input);
 
         let func = match evaluated {
-            Some(object::Object::Function(inner)) => inner,
+            Some(object::Object::FunctionObj(inner)) => inner,
             _ => panic!("object is not Function. got={:?}", evaluated)
         };
 
