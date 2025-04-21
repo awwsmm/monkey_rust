@@ -71,6 +71,7 @@ impl Lexer {
             b')' => tok = token::Token::new(token::TokenType::RPAREN, String::from_utf8(vec![self.ch]).unwrap()),
             b'{' => tok = token::Token::new(token::TokenType::LBRACE, String::from_utf8(vec![self.ch]).unwrap()),
             b'}' => tok = token::Token::new(token::TokenType::RBRACE, String::from_utf8(vec![self.ch]).unwrap()),
+            b'"' => tok = token::Token::new(token::TokenType::STRING, self.read_string()),
 
             _ => {
                 if Self::is_letter(self.ch) {
@@ -89,6 +90,17 @@ impl Lexer {
 
         self.read_char();
         tok
+    }
+
+    fn read_string(&mut self) -> String {
+        let position = self.position + 1;
+        loop {
+            self.read_char();
+            if self.ch == b'"' || self.ch == 0 {
+                break
+            }
+        }
+        String::from(&self.input[position..self.position])
     }
 
     fn peek_char(&self) -> u8 {
