@@ -259,6 +259,9 @@ fn eval_infix_expression(operator: &str, left: Option<object::Object>, right: Op
     if left_type == Some(object::ObjectType::IntegerObj) && right_type == Some(object::ObjectType::IntegerObj) {
         eval_integer_infix_expression(operator, left, right)
 
+    } else if left_type == Some(object::ObjectType::StringObj) && right_type == Some(object::ObjectType::StringObj) {
+        eval_string_infix_expression(operator, left, right)
+
     } else if operator == "==" {
         native_bool_to_boolean_object(left == right)
 
