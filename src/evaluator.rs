@@ -276,6 +276,26 @@ fn eval_infix_expression(operator: &str, left: Option<object::Object>, right: Op
     }
 }
 
+fn eval_string_infix_expression(operator: &str, left: Option<object::Object>, right: Option<object::Object>) -> Option<object::Object> {
+    let left_type = left.as_ref().map(|x| x.object_type());
+    let right_type = right.as_ref().map(|x| x.object_type());
+
+    if operator != "+" {
+        return object::ErrorObj::new(format!("unknown operator: {:?} {} {:?}", left_type, operator, right_type))
+    }
+
+    let left_val = match left {
+        Some(object::Object::StringObj(inner)) => inner.value,
+        _ => panic!()
+    };
+    let right_val = match right {
+        Some(object::Object::StringObj(inner)) => inner.value,
+        _ => panic!()
+    };
+
+    Some(object::Object::StringObj(object::StringObj{ value: format!("{}{}", left_val, right_val) }))
+}
+
 fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, right: Option<object::Object>) -> Option<object::Object> {
     let left_type = left.as_ref().map(|x| x.object_type());
     let right_type = right.as_ref().map(|x| x.object_type());
