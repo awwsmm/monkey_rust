@@ -33,6 +33,7 @@ impl Parser {
         p.register_prefix(token::TokenType::LPAREN, Parser::parse_grouped_expression);
         p.register_prefix(token::TokenType::IF, Parser::parse_if_expression);
         p.register_prefix(token::TokenType::FUNCTION, Parser::parse_function_literal);
+        p.register_prefix(token::TokenType::STRING, Parser::parse_string_literal);
 
         p.register_infix(token::TokenType::PLUS, Parser::parse_infix_expression);
         p.register_infix(token::TokenType::MINUS, Parser::parse_infix_expression);
@@ -49,6 +50,13 @@ impl Parser {
         p.next_token();
 
         p
+    }
+
+    fn parse_string_literal(&mut self) -> Option<ast::Expression> {
+        Some(ast::Expression::StringLiteral(ast::StringLiteral{
+            token: self.cur_token.clone(),
+            value: self.cur_token.literal.clone(),
+        }))
     }
 
     fn parse_call_expression(&mut self, function: ast::Expression) -> ast::Expression {
