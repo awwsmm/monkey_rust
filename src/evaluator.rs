@@ -748,4 +748,20 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_closures() {
+        let input ="
+            let newAdder = fn(x) {
+                fn(y) { x + y };
+            };
+
+            let addTwo = newAdder(2);
+            addTwo(2);
+        ";
+
+        if !test_integer_object(test_eval(input), 4) {
+            panic!()
+        }
+    }
 }
