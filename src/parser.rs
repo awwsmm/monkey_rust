@@ -1409,4 +1409,28 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_string_literal_expression() {
+        let input = r#""hello world";"#;
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let literal = match stmt.expression.as_ref() {
+            Some(Expression::StringLiteral(inner)) => inner,
+            _ => panic!("exp not ast::StringLiteral. got={:?}", stmt.expression)
+        };
+
+        if literal.value != "hello world" {
+            panic!("literal.value not {}. got={}", "hello world", literal.value)
+        }
+    }
+
 }
