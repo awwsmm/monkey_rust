@@ -97,6 +97,9 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             apply_function(function?, args)
         }
 
+        Some(ast::Node::Expression(ast::Expression::StringLiteral(node))) =>
+            Some(object::Object::StringObj(object::StringObj{ value: node.value })),
+
         _ => None
     }
 }
