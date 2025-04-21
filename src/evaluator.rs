@@ -782,4 +782,19 @@ mod tests {
             panic!("String has wrong value. got={}", str.value)
         }
     }
+
+    #[test]
+    fn test_string_concatenation() {
+        let input = r#""Hello" + " " + "World!"#;
+
+        let evaluated = test_eval(input);
+        let str = match evaluated {
+            Some(object::Object::StringObj(str)) => str,
+            _ => panic!("object is not String. got={:?}", evaluated)
+        };
+
+        if str.value != "Hello World!" {
+            panic!("String has wrong value. got={}", str.value)
+        }
+    }
 }
