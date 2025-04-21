@@ -9,6 +9,7 @@ pub(crate) enum TokenType {
     // Identifiers + literals
     IDENT, // add, foobar, x, y, ...
     INT, // 1343456
+    STRING,
 
     // Operators
     ASSIGN,
@@ -51,6 +52,7 @@ impl Display for TokenType {
 
             TokenType::IDENT => "IDENT",
             TokenType::INT => "INT",
+            TokenType::STRING => "STRING",
 
             TokenType::ASSIGN => "=",
             TokenType::PLUS => "+",

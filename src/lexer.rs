@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_next_token() {
-        let input = "let five = 5;
+        let input = r#"let five = 5;
 let ten = 10;
 
 let add = fn(x, y) {
@@ -155,7 +155,9 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
-";
+"foobar"
+"foo bar"
+"#;
 
         struct Test {
             expected_type: token::TokenType,
@@ -242,6 +244,8 @@ if (5 < 10) {
             Test::new(token::TokenType::NEQ, "!="),
             Test::new(token::TokenType::INT, "9"),
             Test::new(token::TokenType::SEMICOLON, ";"),
+            Test::new(token::TokenType::STRING, "foobar"),
+            Test::new(token::TokenType::STRING, "foo bar"),
             Test::new(token::TokenType::EOF, ""),
         ];
 
