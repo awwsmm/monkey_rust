@@ -628,6 +628,10 @@ mod tests {
                 "foobar",
                 "identifier not found: foobar",
             ),
+            Test::new(
+                r#""Hello" - "World""#,
+                "unknown operator: Some(StringObj) - Some(StringObj)"
+            )
         ];
 
         let mut should_panic = false;
