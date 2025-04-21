@@ -49,6 +49,7 @@ impl NodeLike for Statement {
 pub(crate) enum Expression {
     Identifier(Identifier),
     IntegerLiteral(IntegerLiteral),
+    StringLiteral(StringLiteral),
     PrefixExpression(PrefixExpression),
     InfixExpression(InfixExpression),
     Boolean(Boolean),
@@ -62,6 +63,7 @@ impl Expression {
         match self {
             Expression::Identifier(inner) => Box::new(inner),
             Expression::IntegerLiteral(inner) => Box::new(inner),
+            Expression::StringLiteral(inner) => Box::new(inner),
             Expression::PrefixExpression(inner) => Box::new(inner),
             Expression::InfixExpression(inner) => Box::new(inner),
             Expression::Boolean(inner) => Box::new(inner),
@@ -193,6 +195,24 @@ impl Display for IntegerLiteral {
 }
 
 impl NodeLike for IntegerLiteral {
+    fn token_literal(&self) -> &str {
+        &*self.token.literal
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct StringLiteral {
+    pub(crate) token: token::Token,
+    pub(crate) value: String,
+}
+
+impl Display for StringLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.token.literal)
+    }
+}
+
+impl NodeLike for StringLiteral {
     fn token_literal(&self) -> &str {
         &*self.token.literal
     }
