@@ -94,11 +94,43 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
                 }
             }
 
-            todo!()
+            apply_function(function?, args)
         }
 
         _ => None
     }
+}
+
+fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<object::Object> {
+    let function = match func {
+        object::Object::Function(inner) => inner,
+        _ => return object::Error::new(format!("not a function: {:?}", func.object_type()))
+    };
+
+    let mut extended_env = extend_function_env(function.clone(), args);
+    let evaluated = eval(
+        Some(ast::Node::Statement(ast::Statement::BlockStatement(function.body))),
+        &mut extended_env
+    );
+    unwrap_return_value(evaluated.unwrap()).map(|x| *x)
+}
+
+fn extend_function_env(func: object::Function, args: Vec<object::Object>) -> object::environment::Environment {
+    let mut env = object::environment::Environment::new(Some(Box::new(func.env)));
+
+    for (param_idx, param) in func.parameters.iter().enumerate() {
+        env.set(param.value.as_str(), args.get(param_idx).cloned().unwrap());
+    }
+
+    env
+}
+
+fn unwrap_return_value(obj: object::Object) -> Option<Box<object::Object>> {
+    if let object::Object::ReturnValue(return_value) = obj {
+        return return_value.value
+    }
+
+    Some(Box::new(obj))
 }
 
 fn eval_expressions(exps: Vec<ast::Expression>, env: &mut object::environment::Environment) -> Vec<object::Object> {
@@ -267,7 +299,6 @@ fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, r
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::object::Object;
     use crate::{lexer, object, parser};
 
     #[test]
@@ -319,7 +350,7 @@ mod tests {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
         let program = p.parse_program();
-        let mut env = object::environment::Environment::new();
+        let mut env = object::environment::Environment::new(None);
 
         eval(Some(ast::Node::Program(program)), &mut env)
     }
@@ -662,7 +693,7 @@ mod tests {
         let evaluated = test_eval(input);
 
         let func = match evaluated {
-            Some(Object::Function(inner)) => inner,
+            Some(object::Object::Function(inner)) => inner,
             _ => panic!("object is not Function. got={:?}", evaluated)
         };
 
@@ -701,7 +732,7 @@ mod tests {
 		    Test::new("let identity = fn(x) { return x; }; identity(5);", 5),
 		    Test::new("let double = fn(x) { x * 2; }; double(5);", 10),
 		    Test::new("let add = fn(x, y) { x + y; }; add(5, 5);", 10),
-		    Test::new("let add = fn(x, y) { x + y; } add(5 + 5, add(5 + 5));", 20),
+		    Test::new("let add = fn(x, y) { x + y; } add(5 + 5, add(5, 5));", 20),
 		    Test::new("fn(x) { x; }(5)", 5),
         ];
 
