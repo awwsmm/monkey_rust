@@ -1,5 +1,6 @@
 use crate::ast;
 use std::cmp::PartialEq;
+use crate::parser::Parser;
 
 pub(crate) mod environment;
 
@@ -186,3 +187,5 @@ impl ObjectLike for StringObj {
         self.value.to_string()
     }
 }
+
+type BuiltinFunction = fn(Vec<Object>) -> Object;
