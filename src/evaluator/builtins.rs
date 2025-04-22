@@ -1,9 +1,9 @@
 use crate::evaluator;
 
-struct Builtin{}
+pub(crate) struct Builtin{}
 
 impl Builtin {
-    fn from(string: &str) -> Option<evaluator::object::BuiltinObj> {
+    pub(crate) fn from(string: &str) -> Option<evaluator::object::BuiltinObj> {
         match string {
             "len" => Some(evaluator::object::BuiltinObj{
                 func: |x| evaluator::NULL.unwrap()

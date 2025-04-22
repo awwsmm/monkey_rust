@@ -153,10 +153,15 @@ fn eval_expressions(exps: Vec<ast::Expression>, env: &mut object::environment::E
 }
 
 fn eval_identifier(node: ast::Identifier, env: &object::environment::Environment) -> Option<object::Object> {
-    match env.get(node.value.as_str()) {
-        None => object::ErrorObj::new(format!("identifier not found: {}", node.value)),
-        Some(val) => Some(val)
+    if let Some(val) = env.get(node.value.as_str()) {
+        return Some(val)
     }
+
+    if let Some(builtin) = builtins::Builtin::from(node.value.as_str()) {
+        return Some(object::Object::BuiltinObj(builtin))
+    }
+
+    object::ErrorObj::new(format!("identifier not found: {}", node.value))
 }
 
 fn eval_program(program: ast::Program, env: &mut object::environment::Environment) -> Option<object::Object> {
