@@ -107,17 +107,22 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
 }
 
 fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<object::Object> {
-    let function = match func {
-        object::Object::FunctionObj(inner) => inner,
-        _ => return object::ErrorObj::new(format!("not a function: {:?}", func.object_type()))
-    };
+    match func {
+        object::Object::FunctionObj(func) => {
+            let mut extended_env = extend_function_env(func.clone(), args);
+            let evaluated = eval(
+                Some(ast::Node::Statement(ast::Statement::BlockStatement(func.body))),
+                &mut extended_env
+            );
+            unwrap_return_value(evaluated?).map(|x| *x)
+        },
 
-    let mut extended_env = extend_function_env(function.clone(), args);
-    let evaluated = eval(
-        Some(ast::Node::Statement(ast::Statement::BlockStatement(function.body))),
-        &mut extended_env
-    );
-    unwrap_return_value(evaluated.unwrap()).map(|x| *x)
+        object::Object::BuiltinObj(func) =>
+            Some((func.func)(args)),
+
+        _ =>
+            object::ErrorObj::new(format!("not a function: {:?}", func.object_type()))
+    }
 }
 
 fn extend_function_env(func: object::FunctionObj, args: Vec<object::Object>) -> object::environment::Environment {
