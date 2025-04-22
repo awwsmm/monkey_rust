@@ -1,3 +1,5 @@
+mod builtins;
+
 use crate::object::{IsError, ObjectLike};
 use crate::{ast, object};
 
