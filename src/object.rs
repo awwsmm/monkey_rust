@@ -1,6 +1,5 @@
 use crate::ast;
 use std::cmp::PartialEq;
-use crate::parser::Parser;
 
 pub(crate) mod environment;
 
@@ -13,6 +12,7 @@ pub(crate) enum ObjectType {
     ErrorObj,
     FunctionObj,
     StringObj,
+    BuiltinObj,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -24,6 +24,7 @@ pub(crate) enum Object {
     ErrorObj(ErrorObj),
     FunctionObj(FunctionObj),
     StringObj(StringObj),
+    BuiltinObj(BuiltinObj),
 }
 
 pub(crate) trait ObjectLike {
@@ -41,6 +42,7 @@ impl Object {
             Object::ErrorObj(inner) => Box::new(inner),
             Object::FunctionObj(inner) => Box::new(inner),
             Object::StringObj(inner) => Box::new(inner),
+            Object::BuiltinObj(inner) => Box::new(inner),
         }
     }
 }
@@ -189,3 +191,19 @@ impl ObjectLike for StringObj {
 }
 
 type BuiltinFunction = fn(Vec<Object>) -> Object;
+
+
+#[derive(Debug, PartialEq, Clone)]
+pub(crate) struct BuiltinObj {
+    pub(crate) func: BuiltinFunction,
+}
+
+impl ObjectLike for BuiltinObj {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::BuiltinObj
+    }
+
+    fn inspect(&self) -> String {
+        String::from("builtin function")
+    }
+}
