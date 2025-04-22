@@ -559,9 +559,9 @@ mod tests {
         }
     }
 
-    impl From<String> for Expected {
-        fn from(value: String) -> Self {
-            Self::Identifier(value)
+    impl From<&str> for Expected {
+        fn from(value: &str) -> Self {
+            Self::Identifier(value.to_owned())
         }
     }
 
@@ -667,7 +667,7 @@ mod tests {
         let tests = vec![
             Test::new("let x = 5;", "x", 5),
             Test::new("let y = true;", "y", true),
-            Test::new("let foobar = y;", "foobar", "y".to_string()),
+            Test::new("let foobar = y;", "foobar", "y"),
         ];
 
         for tt in tests.into_iter() {
@@ -715,7 +715,7 @@ mod tests {
         let tests = vec![
             Test::new("return 5;", 5),
             Test::new("return true;", true),
-            Test::new("return foobar;", "foobar".to_string()),
+            Test::new("return foobar;", "foobar"),
         ];
 
         for tt in tests.into_iter() {
@@ -766,7 +766,7 @@ mod tests {
                         type_name_of_val(&unexpected)),
         };
 
-        if !test_literal_expression(&stmt.expression.unwrap(), "foobar".to_string()) {
+        if !test_literal_expression(&stmt.expression.unwrap(), "foobar") {
             panic!()
         }
     }
@@ -1096,7 +1096,7 @@ mod tests {
             _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
         };
 
-        if !test_infix_expression(exp.condition.as_ref().unwrap(), "x".to_string(), "<", "y".to_string()) {
+        if !test_infix_expression(exp.condition.as_ref().unwrap(), "x", "<", "y") {
             panic!()
         }
 
@@ -1153,7 +1153,7 @@ mod tests {
             _ => panic!("exp not ast::IfExpression. got={:?}", type_name_of_val(&stmt.expression))
         };
 
-        if !test_infix_expression(&exp.condition.as_ref().unwrap(), "x".to_string(), "<", "y".to_string()) {
+        if !test_infix_expression(&exp.condition.as_ref().unwrap(), "x", "<", "y") {
             panic!()
         }
 
@@ -1226,8 +1226,8 @@ mod tests {
             function.parameters.len())
         }
 
-        test_literal_expression(&Expression::Identifier(function.parameters.get(0).unwrap().clone()), "x".to_string());
-        test_literal_expression(&Expression::Identifier(function.parameters.get(1).unwrap().clone()), "y".to_string());
+        test_literal_expression(&Expression::Identifier(function.parameters.get(0).unwrap().clone()), "x");
+        test_literal_expression(&Expression::Identifier(function.parameters.get(1).unwrap().clone()), "y");
 
         if function.body.as_ref().unwrap().statements.len() != 1 {
             panic!("function.body.statements has not 1 statements. got={}\n",
@@ -1240,7 +1240,7 @@ mod tests {
                         type_name_of_val(function.body.as_ref().unwrap().statements.get(0).unwrap())),
         };
 
-        test_infix_expression(bodyStmt.expression.as_ref().unwrap(), "x".to_string(), "=", "y".to_string());
+        test_infix_expression(bodyStmt.expression.as_ref().unwrap(), "x", "=", "y");
     }
 
     #[test]
@@ -1290,7 +1290,7 @@ mod tests {
             }
 
             for (i, ident) in tt.expected_params.iter().enumerate() {
-                if !test_literal_expression(&Expression::Identifier(function.parameters.get(i).unwrap().to_owned()), ident.to_owned()) {
+                if !test_literal_expression(&Expression::Identifier(function.parameters.get(i).unwrap().to_owned()), ident.as_str()) {
                     should_panic = true
                 }
             }

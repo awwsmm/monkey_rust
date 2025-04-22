@@ -824,4 +824,82 @@ mod tests {
             panic!("String has wrong value. got={}", str.value)
         }
     }
+
+
+    enum Expected {
+        Integer(i32),
+        String(String),
+    }
+
+    impl From<i32> for Expected {
+        fn from(value: i32) -> Self {
+            Self::Integer(value)
+        }
+    }
+
+    impl From<&str> for Expected {
+        fn from(value: &str) -> Self {
+            Self::String(value.to_owned())
+        }
+    }
+
+    #[test]
+    fn test_builtin_functions() {
+        struct Test {
+            input: String,
+            expected: Expected,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: impl Into<Expected>) -> Self {
+                Self {
+                    input: input.to_owned(),
+                    expected: expected.into(),
+                }
+            }
+        }
+
+        let tests = vec![
+            Test::new(r#"len("")"#, 0),
+            Test::new(r#"len("four")"#, 4),
+            Test::new(r#"len("hello world")"#, 11),
+            Test::new(r#"len(1)"#, "argument to `len` not supported, got Some(IntegerObj)"),
+            Test::new(r#"len("one", "two")"#, "wrong number of arguments. got=2, want=1"),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input);
+
+            match tt.expected {
+                Expected::Integer(expected) =>
+                    if !test_integer_object(evaluated, expected) {
+                        should_panic = true
+                    }
+
+                Expected::String(expected) => {
+
+                    let err_obj = match evaluated {
+                        Some(object::Object::ErrorObj(err_obj)) => err_obj,
+                        _ => {
+                            eprint!("object is not Error. got={:?}", evaluated);
+                            should_panic = true;
+                            continue
+                        }
+                    };
+
+                    if err_obj.message != expected {
+                        eprint!("wrong error message. expected={}, got={}",
+                            expected, err_obj.message);
+                        should_panic = true;
+                    }
+                }
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
