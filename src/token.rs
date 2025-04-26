@@ -33,6 +33,8 @@ pub(crate) enum TokenType {
     RPAREN,
     LBRACE,
     RBRACE,
+    LBRACKET,
+    RBRACKET,
 
     // Keywords
     FUNCTION,
@@ -74,6 +76,8 @@ impl Display for TokenType {
             TokenType::RPAREN => ")",
             TokenType::LBRACE => "{",
             TokenType::RBRACE => "}",
+            TokenType::LBRACKET => "[",
+            TokenType::RBRACKET => "]",
 
             TokenType::FUNCTION => "FUNCTION",
             TokenType::LET => "LET",
