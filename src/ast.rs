@@ -56,6 +56,7 @@ pub(crate) enum Expression {
     IfExpression(IfExpression),
     FunctionLiteral(FunctionLiteral),
     CallExpression(CallExpression),
+    ArrayLiteral(ArrayLiteral),
 }
 
 impl Expression {
@@ -70,6 +71,7 @@ impl Expression {
             Expression::IfExpression(inner) => Box::new(inner),
             Expression::FunctionLiteral(inner) => Box::new(inner),
             Expression::CallExpression(inner) => Box::new(inner),
+            Expression::ArrayLiteral(inner) => Box::new(inner),
         }
     }
 }
@@ -369,6 +371,30 @@ impl Display for CallExpression {
 }
 
 impl NodeLike for CallExpression {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct ArrayLiteral {
+    token: token::Token, // the '[' token
+    elements: Vec<Expression>,
+}
+
+impl Display for ArrayLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut elements = vec![];
+
+        for el in self.elements.iter() {
+            elements.push(el.to_string())
+        }
+
+        write!(f, "[{}]", elements.join(", "))
+    }
+}
+
+impl NodeLike for ArrayLiteral {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
