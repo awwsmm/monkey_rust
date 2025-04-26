@@ -1,4 +1,4 @@
-use crate::token;
+use crate::token::{Token, TokenType};
 
 #[derive(Default)]
 pub(crate) struct Lexer {
@@ -28,62 +28,65 @@ impl Lexer {
         self.read_position += 1;
     }
 
-    pub(crate) fn next_token(&mut self) -> token::Token {
-        let mut tok = token::Token::default();
+    pub(crate) fn next_token(&mut self) -> Token {
+        let mut tok = Token::default();
 
         self.skip_whitespace();
 
         match self.ch {
-            0 => tok = token::Token::new(token::TokenType::EOF, String::from("")),
+            0 => tok = Token::new(TokenType::EOF, String::from("")),
 
             b'=' => {
                 if self.peek_char() == b'=' {
                     let ch = self.ch;
                     self.read_char();
                     let literal = String::from_utf8(vec![ch, self.ch]).unwrap();
-                    tok = token::Token::new(token::TokenType::EQ, literal)
+                    tok = Token::new(TokenType::EQ, literal)
                 } else {
-                    tok = token::Token::new(token::TokenType::ASSIGN, String::from_utf8(vec![self.ch]).unwrap())
+                    tok = Token::new(TokenType::ASSIGN, String::from_utf8(vec![self.ch]).unwrap())
                 }
             }
-            b'+' => tok = token::Token::new(token::TokenType::PLUS, String::from_utf8(vec![self.ch]).unwrap()),
-            b'-' => tok = token::Token::new(token::TokenType::MINUS, String::from_utf8(vec![self.ch]).unwrap()),
+            b'+' => tok = Token::new(TokenType::PLUS, String::from_utf8(vec![self.ch]).unwrap()),
+            b'-' => tok = Token::new(TokenType::MINUS, String::from_utf8(vec![self.ch]).unwrap()),
             b'!' => {
                 if self.peek_char() == b'=' {
                     let ch = self.ch;
                     self.read_char();
                     let literal = String::from_utf8(vec![ch, self.ch]).unwrap();
-                    tok = token::Token::new(token::TokenType::NEQ, literal)
+                    tok = Token::new(TokenType::NEQ, literal)
                 } else {
-                    tok = token::Token::new(token::TokenType::BANG, String::from_utf8(vec![self.ch]).unwrap())
+                    tok = Token::new(TokenType::BANG, String::from_utf8(vec![self.ch]).unwrap())
                 }
             }
-            b'/' => tok = token::Token::new(token::TokenType::SLASH, String::from_utf8(vec![self.ch]).unwrap()),
-            b'*' => tok = token::Token::new(token::TokenType::ASTERISK, String::from_utf8(vec![self.ch]).unwrap()),
+            b'/' => tok = Token::new(TokenType::SLASH, String::from_utf8(vec![self.ch]).unwrap()),
+            b'*' => tok = Token::new(TokenType::ASTERISK, String::from_utf8(vec![self.ch]).unwrap()),
 
-            b'<' => tok = token::Token::new(token::TokenType::LT, String::from_utf8(vec![self.ch]).unwrap()),
-            b'>' => tok = token::Token::new(token::TokenType::GT, String::from_utf8(vec![self.ch]).unwrap()),
+            b'<' => tok = Token::new(TokenType::LT, String::from_utf8(vec![self.ch]).unwrap()),
+            b'>' => tok = Token::new(TokenType::GT, String::from_utf8(vec![self.ch]).unwrap()),
 
-            b',' => tok = token::Token::new(token::TokenType::COMMA, String::from_utf8(vec![self.ch]).unwrap()),
-            b';' => tok = token::Token::new(token::TokenType::SEMICOLON, String::from_utf8(vec![self.ch]).unwrap()),
+            b',' => tok = Token::new(TokenType::COMMA, String::from_utf8(vec![self.ch]).unwrap()),
+            b';' => tok = Token::new(TokenType::SEMICOLON, String::from_utf8(vec![self.ch]).unwrap()),
 
-            b'(' => tok = token::Token::new(token::TokenType::LPAREN, String::from_utf8(vec![self.ch]).unwrap()),
-            b')' => tok = token::Token::new(token::TokenType::RPAREN, String::from_utf8(vec![self.ch]).unwrap()),
-            b'{' => tok = token::Token::new(token::TokenType::LBRACE, String::from_utf8(vec![self.ch]).unwrap()),
-            b'}' => tok = token::Token::new(token::TokenType::RBRACE, String::from_utf8(vec![self.ch]).unwrap()),
-            b'"' => tok = token::Token::new(token::TokenType::STRING, self.read_string()),
+            b'(' => tok = Token::new(TokenType::LPAREN, String::from_utf8(vec![self.ch]).unwrap()),
+            b')' => tok = Token::new(TokenType::RPAREN, String::from_utf8(vec![self.ch]).unwrap()),
+            b'{' => tok = Token::new(TokenType::LBRACE, String::from_utf8(vec![self.ch]).unwrap()),
+            b'}' => tok = Token::new(TokenType::RBRACE, String::from_utf8(vec![self.ch]).unwrap()),
+            b'[' => tok = Token::new(TokenType::LBRACKET, String::from_utf8(vec![self.ch]).unwrap()),
+            b']' => tok = Token::new(TokenType::RBRACKET, String::from_utf8(vec![self.ch]).unwrap()),
+
+            b'"' => tok = Token::new(TokenType::STRING, self.read_string()),
 
             _ => {
                 if Self::is_letter(self.ch) {
                     tok.literal = self.read_identifier();
-                    tok.token_type = token::TokenType::lookup_ident(tok.literal.as_str());
+                    tok.token_type = TokenType::lookup_ident(tok.literal.as_str());
                     return tok;
                 } else if Self::is_digit(self.ch) {
                     tok.literal = self.read_number();
-                    tok.token_type = token::TokenType::INT;
+                    tok.token_type = TokenType::INT;
                     return tok;
                 } else {
-                    tok = token::Token::new(token::TokenType::ILLEGAL, String::from_utf8(vec![self.ch]).unwrap())
+                    tok = Token::new(TokenType::ILLEGAL, String::from_utf8(vec![self.ch]).unwrap())
                 }
             }
         };
@@ -173,99 +176,99 @@ if (5 < 10) {
 "#;
 
         struct Test {
-            expected_type: token::TokenType,
+            expected_type: TokenType,
             expected_literal: String,
         }
 
         impl Test {
-            fn new(expected_type: token::TokenType, expected_literal: &str) -> Self {
+            fn new(expected_type: TokenType, expected_literal: &str) -> Self {
                 Self { expected_type, expected_literal: String::from(expected_literal) }
             }
         }
 
         let tests = [
-            Test::new(token::TokenType::LET, "let"),
-            Test::new(token::TokenType::IDENT, "five"),
-            Test::new(token::TokenType::ASSIGN, "="),
-            Test::new(token::TokenType::INT, "5"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::LET, "let"),
-            Test::new(token::TokenType::IDENT, "ten"),
-            Test::new(token::TokenType::ASSIGN, "="),
-            Test::new(token::TokenType::INT, "10"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::LET, "let"),
-            Test::new(token::TokenType::IDENT, "add"),
-            Test::new(token::TokenType::ASSIGN, "="),
-            Test::new(token::TokenType::FUNCTION, "fn"),
-            Test::new(token::TokenType::LPAREN, "("),
-            Test::new(token::TokenType::IDENT, "x"),
-            Test::new(token::TokenType::COMMA, ","),
-            Test::new(token::TokenType::IDENT, "y"),
-            Test::new(token::TokenType::RPAREN, ")"),
-            Test::new(token::TokenType::LBRACE, "{"),
-            Test::new(token::TokenType::IDENT, "x"),
-            Test::new(token::TokenType::PLUS, "+"),
-            Test::new(token::TokenType::IDENT, "y"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::RBRACE, "}"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::LET, "let"),
-            Test::new(token::TokenType::IDENT, "result"),
-            Test::new(token::TokenType::ASSIGN, "="),
-            Test::new(token::TokenType::IDENT, "add"),
-            Test::new(token::TokenType::LPAREN, "("),
-            Test::new(token::TokenType::IDENT, "five"),
-            Test::new(token::TokenType::COMMA, ","),
-            Test::new(token::TokenType::IDENT, "ten"),
-            Test::new(token::TokenType::RPAREN, ")"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::BANG, "!"),
-            Test::new(token::TokenType::MINUS, "-"),
-            Test::new(token::TokenType::SLASH, "/"),
-            Test::new(token::TokenType::ASTERISK, "*"),
-            Test::new(token::TokenType::INT, "5"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::INT, "5"),
-            Test::new(token::TokenType::LT, "<"),
-            Test::new(token::TokenType::INT, "10"),
-            Test::new(token::TokenType::GT, ">"),
-            Test::new(token::TokenType::INT, "5"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::IF, "if"),
-            Test::new(token::TokenType::LPAREN, "("),
-            Test::new(token::TokenType::INT, "5"),
-            Test::new(token::TokenType::LT, "<"),
-            Test::new(token::TokenType::INT, "10"),
-            Test::new(token::TokenType::RPAREN, ")"),
-            Test::new(token::TokenType::LBRACE, "{"),
-            Test::new(token::TokenType::RETURN, "return"),
-            Test::new(token::TokenType::TRUE, "true"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::RBRACE, "}"),
-            Test::new(token::TokenType::ELSE, "else"),
-            Test::new(token::TokenType::LBRACE, "{"),
-            Test::new(token::TokenType::RETURN, "return"),
-            Test::new(token::TokenType::FALSE, "false"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::RBRACE, "}"),
-            Test::new(token::TokenType::INT, "10"),
-            Test::new(token::TokenType::EQ, "=="),
-            Test::new(token::TokenType::INT, "10"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::INT, "10"),
-            Test::new(token::TokenType::NEQ, "!="),
-            Test::new(token::TokenType::INT, "9"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::STRING, "foobar"),
-            Test::new(token::TokenType::STRING, "foo bar"),
-            Test::new(token::TokenType::LBRACKET, "["),
-            Test::new(token::TokenType::INT, "1"),
-            Test::new(token::TokenType::COMMA, ","),
-            Test::new(token::TokenType::INT, "2"),
-            Test::new(token::TokenType::RBRACKET, "]"),
-            Test::new(token::TokenType::SEMICOLON, ";"),
-            Test::new(token::TokenType::EOF, ""),
+            Test::new(TokenType::LET, "let"),
+            Test::new(TokenType::IDENT, "five"),
+            Test::new(TokenType::ASSIGN, "="),
+            Test::new(TokenType::INT, "5"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::LET, "let"),
+            Test::new(TokenType::IDENT, "ten"),
+            Test::new(TokenType::ASSIGN, "="),
+            Test::new(TokenType::INT, "10"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::LET, "let"),
+            Test::new(TokenType::IDENT, "add"),
+            Test::new(TokenType::ASSIGN, "="),
+            Test::new(TokenType::FUNCTION, "fn"),
+            Test::new(TokenType::LPAREN, "("),
+            Test::new(TokenType::IDENT, "x"),
+            Test::new(TokenType::COMMA, ","),
+            Test::new(TokenType::IDENT, "y"),
+            Test::new(TokenType::RPAREN, ")"),
+            Test::new(TokenType::LBRACE, "{"),
+            Test::new(TokenType::IDENT, "x"),
+            Test::new(TokenType::PLUS, "+"),
+            Test::new(TokenType::IDENT, "y"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::RBRACE, "}"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::LET, "let"),
+            Test::new(TokenType::IDENT, "result"),
+            Test::new(TokenType::ASSIGN, "="),
+            Test::new(TokenType::IDENT, "add"),
+            Test::new(TokenType::LPAREN, "("),
+            Test::new(TokenType::IDENT, "five"),
+            Test::new(TokenType::COMMA, ","),
+            Test::new(TokenType::IDENT, "ten"),
+            Test::new(TokenType::RPAREN, ")"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::BANG, "!"),
+            Test::new(TokenType::MINUS, "-"),
+            Test::new(TokenType::SLASH, "/"),
+            Test::new(TokenType::ASTERISK, "*"),
+            Test::new(TokenType::INT, "5"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::INT, "5"),
+            Test::new(TokenType::LT, "<"),
+            Test::new(TokenType::INT, "10"),
+            Test::new(TokenType::GT, ">"),
+            Test::new(TokenType::INT, "5"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::IF, "if"),
+            Test::new(TokenType::LPAREN, "("),
+            Test::new(TokenType::INT, "5"),
+            Test::new(TokenType::LT, "<"),
+            Test::new(TokenType::INT, "10"),
+            Test::new(TokenType::RPAREN, ")"),
+            Test::new(TokenType::LBRACE, "{"),
+            Test::new(TokenType::RETURN, "return"),
+            Test::new(TokenType::TRUE, "true"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::RBRACE, "}"),
+            Test::new(TokenType::ELSE, "else"),
+            Test::new(TokenType::LBRACE, "{"),
+            Test::new(TokenType::RETURN, "return"),
+            Test::new(TokenType::FALSE, "false"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::RBRACE, "}"),
+            Test::new(TokenType::INT, "10"),
+            Test::new(TokenType::EQ, "=="),
+            Test::new(TokenType::INT, "10"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::INT, "10"),
+            Test::new(TokenType::NEQ, "!="),
+            Test::new(TokenType::INT, "9"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::STRING, "foobar"),
+            Test::new(TokenType::STRING, "foo bar"),
+            Test::new(TokenType::LBRACKET, "["),
+            Test::new(TokenType::INT, "1"),
+            Test::new(TokenType::COMMA, ","),
+            Test::new(TokenType::INT, "2"),
+            Test::new(TokenType::RBRACKET, "]"),
+            Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::EOF, ""),
         ];
 
         let mut l = Lexer::new(input);
