@@ -169,6 +169,7 @@ if (5 < 10) {
 10 != 9;
 "foobar"
 "foo bar"
+[1, 2];
 "#;
 
         struct Test {
@@ -258,6 +259,12 @@ if (5 < 10) {
             Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::STRING, "foobar"),
             Test::new(token::TokenType::STRING, "foo bar"),
+            Test::new(token::TokenType::LBRACKET, "["),
+            Test::new(token::TokenType::INT, "1"),
+            Test::new(token::TokenType::COMMA, ","),
+            Test::new(token::TokenType::INT, "2"),
+            Test::new(token::TokenType::RBRACKET, "]"),
+            Test::new(token::TokenType::SEMICOLON, ";"),
             Test::new(token::TokenType::EOF, ""),
         ];
 
