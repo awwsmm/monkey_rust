@@ -57,6 +57,7 @@ pub(crate) enum Expression {
     FunctionLiteral(FunctionLiteral),
     CallExpression(CallExpression),
     ArrayLiteral(ArrayLiteral),
+    IndexExpression(IndexExpression),
 }
 
 impl Expression {
@@ -72,6 +73,7 @@ impl Expression {
             Expression::FunctionLiteral(inner) => Box::new(inner),
             Expression::CallExpression(inner) => Box::new(inner),
             Expression::ArrayLiteral(inner) => Box::new(inner),
+            Expression::IndexExpression(inner) => Box::new(inner),
         }
     }
 }
@@ -395,6 +397,25 @@ impl Display for ArrayLiteral {
 }
 
 impl NodeLike for ArrayLiteral {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct IndexExpression {
+    token: token::Token, // The [ token
+    left: Box<Expression>,
+    index: Box<Expression>,
+}
+
+impl Display for IndexExpression {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}[{}])", self.left.to_string(), self.index.to_string())
+    }
+}
+
+impl NodeLike for IndexExpression {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
