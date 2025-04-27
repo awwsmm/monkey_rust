@@ -377,8 +377,8 @@ impl NodeLike for CallExpression {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-struct ArrayLiteral {
-    token: token::Token, // the '[' token
+pub(crate) struct ArrayLiteral {
+    pub(crate) token: token::Token, // the '[' token
     pub(crate) elements: Vec<Expression>,
 }
 
