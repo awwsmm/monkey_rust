@@ -82,28 +82,28 @@ impl Parser {
         ast::Expression::CallExpression(exp)
     }
 
-    fn parse_call_arguments(&mut self) -> Vec<ast::Expression> {
-        let mut args = vec![];
+    fn parse_expression_list(&mut self, end: TokenType) -> Vec<ast::Expression> {
+        let mut list = vec![];
 
-        if self.peek_token_is(TokenType::RPAREN) {
+        if self.peek_token_is(end) {
             self.next_token();
-            return args
+            return list
         }
 
         self.next_token();
-        args.push(self.parse_expression(Precedence::Lowest).unwrap());
+        list.push(self.parse_expression(Precedence::Lowest).unwrap());
 
         while self.peek_token_is(TokenType::COMMA) {
             self.next_token();
             self.next_token();
-            args.push(self.parse_expression(Precedence::Lowest).unwrap())
+            list.push(self.parse_expression(Precedence::Lowest).unwrap())
         }
 
-        if !self.expect_peek(TokenType::RPAREN) {
+        if !self.expect_peek(end) {
             return vec![]
         }
 
-        args
+        list
     }
 
     fn parse_function_parameters(&mut self) -> Vec<ast::Identifier> {
@@ -1247,13 +1247,13 @@ mod tests {
                    function.body.as_ref().unwrap().statements.len())
         }
 
-        let bodyStmt = match function.body.as_ref().unwrap().statements.get(0).unwrap() {
+        let body_stmt = match function.body.as_ref().unwrap().statements.get(0).unwrap() {
             Statement::ExpressionStatement(expression_statement) => expression_statement,
             _ => panic!("function body stmt is not ast::ExpressionStatement. got={}",
                         type_name_of_val(function.body.as_ref().unwrap().statements.get(0).unwrap())),
         };
 
-        test_infix_expression(bodyStmt.expression.as_ref().unwrap(), "x", "=", "y");
+        test_infix_expression(body_stmt.expression.as_ref().unwrap(), "x", "=", "y");
     }
 
     #[test]

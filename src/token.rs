@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-#[derive(Default, Eq, PartialEq, Clone, Debug, Hash)]
+#[derive(Default, Eq, PartialEq, Clone, Copy, Debug, Hash)]
 pub(crate) enum TokenType {
     #[default]
     ILLEGAL,
