@@ -403,10 +403,10 @@ impl NodeLike for ArrayLiteral {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-struct IndexExpression {
+pub(crate) struct IndexExpression {
     token: token::Token, // The [ token
-    left: Box<Expression>,
-    index: Box<Expression>,
+    pub(crate) left: Box<Expression>,
+    pub(crate) index: Box<Expression>,
 }
 
 impl Display for IndexExpression {

@@ -1519,4 +1519,32 @@ mod tests {
             panic!("array.elements.len() not 0. got={}", array.elements.len())
         }
     }
+
+    #[test]
+    fn test_parsing_index_expressions() {
+        let input = "myArray[1 + 1]";
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let index_exp = match stmt.expression.as_ref() {
+            Some(Expression::IndexExpression(inner)) => inner,
+            _ => panic!("exp not ast::IndexExpression. got={:?}", stmt.expression)
+        };
+
+        if !test_identifier(&index_exp.left, "myArray") {
+            panic!()
+        }
+
+        if !test_infix_expression(&index_exp.index, 1, "+", 1) {
+            panic!()
+        }
+    }
 }
