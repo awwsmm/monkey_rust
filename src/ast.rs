@@ -379,7 +379,7 @@ impl NodeLike for CallExpression {
 #[derive(Clone, Debug, PartialEq)]
 struct ArrayLiteral {
     token: token::Token, // the '[' token
-    elements: Vec<Expression>,
+    pub(crate) elements: Vec<Expression>,
 }
 
 impl Display for ArrayLiteral {

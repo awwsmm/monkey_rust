@@ -1441,4 +1441,69 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_parsing_array_literals() {
+        let input = "[1, 2 * 2, 3 + 3]";
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let array = match stmt.expression.as_ref() {
+            Some(Expression::ArrayLiteral(inner)) => inner,
+            _ => panic!("exp not ast::ArrayLiteral. got={:?}", stmt.expression)
+        };
+
+        if array.elements.len() != 3 {
+            panic!("array.elements.len() not 3. got={}", array.elements.len())
+        }
+
+        let mut should_panic = false;
+
+        if !test_integer_literal(array.elements.get(0).unwrap(), 1) {
+            should_panic = true
+        }
+
+        if !test_infix_expression(array.elements.get(1).unwrap(), 2, "*", 2) {
+            should_panic = true
+        }
+
+        if !test_infix_expression(array.elements.get(2).unwrap(), 3, "+", 3) {
+            should_panic = true
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_parsing_empty_array_literals() {
+        let input = "[]";
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let array = match stmt.expression.as_ref() {
+            Some(Expression::ArrayLiteral(inner)) => inner,
+            _ => panic!("exp not ast::ArrayLiteral. got={:?}", stmt.expression)
+        };
+
+        if array.elements.len() != 0 {
+            panic!("array.elements.len() not 0. got={}", array.elements.len())
+        }
+    }
 }
