@@ -15,21 +15,21 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             eval_program(node, env),
 
         Some(ast::Node::Statement(ast::Statement::ExpressionStatement(node))) =>
-            eval(node.expression.map(|e| ast::Node::Expression(e)), env),
+            eval(node.expression.map(ast::Node::Expression), env),
 
         Some(ast::Node::Statement(ast::Statement::BlockStatement(node))) =>
             eval_block_statement(node, env),
 
         Some(ast::Node::Statement(ast::Statement::ReturnStatement(node))) => {
-            let val = eval(node.return_value.map(|x| ast::Node::Expression(x)), env);
+            let val = eval(node.return_value.map(ast::Node::Expression), env);
             if val.is_error() {
                 return val
             }
-            Some(object::Object::ReturnValueObj(object::ReturnValueObj { value: val.map(|x| Box::new(x)) }))
+            Some(object::Object::ReturnValueObj(object::ReturnValueObj { value: val.map(Box::new) }))
         }
 
         Some(ast::Node::Statement(ast::Statement::LetStatement(node))) => {
-            let val = eval(node.value.map(|x| ast::Node::Expression(x)), env);
+            let val = eval(node.value.map(ast::Node::Expression), env);
             if val.is_error() {
                 return val
             }

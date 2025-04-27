@@ -404,14 +404,14 @@ impl NodeLike for ArrayLiteral {
 
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct IndexExpression {
-    token: token::Token, // The [ token
+    pub(crate) token: token::Token, // The [ token
     pub(crate) left: Box<Expression>,
-    pub(crate) index: Box<Expression>,
+    pub(crate) index: Option<Box<Expression>>,
 }
 
 impl Display for IndexExpression {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({}[{}])", self.left.to_string(), self.index.to_string())
+        write!(f, "({}[{}])", self.left.to_string(), self.index.as_ref().unwrap().to_string())
     }
 }
 

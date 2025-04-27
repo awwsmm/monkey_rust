@@ -46,12 +46,30 @@ impl Parser {
         p.register_infix(TokenType::LT, Self::parse_infix_expression);
         p.register_infix(TokenType::GT, Self::parse_infix_expression);
         p.register_infix(TokenType::LPAREN, Self::parse_call_expression);
+        p.register_infix(TokenType::LBRACKET, Self::parse_index_expression);
 
         // Read two tokens, so cur_token and peek_token are both set
         p.next_token();
         p.next_token();
 
         p
+    }
+
+    fn parse_index_expression(&mut self, left: ast::Expression) -> Option<ast::Expression> {
+        let mut exp = ast::IndexExpression{
+            token: self.cur_token.clone(),
+            left: Box::new(left),
+            index: None,
+        };
+
+        self.next_token();
+        exp.index = self.parse_expression(Precedence::Lowest).map(Box::new);
+
+        if !self.expect_peek(TokenType::RBRACKET) {
+            return None
+        }
+
+        Some(ast::Expression::IndexExpression(exp))
     }
 
     fn parse_array_literal(&mut self) -> Option<ast::Expression> {
@@ -72,14 +90,14 @@ impl Parser {
         }))
     }
 
-    fn parse_call_expression(&mut self, function: ast::Expression) -> ast::Expression {
+    fn parse_call_expression(&mut self, function: ast::Expression) -> Option<ast::Expression> {
         let mut exp = ast::CallExpression{
             token: self.cur_token.clone(),
             function: Box::new(function),
             arguments: vec![],
         };
         exp.arguments = self.parse_expression_list(TokenType::RPAREN);
-        ast::Expression::CallExpression(exp)
+        Some(ast::Expression::CallExpression(exp))
     }
 
     fn parse_expression_list(&mut self, end: TokenType) -> Vec<ast::Expression> {
@@ -184,7 +202,7 @@ impl Parser {
         }
 
         self.next_token();
-        expression.condition = self.parse_expression(Precedence::Lowest).map(|e| Box::new(e));
+        expression.condition = self.parse_expression(Precedence::Lowest).map(Box::new);
 
         if !self.expect_peek(TokenType::RPAREN) {
             return None
@@ -258,9 +276,9 @@ impl Parser {
 
     fn parse_statement(&mut self) -> Option<ast::Statement> {
         match self.cur_token.token_type {
-            TokenType::LET => self.parse_let_statement().map(|x| ast::Statement::LetStatement(x)),
-            TokenType::RETURN => self.parse_return_statement().map(|x| ast::Statement::ReturnStatement(x)),
-            _ => self.parse_expression_statement().map(|x| ast::Statement::ExpressionStatement(x)),
+            TokenType::LET => self.parse_let_statement().map(ast::Statement::LetStatement),
+            TokenType::RETURN => self.parse_return_statement().map(ast::Statement::ReturnStatement),
+            _ => self.parse_expression_statement().map(ast::Statement::ExpressionStatement),
         }
     }
 
@@ -373,7 +391,7 @@ impl Parser {
 
             self.next_token();
 
-            left_exp = left_exp.map(|l| infix(self, l))
+            left_exp = left_exp.map(|l| infix(self, l)).flatten()
         }
 
         left_exp
@@ -405,7 +423,7 @@ impl Parser {
 
         self.next_token();
 
-        expression.right = self.parse_expression(Precedence::Prefix).map(|x| Box::new(x));
+        expression.right = self.parse_expression(Precedence::Prefix).map(Box::new);
 
         Some(ast::Expression::PrefixExpression(expression))
     }
@@ -417,7 +435,7 @@ impl Parser {
         }))
     }
 
-    fn parse_infix_expression(&mut self, left: ast::Expression) -> ast::Expression {
+    fn parse_infix_expression(&mut self, left: ast::Expression) -> Option<ast::Expression> {
         let mut expression = ast::InfixExpression{
             token: self.cur_token.clone(),
             left: Some(Box::new(left)),
@@ -427,9 +445,9 @@ impl Parser {
 
         let precedence = self.cur_precedence();
         self.next_token();
-        expression.right = self.parse_expression(precedence).map(|x| Box::new(x));
+        expression.right = self.parse_expression(precedence).map(Box::new);
 
-        ast::Expression::InfixExpression(expression)
+        Some(ast::Expression::InfixExpression(expression))
     }
 
     fn peek_precedence(&self) -> Precedence {
@@ -487,7 +505,7 @@ const PRECEDENCES: [(TokenType, Precedence); 9] = [
 ];
 
 type PrefixParseFn = fn(&mut Parser) -> Option<ast::Expression>;
-type InfixParseFn = fn(&mut Parser, ast::Expression) -> ast::Expression;
+type InfixParseFn = fn(&mut Parser, ast::Expression) -> Option<ast::Expression>;
 
 #[cfg(test)]
 mod tests {
@@ -1082,7 +1100,7 @@ mod tests {
 
             let actual = program.to_string();
             if actual != tt.expected {
-                eprint!("expected={}, got={}", tt.expected, actual);
+                eprint!("expected={}, got={}\n", tt.expected, actual);
                 should_panic = true
             }
         }
@@ -1551,7 +1569,7 @@ mod tests {
             panic!()
         }
 
-        if !test_infix_expression(&index_exp.index, 1, "+", 1) {
+        if !test_infix_expression(index_exp.index.as_ref().unwrap(), 1, "+", 1) {
             panic!()
         }
     }
