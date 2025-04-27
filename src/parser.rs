@@ -78,7 +78,7 @@ impl Parser {
             function: Box::new(function),
             arguments: vec![],
         };
-        exp.arguments = self.parse_call_arguments();
+        exp.arguments = self.parse_expression_list(TokenType::RPAREN);
         ast::Expression::CallExpression(exp)
     }
 
