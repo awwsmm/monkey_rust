@@ -127,6 +127,17 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
     }
 }
 
+fn eval_index_expression(left: Option<object::Object>, index: Option<object::Object>) -> Option<object::Object> {
+    let left_type = left.as_ref()?.object_type();
+    let index_type = index.as_ref()?.object_type();
+
+    if left_type == object::ObjectType::ArrayObj && index_type == object::ObjectType::IntegerObj {
+        eval_array_index_expression(left, index)
+    } else {
+        object::ErrorObj::new(format!("index operator not supported: {:?}", left_type))
+    }
+}
+
 fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<object::Object> {
     match func {
         object::Object::FunctionObj(func) => {
