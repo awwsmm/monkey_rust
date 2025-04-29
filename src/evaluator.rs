@@ -111,6 +111,18 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             Some(object::Object::ArrayObj(object::ArrayObj{ elements }))
         }
 
+        Some(ast::Node::Expression(ast::Expression::IndexExpression(node))) => {
+            let left = eval(Some(ast::Node::Expression(*node.left)), env);
+            if left.is_error() {
+                return left
+            }
+            let index = eval(Some(ast::Node::Expression(*node.index)), env);
+            if index.is_error() {
+                return index
+            }
+            eval_index_expression(left, index)
+        }
+
         _ => None
     }
 }
