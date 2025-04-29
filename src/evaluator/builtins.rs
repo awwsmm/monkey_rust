@@ -1,5 +1,6 @@
-use crate::object::ObjectLike;
+use crate::evaluator::NULL;
 use crate::object;
+use crate::object::ObjectLike;
 
 pub(crate) struct Builtin{}
 
@@ -29,7 +30,37 @@ impl Builtin {
                             )).unwrap()
                     }
                 }
-            }) ,
+            }),
+
+            "first" => Some(object::BuiltinObj{
+                func: |args| {
+                    if args.len() != 1 {
+                        return object::ErrorObj::new(format!(
+                            "wrong number of arguments. got={}, want=1",
+                            args.len()
+                        )).unwrap()
+                    };
+
+                    if args.get(0).unwrap().object_type() != object::ObjectType::ArrayObj {
+                        return object::ErrorObj::new(format!(
+                            "argument to `first` must be ArrayObj, got {:?}",
+                            args.get(0).unwrap().object_type()
+                        )).unwrap()
+                    };
+
+                    let arr = match args.get(0) {
+                        Some(object::Object::ArrayObj(inner)) => inner,
+                        _ => panic!()
+                    };
+
+                    if arr.elements.len() > 0 {
+                        return arr.elements.get(0).cloned().unwrap()
+                    }
+
+                    NULL.unwrap()
+                }
+            }),
+
             _ => None,
         }
     }
