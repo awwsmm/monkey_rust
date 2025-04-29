@@ -13,6 +13,7 @@ pub(crate) enum ObjectType {
     FunctionObj,
     StringObj,
     BuiltinObj,
+    ArrayObj,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -25,6 +26,7 @@ pub(crate) enum Object {
     FunctionObj(FunctionObj),
     StringObj(StringObj),
     BuiltinObj(BuiltinObj),
+    ArrayObj(ArrayObj),
 }
 
 pub(crate) trait ObjectLike {
@@ -43,6 +45,7 @@ impl Object {
             Object::FunctionObj(inner) => Box::new(inner),
             Object::StringObj(inner) => Box::new(inner),
             Object::BuiltinObj(inner) => Box::new(inner),
+            Object::ArrayObj(inner) => Box::new(inner),
         }
     }
 }
@@ -192,7 +195,6 @@ impl ObjectLike for StringObj {
 
 type BuiltinFunction = fn(Vec<Object>) -> Object;
 
-
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct BuiltinObj {
     pub(crate) func: BuiltinFunction,
@@ -205,5 +207,26 @@ impl ObjectLike for BuiltinObj {
 
     fn inspect(&self) -> String {
         String::from("builtin function")
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+struct ArrayObj {
+    elements: Vec<Object>,
+}
+
+impl ObjectLike for ArrayObj {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::ArrayObj
+    }
+
+    fn inspect(&self) -> String {
+        let mut elements = vec![];
+
+        for e in self.elements.iter() {
+            elements.push(e.inspect())
+        }
+
+        format!("[{}]", elements.join(", "))
     }
 }

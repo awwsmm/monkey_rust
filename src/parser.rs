@@ -490,7 +490,7 @@ enum Precedence {
     Product,     // *
     Prefix,      // -X or !X
     Call,        // myFunction(X)
-    Index, // array[index]
+    Index,       // array[index]
 }
 
 const PRECEDENCES: [(TokenType, Precedence); 10] = [
