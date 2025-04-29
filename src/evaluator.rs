@@ -116,7 +116,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             if left.is_error() {
                 return left
             }
-            let index = eval(Some(ast::Node::Expression(*node.index)), env);
+            let index = eval(Some(ast::Node::Expression(*node.index?)), env);
             if index.is_error() {
                 return index
             }
@@ -136,6 +136,26 @@ fn eval_index_expression(left: Option<object::Object>, index: Option<object::Obj
     } else {
         object::ErrorObj::new(format!("index operator not supported: {:?}", left_type))
     }
+}
+
+fn eval_array_index_expression(array: Option<object::Object>, index: Option<object::Object>) -> Option<object::Object> {
+    let array_object = match array {
+        Some(object::Object::ArrayObj(inner)) => inner,
+        _ => panic!()
+    };
+
+    let idx = match index {
+        Some(object::Object::IntegerObj(inner)) => inner.value as usize,
+        _ => panic!()
+    };
+
+    let max = array_object.elements.len() - 1;
+
+    if idx < 0 || idx > max {
+        return NULL
+    }
+
+    array_object.elements.get(idx).cloned()
 }
 
 fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<object::Object> {
