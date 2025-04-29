@@ -102,6 +102,15 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
         Some(ast::Node::Expression(ast::Expression::StringLiteral(node))) =>
             Some(object::Object::StringObj(object::StringObj{ value: node.value })),
 
+        Some(ast::Node::Expression(ast::Expression::ArrayLiteral(node))) => {
+            let elements = eval_expressions(node.elements, env);
+            let elements_0 = elements.get(0).cloned();
+            if elements.len() == 1 && elements_0.is_error() {
+                return elements_0
+            }
+            Some(object::Object::ArrayObj(object::ArrayObj{ elements }))
+        }
+
         _ => None
     }
 }

@@ -211,7 +211,7 @@ impl ObjectLike for BuiltinObj {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-struct ArrayObj {
+pub(crate) struct ArrayObj {
     pub(crate) elements: Vec<Object>,
 }
 
