@@ -914,4 +914,38 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_array_literals() {
+        let input = "[1, 2 * 2, 3 + 3]";
+
+        let evaluated = test_eval(input);
+        let result = match evaluated {
+            Some(object::Object::ArrayObj(inner)) => inner,
+            _ => panic!("object is not Array. got={:?}", evaluated)
+        };
+
+        if result.elements.len() != 3 {
+            panic!("array has wrong num of elements. got={}",
+                result.elements.len())
+        }
+
+        let mut should_panic = false;
+
+        if !test_integer_object(result.elements.get(0).cloned(), 1) {
+            should_panic = true
+        }
+
+        if !test_integer_object(result.elements.get(1).cloned(), 4) {
+            should_panic = true
+        }
+
+        if !test_integer_object(result.elements.get(2).cloned(), 6) {
+            should_panic = true
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }

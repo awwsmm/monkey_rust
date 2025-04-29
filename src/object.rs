@@ -212,7 +212,7 @@ impl ObjectLike for BuiltinObj {
 
 #[derive(Debug, PartialEq, Clone)]
 struct ArrayObj {
-    elements: Vec<Object>,
+    pub(crate) elements: Vec<Object>,
 }
 
 impl ObjectLike for ArrayObj {
