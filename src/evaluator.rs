@@ -957,4 +957,82 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_array_index_expressions() {
+        struct Test {
+            input: String,
+            expected: Option<i32>,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: Option<i32>) -> Self {
+                Self {
+                    input: input.to_owned(),
+                    expected: expected,
+                }
+            }
+        }
+
+        let tests = vec![
+            Test::new(
+                "[1, 2, 3][0]",
+                Some(1)
+            ),
+            Test::new(
+                "[1, 2, 3][1]",
+                Some(2)
+            ),
+            Test::new(
+                "[1, 2, 3][2]",
+                Some(3)
+            ),
+            Test::new(
+                "let i = 0; [1][i]",
+                Some(1)
+            ),
+            Test::new(
+                "[1, 2, 3][1 + 1]",
+                Some(3)
+            ),
+            Test::new(
+                "let myArray = [1, 2, 3]; myArray[2];",
+                Some(3)
+            ),
+            Test::new(
+                "let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
+                Some(6)
+            ),
+            Test::new(
+                "let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]",
+                Some(2)
+            ),
+            Test::new(
+                "[1, 2, 3][3]",
+                None
+            ),
+            Test::new(
+                "[1, 2, 3][-1]",
+                None
+            )
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input);
+            let result = match tt.expected {
+                Some(integer) => test_integer_object(evaluated, integer),
+                None => test_null_object(evaluated),
+            };
+
+            if !result {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
