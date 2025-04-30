@@ -2,26 +2,28 @@ mod builtins;
 
 use crate::object::{IsError, ObjectLike};
 use crate::{ast, object};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 const NULL: Option<object::Object> = Some(object::Object::NullObj(object::NullObj {}));
 const TRUE: Option<object::Object> = Some(object::Object::BooleanObj(object::BooleanObj { value: true }));
 const FALSE: Option<object::Object> = Some(object::Object::BooleanObj(object::BooleanObj { value: false }));
 
-pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Environment) -> Option<object::Object> {
+pub(crate) fn eval(node: Option<ast::Node>, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
     match node {
 
         // Statements
         Some(ast::Node::Program(node)) =>
-            eval_program(node, env),
+            eval_program(node, Rc::clone(&env)),
 
         Some(ast::Node::Statement(ast::Statement::ExpressionStatement(node))) =>
-            eval(node.expression.map(ast::Node::Expression), env),
+            eval(node.expression.map(ast::Node::Expression), Rc::clone(&env)),
 
         Some(ast::Node::Statement(ast::Statement::BlockStatement(node))) =>
-            eval_block_statement(node, env),
+            eval_block_statement(node, Rc::clone(&env)),
 
         Some(ast::Node::Statement(ast::Statement::ReturnStatement(node))) => {
-            let val = eval(node.return_value.map(ast::Node::Expression), env);
+            let val = eval(node.return_value.map(ast::Node::Expression), Rc::clone(&env));
             if val.is_error() {
                 return val
             }
@@ -29,17 +31,17 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
         }
 
         Some(ast::Node::Statement(ast::Statement::LetStatement(node))) => {
-            let val = eval(node.value.map(ast::Node::Expression), env);
+            let val = eval(node.value.map(ast::Node::Expression), Rc::clone(&env));
             if val.is_error() {
                 return val
             }
-            env.set(node.name?.value.as_str(), val?);
+            env.borrow_mut().set(node.name?.value.as_str(), val?);
             None
         }
 
         // Expressions
         Some(ast::Node::Expression(ast::Expression::PrefixExpression(node))) => {
-            let right = eval(node.right.map(|e| ast::Node::Expression(*e)), env);
+            let right = eval(node.right.map(|e| ast::Node::Expression(*e)), Rc::clone(&env));
             if right.is_error() {
                 return right
             }
@@ -47,12 +49,12 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
         }
 
         Some(ast::Node::Expression(ast::Expression::InfixExpression(node))) => {
-            let left = eval(node.left.map(|e| ast::Node::Expression(*e)), env);
+            let left = eval(node.left.map(|e| ast::Node::Expression(*e)), Rc::clone(&env));
             if left.is_error() {
                 return left
             }
 
-            let right = eval(node.right.map(|e| ast::Node::Expression(*e)), env);
+            let right = eval(node.right.map(|e| ast::Node::Expression(*e)), Rc::clone(&env));
             if right.is_error() {
                 return right
             }
@@ -61,7 +63,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
         }
 
         Some(ast::Node::Expression(ast::Expression::IfExpression(node))) =>
-            eval_if_expression(node, env),
+            eval_if_expression(node, Rc::clone(&env)),
 
         Some(ast::Node::Expression(ast::Expression::IntegerLiteral(node))) =>
             Some(object::Object::IntegerObj(object::IntegerObj { value: node.value })),
@@ -70,7 +72,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             native_bool_to_boolean_object(node.value),
 
         Some(ast::Node::Expression(ast::Expression::Identifier(node))) =>
-            eval_identifier(node, env),
+            eval_identifier(node, Rc::clone(&env)),
 
         Some(ast::Node::Expression(ast::Expression::FunctionLiteral(node))) => {
             let params = node.parameters;
@@ -78,16 +80,16 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             Some(object::Object::FunctionObj(object::FunctionObj {
                 parameters: params,
                 body: body?,
-                env: env.clone(),
+                env: Rc::clone(&env),
             }))
         }
 
         Some(ast::Node::Expression(ast::Expression::CallExpression(node))) => {
-            let function = eval(Some(ast::Node::Expression(*node.function)), env);
+            let function = eval(Some(ast::Node::Expression(*node.function)), Rc::clone(&env));
             if function.is_error() {
                 return function
             }
-            let args = eval_expressions(node.arguments, env);
+            let args = eval_expressions(node.arguments, Rc::clone(&env));
 
             if args.len() == 1 {
                 let args_0 = args.get(0).cloned();
@@ -103,7 +105,7 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
             Some(object::Object::StringObj(object::StringObj{ value: node.value })),
 
         Some(ast::Node::Expression(ast::Expression::ArrayLiteral(node))) => {
-            let elements = eval_expressions(node.elements, env);
+            let elements = eval_expressions(node.elements, Rc::clone(&env));
             let elements_0 = elements.get(0).cloned();
             if elements.len() == 1 && elements_0.is_error() {
                 return elements_0
@@ -112,11 +114,11 @@ pub(crate) fn eval(node: Option<ast::Node>, env: &mut object::environment::Envir
         }
 
         Some(ast::Node::Expression(ast::Expression::IndexExpression(node))) => {
-            let left = eval(Some(ast::Node::Expression(*node.left)), env);
+            let left = eval(Some(ast::Node::Expression(*node.left)), Rc::clone(&env));
             if left.is_error() {
                 return left
             }
-            let index = eval(Some(ast::Node::Expression(*node.index?)), env);
+            let index = eval(Some(ast::Node::Expression(*node.index?)), Rc::clone(&env));
             if index.is_error() {
                 return index
             }
@@ -151,7 +153,7 @@ fn eval_array_index_expression(array: Option<object::Object>, index: Option<obje
 
     let max = array_object.elements.len() - 1;
 
-    if idx < 0 || idx > max {
+    if idx > max {
         return NULL
     }
 
@@ -161,10 +163,10 @@ fn eval_array_index_expression(array: Option<object::Object>, index: Option<obje
 fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<object::Object> {
     match func {
         object::Object::FunctionObj(func) => {
-            let mut extended_env = extend_function_env(func.clone(), args);
+            let extended_env = extend_function_env(func.clone(), args);
             let evaluated = eval(
                 Some(ast::Node::Statement(ast::Statement::BlockStatement(func.body))),
-                &mut extended_env
+                Rc::new(RefCell::new(extended_env))
             );
             unwrap_return_value(evaluated?).map(|x| *x)
         },
@@ -178,7 +180,7 @@ fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<obj
 }
 
 fn extend_function_env(func: object::FunctionObj, args: Vec<object::Object>) -> object::environment::Environment {
-    let mut env = object::environment::Environment::new(Some(Box::new(func.env)));
+    let mut env = object::environment::Environment::new(Some(Rc::clone(&func.env)));
 
     for (param_idx, param) in func.parameters.iter().enumerate() {
         env.set(param.value.as_str(), args.get(param_idx).cloned().unwrap());
@@ -195,11 +197,11 @@ fn unwrap_return_value(obj: object::Object) -> Option<Box<object::Object>> {
     Some(Box::new(obj))
 }
 
-fn eval_expressions(exps: Vec<ast::Expression>, env: &mut object::environment::Environment) -> Vec<object::Object> {
+fn eval_expressions(exps: Vec<ast::Expression>, env: Rc<RefCell<object::environment::Environment>>) -> Vec<object::Object> {
     let mut result = vec![];
 
     for e in exps.into_iter() {
-        let evaluated = eval(Some(ast::Node::Expression(e)), env);
+        let evaluated = eval(Some(ast::Node::Expression(e)), Rc::clone(&env));
         if evaluated.is_error() {
             return vec![evaluated].into_iter().flatten().collect()
         }
@@ -209,8 +211,8 @@ fn eval_expressions(exps: Vec<ast::Expression>, env: &mut object::environment::E
     result.into_iter().flatten().collect()
 }
 
-fn eval_identifier(node: ast::Identifier, env: &object::environment::Environment) -> Option<object::Object> {
-    if let Some(val) = env.get(node.value.as_str()) {
+fn eval_identifier(node: ast::Identifier, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
+    if let Some(val) = env.borrow().get(node.value.as_str()) {
         return Some(val)
     }
 
@@ -221,11 +223,11 @@ fn eval_identifier(node: ast::Identifier, env: &object::environment::Environment
     object::ErrorObj::new(format!("identifier not found: {}", node.value))
 }
 
-fn eval_program(program: ast::Program, env: &mut object::environment::Environment) -> Option<object::Object> {
+fn eval_program(program: ast::Program, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
     let mut result: Option<object::Object> = None;
 
     for statement in program.statements.into_iter() {
-        result = eval(Some(ast::Node::Statement(statement)), env);
+        result = eval(Some(ast::Node::Statement(statement)), Rc::clone(&env));
 
         if let Some(object::Object::ReturnValueObj(return_value)) = result {
             return return_value.value.map(|x| *x)
@@ -238,16 +240,16 @@ fn eval_program(program: ast::Program, env: &mut object::environment::Environmen
     result
 }
 
-fn eval_if_expression(ie: ast::IfExpression, env: &mut object::environment::Environment) -> Option<object::Object> {
-    let condition = eval(ie.condition.map(|e| ast::Node::Expression(*e)) ,env);
+fn eval_if_expression(ie: ast::IfExpression, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
+    let condition = eval(ie.condition.map(|e| ast::Node::Expression(*e)) ,Rc::clone(&env));
     if condition.is_error() {
         return condition
     }
 
     if is_truthy(condition) {
-        eval(ie.consequence.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))), env)
+        eval(ie.consequence.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))), Rc::clone(&env))
     } else if ie.alternative.is_some() {
-        eval(ie.alternative.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))), env)
+        eval(ie.alternative.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))), Rc::clone(&env))
     } else {
         NULL
     }
@@ -269,11 +271,11 @@ fn native_bool_to_boolean_object(input: bool) -> Option<object::Object> {
     FALSE
 }
 
-fn eval_block_statement(block: ast::BlockStatement, env: &mut object::environment::Environment) -> Option<object::Object> {
+fn eval_block_statement(block: ast::BlockStatement, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
     let mut result: Option<object::Object> = None;
 
     for statement in block.statements.into_iter() {
-        result = eval(Some(ast::Node::Statement(statement)), env);
+        result = eval(Some(ast::Node::Statement(statement)), Rc::clone(&env));
 
         if result.is_some() {
             let rt = result.as_ref()?.object_type();
@@ -440,9 +442,9 @@ mod tests {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
         let program = p.parse_program();
-        let mut env = object::environment::Environment::new(None);
+        let env = object::environment::Environment::new(None);
 
-        eval(Some(ast::Node::Program(program)), &mut env)
+        eval(Some(ast::Node::Program(program)), Rc::new(RefCell::new(env)))
     }
 
     fn test_integer_object(obj: Option<object::Object>, expected: i32) -> bool {
@@ -1012,7 +1014,7 @@ mod tests {
             fn new(input: &str, expected: Option<i32>) -> Self {
                 Self {
                     input: input.to_owned(),
-                    expected: expected,
+                    expected,
                 }
             }
         }

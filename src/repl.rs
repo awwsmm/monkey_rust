@@ -1,10 +1,12 @@
 use crate::{ast, evaluator, lexer, object, parser};
+use std::cell::RefCell;
 use std::io::{BufRead, Write};
+use std::rc::Rc;
 
 const PROMPT: &'static [u8] = ">> ".as_bytes();
 
 pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
-    let mut env = object::environment::Environment::new(None);
+    let env = Rc::new(RefCell::new(object::environment::Environment::new(None)));
 
     loop {
         writer.write(PROMPT).unwrap();
@@ -26,7 +28,7 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
             continue
         }
 
-        let evaluated = evaluator::eval(Some(ast::Node::Program(program)), &mut env);
+        let evaluated = evaluator::eval(Some(ast::Node::Program(program)), Rc::clone(&env));
         if let Some(evaluated) = evaluated {
             write!(writer, "{}\n", evaluated.inner().inspect()).unwrap();
         }

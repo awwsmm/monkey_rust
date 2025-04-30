@@ -1,5 +1,7 @@
+use std::cell::RefCell;
 use crate::ast;
 use std::cmp::PartialEq;
+use std::rc::Rc;
 
 pub(crate) mod environment;
 
@@ -156,7 +158,7 @@ impl ErrorObj {
 pub(crate) struct FunctionObj {
     pub(crate) parameters: Vec<ast::Identifier>,
     pub(crate) body: ast::BlockStatement,
-    pub(crate) env: environment::Environment,
+    pub(crate) env: Rc<RefCell<environment::Environment>>,
 }
 
 impl ObjectLike for FunctionObj {
