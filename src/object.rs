@@ -55,6 +55,15 @@ impl Object {
             Object::HashObj(inner) => Box::new(inner),
         }
     }
+
+    pub(crate) fn as_hashable(&self) -> Option<Hashable> {
+        match self {
+            Object::IntegerObj(inner) => Some(Hashable::IntegerObj(inner.clone())),
+            Object::BooleanObj(inner) => Some(Hashable::BooleanObj(inner.clone())),
+            Object::StringObj(inner) => Some(Hashable::StringObj(inner.clone())),
+            _ => None,
+        }
+    }
 }
 
 pub(crate) trait IsError {
@@ -271,7 +280,7 @@ impl HasHashKey for StringObj {
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct HashPair {
-    key: Object,
+    pub(crate) key: Object,
     pub(crate) value: Object,
 }
 

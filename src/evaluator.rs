@@ -1,8 +1,10 @@
 mod builtins;
 
-use crate::object::{IsError, ObjectLike};
+use crate::ast::HashLiteral;
+use crate::object::{HasHashKey, Hashable, IsError, ObjectLike};
 use crate::{ast, object};
 use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::rc::Rc;
 
 const NULL: object::NullObj = object::NullObj {};
@@ -130,6 +132,35 @@ pub(crate) fn eval(node: Option<ast::Node>, env: Rc<RefCell<object::environment:
 
         _ => None
     }
+}
+
+fn eval_hash_literal(node: HashLiteral, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
+    let mut pairs = BTreeMap::new();
+
+    for (key_node, value_node) in node.pairs.iter() {
+        let key = eval(Some(ast::Node::Expression(key_node.clone())), Rc::clone(&env));
+        if key.is_error() {
+            return key
+        }
+
+        let hash_key = match key.as_ref().map(|k| k.as_hashable()).flatten() {
+            Some(inner) => inner,
+            None => {
+                return object::ErrorObj::new(format!("unusable as hash key: {:?}", key.map(|k| k.object_type())))
+            }
+        };
+
+        let value = eval(Some(ast::Node::Expression(value_node.clone())), Rc::clone(&env));
+        if value.is_error() {
+            return value
+        }
+
+        let hashed = hash_key.hash_key();
+
+        pairs.insert(hashed, object::HashPair{ key: key?, value: value? });
+    }
+
+    Some(object::Object::HashObj(object::HashObj{ pairs }))
 }
 
 fn eval_index_expression(left: Option<object::Object>, index: Option<object::Object>) -> Option<object::Object> {
