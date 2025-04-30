@@ -169,6 +169,8 @@ fn eval_index_expression(left: Option<object::Object>, index: Option<object::Obj
 
     if left_type == object::ObjectType::ArrayObj && index_type == object::ObjectType::IntegerObj {
         eval_array_index_expression(left, index)
+    } else if left_type == object::ObjectType::HashObj {
+        eval_hash_index_expression(left, index)
     } else {
         object::ErrorObj::new(format!("index operator not supported: {:?}", left_type))
     }
