@@ -286,7 +286,14 @@ impl ObjectLike for HashObj {
     }
 
     fn inspect(&self) -> String {
-        todo!()
+        let mut pairs = vec![];
+
+        for (_, pair) in self.pairs.iter() {
+            pairs.push(format!("{}: {}",
+                pair.key.inspect(), pair.value.inspect()))
+        }
+
+        format!("{{{}}}", pairs.join(", "))
     }
 }
 
