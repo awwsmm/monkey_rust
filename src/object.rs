@@ -1,12 +1,13 @@
 use crate::ast;
 use std::cell::RefCell;
 use std::cmp::PartialEq;
+use std::collections::BTreeMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::rc::Rc;
 
 pub(crate) mod environment;
 
-#[derive(PartialEq, Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) enum ObjectType {
     IntegerObj,
     BooleanObj,
@@ -17,6 +18,7 @@ pub(crate) enum ObjectType {
     StringObj,
     BuiltinObj,
     ArrayObj,
+    HashObj,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -30,6 +32,7 @@ pub(crate) enum Object {
     StringObj(StringObj),
     BuiltinObj(BuiltinObj),
     ArrayObj(ArrayObj),
+    HashObj(HashObj),
 }
 
 pub(crate) trait ObjectLike {
@@ -49,6 +52,7 @@ impl Object {
             Object::StringObj(inner) => Box::new(inner),
             Object::BuiltinObj(inner) => Box::new(inner),
             Object::ArrayObj(inner) => Box::new(inner),
+            Object::HashObj(inner) => Box::new(inner),
         }
     }
 }
@@ -234,7 +238,7 @@ impl ObjectLike for ArrayObj {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 struct HashKey {
     object_type: ObjectType,
     value: u64,
@@ -262,6 +266,27 @@ impl HasHashKey for StringObj {
         self.value.hash(&mut s);
 
         HashKey{ object_type: self.object_type(), value: s.finish() }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+struct HashPair {
+    key: Object,
+    value: Object,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+struct HashObj {
+    pairs: BTreeMap<HashKey, HashPair>
+}
+
+impl ObjectLike for HashObj {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::HashObj
+    }
+
+    fn inspect(&self) -> String {
+        todo!()
     }
 }
 
