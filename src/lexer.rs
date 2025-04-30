@@ -73,6 +73,7 @@ impl Lexer {
             b'}' => tok = Token::new(TokenType::RBRACE, String::from_utf8(vec![self.ch]).unwrap()),
             b'[' => tok = Token::new(TokenType::LBRACKET, String::from_utf8(vec![self.ch]).unwrap()),
             b']' => tok = Token::new(TokenType::RBRACKET, String::from_utf8(vec![self.ch]).unwrap()),
+            b':' => tok = Token::new(TokenType::COLON, String::from_utf8(vec![self.ch]).unwrap()),
 
             b'"' => tok = Token::new(TokenType::STRING, self.read_string()),
 
