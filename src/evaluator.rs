@@ -756,7 +756,11 @@ mod tests {
             Test::new(
                 r#""Hello" - "World""#,
                 "unknown operator: Some(StringObj) - Some(StringObj)"
-            )
+            ),
+            Test::new(
+                r#"{"name": "Monkey"}[fn(x) { x }];"#,
+                "unusable as hash key: Some(FunctionObj)"
+            ),
         ];
 
         let mut should_panic = false;
