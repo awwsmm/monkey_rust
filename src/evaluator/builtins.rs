@@ -155,6 +155,16 @@ impl Builtin {
                 }
             }),
 
+            "puts" => Some(object::BuiltinObj{
+                func: |args| {
+                    for arg in args.iter() {
+                        println!("{}", arg.inspect())
+                    }
+
+                    object::Object::NullObj(NULL)
+                }
+            }),
+
             _ => None,
         }
     }
