@@ -1,5 +1,5 @@
-use std::cell::RefCell;
 use crate::ast;
+use std::cell::RefCell;
 use std::cmp::PartialEq;
 use std::rc::Rc;
 
@@ -230,5 +230,35 @@ impl ObjectLike for ArrayObj {
         }
 
         format!("[{}]", elements.join(", "))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_string_hash_key() {
+        let hello1 = Object::StringObj(StringObj{ value: "Hello World".to_string() });
+        let hello2 = Object::StringObj(StringObj{ value: "Hello World".to_string() });
+        let diff1 = Object::StringObj(StringObj{ value: "My name is johnny".to_string() });
+        let diff2 = Object::StringObj(StringObj{ value: "My name is johnny".to_string() });
+
+        let mut should_panic = false;
+
+        if hello1.hash_key() != hello2.hash_key() {
+            should_panic = true;
+            eprintln!("strings with same content have different hash keys")
+        }
+
+        if diff1.hash_key() != diff2.hash_key() {
+            should_panic = true;
+            eprintln!("strings with same content have different hash keys")
+        }
+
+        if hello1.hash_key() == diff1.hash_key() {
+            should_panic = true;
+            eprintln!("strings with different content have same hash keys")
+        }
     }
 }
