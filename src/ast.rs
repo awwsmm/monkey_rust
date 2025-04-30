@@ -1,4 +1,5 @@
 use crate::token;
+use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
 
 pub(crate) enum Node {
@@ -58,6 +59,7 @@ pub(crate) enum Expression {
     CallExpression(CallExpression),
     ArrayLiteral(ArrayLiteral),
     IndexExpression(IndexExpression),
+    HashLiteral(HashLiteral),
 }
 
 impl Expression {
@@ -74,6 +76,7 @@ impl Expression {
             Expression::CallExpression(inner) => Box::new(inner),
             Expression::ArrayLiteral(inner) => Box::new(inner),
             Expression::IndexExpression(inner) => Box::new(inner),
+            Expression::HashLiteral(inner) => Box::new(inner),
         }
     }
 }
@@ -416,6 +419,30 @@ impl Display for IndexExpression {
 }
 
 impl NodeLike for IndexExpression {
+    fn token_literal(&self) -> &str {
+        &self.token.literal
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct HashLiteral {
+    token: token::Token, // the '{' token
+    pairs: BTreeMap<Expression, Expression>,
+}
+
+impl Display for HashLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut pairs = vec![];
+
+        for (key, value) in self.pairs.iter() {
+            pairs.push(format!("{}:{}", key.to_string(), value.to_string()))
+        }
+
+        write!(f, "{{{}}}", pairs.join(", "))
+    }
+}
+
+impl NodeLike for HashLiteral {
     fn token_literal(&self) -> &str {
         &self.token.literal
     }
