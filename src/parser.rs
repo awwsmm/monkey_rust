@@ -36,6 +36,7 @@ impl Parser {
         p.register_prefix(TokenType::FUNCTION, Self::parse_function_literal);
         p.register_prefix(TokenType::STRING, Self::parse_string_literal);
         p.register_prefix(TokenType::LBRACKET, Self::parse_array_literal);
+        p.register_prefix(TokenType::LBRACE, Self::parse_hash_literal);
 
         p.register_infix(TokenType::PLUS, Self::parse_infix_expression);
         p.register_infix(TokenType::MINUS, Self::parse_infix_expression);
@@ -53,6 +54,34 @@ impl Parser {
         p.next_token();
 
         p
+    }
+
+    fn parse_hash_literal(&mut self) -> Option<ast::Expression> {
+        let mut hash = ast::HashLiteral{ token: self.cur_token.clone(), pairs: Default::default() };
+
+        while !self.peek_token_is(TokenType::RBRACE) {
+            self.next_token();
+            let key = self.parse_expression(Precedence::Lowest)?;
+
+            if !self.expect_peek(TokenType::COLON) {
+                return None
+            }
+
+            self.next_token();
+            let value = self.parse_expression(Precedence::Lowest)?;
+
+            hash.pairs.insert(key, value);
+
+            if !self.peek_token_is(TokenType::RBRACE) && !self.expect_peek(TokenType::COMMA) {
+                return None
+            }
+        }
+
+        if !self.expect_peek(TokenType::RBRACE) {
+            return None
+        }
+
+        Some(ast::Expression::HashLiteral(hash))
     }
 
     fn parse_index_expression(&mut self, left: ast::Expression) -> Option<ast::Expression> {
@@ -1609,7 +1638,7 @@ mod tests {
 
         for (key, value) in hash.pairs.iter() {
             let literal = match key {
-                Some(Expression::StringLiteral(inner)) => inner,
+                Expression::StringLiteral(inner) => inner,
                 _ => panic!("key is not ast::StringLiteral. got={:?}", key)
             };
 
@@ -1682,7 +1711,7 @@ mod tests {
 
         for (key, value) in hash.pairs.iter() {
             let literal = match key {
-                Some(Expression::IntegerLiteral(inner)) => inner,
+                Expression::IntegerLiteral(inner) => inner,
                 _ => panic!("key is not ast::IntegerLiteral. got={:?}", key)
             };
 
@@ -1730,7 +1759,7 @@ mod tests {
 
         for (key, value) in hash.pairs.iter() {
             let literal = match key {
-                Some(Expression::Boolean(inner)) => inner,
+                Expression::Boolean(inner) => inner,
                 _ => panic!("key is not ast::Boolean. got={:?}", key)
             };
 
@@ -1772,18 +1801,18 @@ mod tests {
             eprintln!("hash.pairs has wrong length. got={}", hash.pairs.len())
         }
 
-        let mut tests = HashMap::<dyn Into<String>, fn(&Expression) -> bool>::new();
+        let mut tests = HashMap::<&str, fn(&Expression) -> bool>::new();
         tests.insert("one", |e| test_infix_expression(e, 0, "+", 1));
         tests.insert("two", |e| test_infix_expression(e, 10, "-", 8));
         tests.insert("three", |e| test_infix_expression(e, 15, "/", 5));
 
         for (key, value) in hash.pairs.iter() {
             let literal = match key {
-                Some(Expression::StringLiteral(inner)) => inner,
+                Expression::StringLiteral(inner) => inner,
                 _ => panic!("key is not ast::StringLiteral. got={:?}", key)
             };
 
-            let test_func = match tests.get(literal) {
+            let test_func = match tests.get(literal.to_string().as_str()) {
                 Some(value) => value,
                 None => {
                     should_panic = true;

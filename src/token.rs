@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-#[derive(Default, Eq, PartialEq, Clone, Copy, Debug, Hash)]
+#[derive(Default, Eq, PartialEq, Clone, Copy, Debug, Hash, PartialOrd, Ord)]
 pub(crate) enum TokenType {
     #[default]
     ILLEGAL,
@@ -109,7 +109,7 @@ impl TokenType {
     }
 }
 
-#[derive(Default, Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct Token {
     pub(crate) token_type: TokenType,
     pub(crate) literal: String,

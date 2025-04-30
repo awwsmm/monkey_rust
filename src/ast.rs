@@ -15,7 +15,7 @@ pub(crate) trait NodeLike: Display {
 trait DisplayableNode: Display + NodeLike {}
 impl<T: Display + NodeLike> DisplayableNode for T {}
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) enum Statement {
     LetStatement(LetStatement),
     ReturnStatement(ReturnStatement),
@@ -46,7 +46,7 @@ impl NodeLike for Statement {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) enum Expression {
     Identifier(Identifier),
     IntegerLiteral(IntegerLiteral),
@@ -113,7 +113,7 @@ impl NodeLike for Program {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct LetStatement {
     pub(crate) token: token::Token, // the token::TokenType::LET token
     pub(crate) name: Option<Identifier>,
@@ -134,7 +134,7 @@ impl NodeLike for LetStatement {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct Identifier {
     pub(crate) token: token::Token, // the token::TokenType::IDENT token
     pub(crate) value: String,
@@ -152,7 +152,7 @@ impl NodeLike for Identifier {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct ReturnStatement {
     pub(crate) token: token::Token,
     pub(crate) return_value: Option<Expression>,
@@ -171,7 +171,7 @@ impl NodeLike for ReturnStatement {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct ExpressionStatement {
     pub(crate) token: token::Token, // the first token of the expression
     pub(crate) expression: Option<Expression>,
@@ -189,7 +189,7 @@ impl NodeLike for ExpressionStatement {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct IntegerLiteral {
     pub(crate) token: token::Token,
     pub(crate) value: i32,
@@ -207,7 +207,7 @@ impl NodeLike for IntegerLiteral {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct StringLiteral {
     pub(crate) token: token::Token,
     pub(crate) value: String,
@@ -225,7 +225,7 @@ impl NodeLike for StringLiteral {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct PrefixExpression {
     pub(crate) token: token::Token, // The prefix token, e.g. !
     pub(crate) operator: String,
@@ -244,7 +244,7 @@ impl NodeLike for PrefixExpression {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct InfixExpression {
     pub(crate) token: token::Token, // The operator token, e.g. +
     pub(crate) left: Option<Box<Expression>>,
@@ -266,7 +266,7 @@ impl NodeLike for InfixExpression {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct Boolean {
     pub(crate) token: token::Token,
     pub(crate) value: bool,
@@ -284,7 +284,7 @@ impl NodeLike for Boolean {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct IfExpression {
     pub(crate) token: token::Token, // The 'if' token
     pub(crate) condition: Option<Box<Expression>>,
@@ -305,7 +305,7 @@ impl NodeLike for IfExpression {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct BlockStatement {
     pub(crate) token: token::Token, // the { token
     pub(crate) statements: Vec<Statement>,
@@ -329,7 +329,7 @@ impl NodeLike for BlockStatement {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct FunctionLiteral {
     pub(crate) token: token::Token, // the 'fn' token
     pub(crate) parameters: Vec<Identifier>,
@@ -356,7 +356,7 @@ impl NodeLike for FunctionLiteral {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct CallExpression {
     pub(crate) token: token::Token, // The '(' token
     pub(crate) function: Box<Expression>, // Identifier or FunctionLiteral
@@ -381,7 +381,7 @@ impl NodeLike for CallExpression {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct ArrayLiteral {
     pub(crate) token: token::Token, // the '[' token
     pub(crate) elements: Vec<Expression>,
@@ -405,7 +405,7 @@ impl NodeLike for ArrayLiteral {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct IndexExpression {
     pub(crate) token: token::Token, // The [ token
     pub(crate) left: Box<Expression>,
@@ -424,9 +424,9 @@ impl NodeLike for IndexExpression {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
-struct HashLiteral {
-    token: token::Token, // the '{' token
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) struct HashLiteral {
+    pub(crate) token: token::Token, // the '{' token
     pub(crate) pairs: BTreeMap<Expression, Expression>,
 }
 
