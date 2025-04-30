@@ -173,6 +173,7 @@ if (5 < 10) {
 "foobar"
 "foo bar"
 [1, 2];
+{"foo": "bar"}
 "#;
 
         struct Test {
@@ -268,6 +269,11 @@ if (5 < 10) {
             Test::new(TokenType::INT, "2"),
             Test::new(TokenType::RBRACKET, "]"),
             Test::new(TokenType::SEMICOLON, ";"),
+            Test::new(TokenType::LBRACE, "{"),
+            Test::new(TokenType::STRING, "foo"),
+            Test::new(TokenType::COLON, ":"),
+            Test::new(TokenType::STRING, "bar"),
+            Test::new(TokenType::RBRACE, "}"),
             Test::new(TokenType::EOF, ""),
         ];
 
