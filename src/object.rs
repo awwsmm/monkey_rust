@@ -261,4 +261,54 @@ mod tests {
             eprintln!("strings with different content have same hash keys")
         }
     }
+
+    #[test]
+    fn test_boolean_hash_key() {
+        let hello1 = Object::BooleanObj(BooleanObj{ value: true });
+        let hello2 = Object::BooleanObj(BooleanObj{ value: true });
+        let diff1 = Object::BooleanObj(BooleanObj{ value: false });
+        let diff2 = Object::BooleanObj(BooleanObj{ value: false });
+
+        let mut should_panic = false;
+
+        if hello1.hash_key() != hello2.hash_key() {
+            should_panic = true;
+            eprintln!("booleans with same value have different hash keys")
+        }
+
+        if diff1.hash_key() != diff2.hash_key() {
+            should_panic = true;
+            eprintln!("booleans with same value have different hash keys")
+        }
+
+        if hello1.hash_key() == diff1.hash_key() {
+            should_panic = true;
+            eprintln!("booleans with different values have same hash keys")
+        }
+    }
+
+    #[test]
+    fn test_integer_hash_key() {
+        let hello1 = Object::IntegerObj(IntegerObj{ value: 42 });
+        let hello2 = Object::IntegerObj(IntegerObj{ value: 42 });
+        let diff1 = Object::IntegerObj(IntegerObj{ value: 43 });
+        let diff2 = Object::IntegerObj(IntegerObj{ value: 43 });
+
+        let mut should_panic = false;
+
+        if hello1.hash_key() != hello2.hash_key() {
+            should_panic = true;
+            eprintln!("integers with same v have different hash keys")
+        }
+
+        if diff1.hash_key() != diff2.hash_key() {
+            should_panic = true;
+            eprintln!("integers with same value have different hash keys")
+        }
+
+        if hello1.hash_key() == diff1.hash_key() {
+            should_panic = true;
+            eprintln!("integers with different values have same hash keys")
+        }
+    }
 }
