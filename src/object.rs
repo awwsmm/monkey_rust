@@ -1,6 +1,7 @@
 use crate::ast;
 use std::cell::RefCell;
 use std::cmp::PartialEq;
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::rc::Rc;
 
 pub(crate) mod environment;
@@ -233,16 +234,47 @@ impl ObjectLike for ArrayObj {
     }
 }
 
+#[derive(PartialEq)]
+struct HashKey {
+    object_type: ObjectType,
+    value: u64,
+}
+
+trait HasHashKey {
+    fn hash_key(&self) -> HashKey;
+}
+
+impl HasHashKey for BooleanObj {
+    fn hash_key(&self) -> HashKey {
+        HashKey{ object_type: self.object_type(), value: if self.value { 1 } else { 0 }}
+    }
+}
+
+impl HasHashKey for IntegerObj {
+    fn hash_key(&self) -> HashKey {
+        HashKey{ object_type: self.object_type(), value: self.value as u64 }
+    }
+}
+
+impl HasHashKey for StringObj {
+    fn hash_key(&self) -> HashKey {
+        let mut s = DefaultHasher::new();
+        self.value.hash(&mut s);
+
+        HashKey{ object_type: self.object_type(), value: s.finish() }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_string_hash_key() {
-        let hello1 = Object::StringObj(StringObj{ value: "Hello World".to_string() });
-        let hello2 = Object::StringObj(StringObj{ value: "Hello World".to_string() });
-        let diff1 = Object::StringObj(StringObj{ value: "My name is johnny".to_string() });
-        let diff2 = Object::StringObj(StringObj{ value: "My name is johnny".to_string() });
+        let hello1 = StringObj{ value: "Hello World".to_string() };
+        let hello2 = StringObj{ value: "Hello World".to_string() };
+        let diff1 = StringObj{ value: "My name is johnny".to_string() };
+        let diff2 = StringObj{ value: "My name is johnny".to_string() };
 
         let mut should_panic = false;
 
@@ -264,10 +296,10 @@ mod tests {
 
     #[test]
     fn test_boolean_hash_key() {
-        let hello1 = Object::BooleanObj(BooleanObj{ value: true });
-        let hello2 = Object::BooleanObj(BooleanObj{ value: true });
-        let diff1 = Object::BooleanObj(BooleanObj{ value: false });
-        let diff2 = Object::BooleanObj(BooleanObj{ value: false });
+        let hello1 = BooleanObj{ value: true };
+        let hello2 = BooleanObj{ value: true };
+        let diff1 = BooleanObj{ value: false };
+        let diff2 = BooleanObj{ value: false };
 
         let mut should_panic = false;
 
@@ -289,10 +321,10 @@ mod tests {
 
     #[test]
     fn test_integer_hash_key() {
-        let hello1 = Object::IntegerObj(IntegerObj{ value: 42 });
-        let hello2 = Object::IntegerObj(IntegerObj{ value: 42 });
-        let diff1 = Object::IntegerObj(IntegerObj{ value: 43 });
-        let diff2 = Object::IntegerObj(IntegerObj{ value: 43 });
+        let hello1 = IntegerObj{ value: 42 };
+        let hello2 = IntegerObj{ value: 42 };
+        let diff1 = IntegerObj{ value: 43 };
+        let diff2 = IntegerObj{ value: 43 };
 
         let mut should_panic = false;
 
