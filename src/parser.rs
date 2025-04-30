@@ -1745,4 +1745,60 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_parsing_hash_literals_with_expressions() {
+        let input = r#"{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}"#;
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let hash = match stmt.expression.as_ref() {
+            Some(Expression::HashLiteral(inner)) => inner,
+            _ => panic!("exp not ast::HashLiteral. got={:?}", stmt.expression)
+        };
+
+        let mut should_panic = false;
+
+        if hash.pairs.len() != 3 {
+            should_panic = true;
+            eprintln!("hash.pairs has wrong length. got={}", hash.pairs.len())
+        }
+
+        let mut tests = HashMap::<dyn Into<String>, fn(&Expression) -> bool>::new();
+        tests.insert("one", |e| test_infix_expression(e, 0, "+", 1));
+        tests.insert("two", |e| test_infix_expression(e, 10, "-", 8));
+        tests.insert("three", |e| test_infix_expression(e, 15, "/", 5));
+
+        for (key, value) in hash.pairs.iter() {
+            let literal = match key {
+                Some(Expression::StringLiteral(inner)) => inner,
+                _ => panic!("key is not ast::StringLiteral. got={:?}", key)
+            };
+
+            let test_func = match tests.get(literal) {
+                Some(value) => value,
+                None => {
+                    should_panic = true;
+                    eprintln!("No test function for key {} found", literal.to_string());
+                    continue
+                }
+            };
+
+            if !test_func(value) {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
