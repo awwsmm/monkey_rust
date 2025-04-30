@@ -5,9 +5,9 @@ use crate::{ast, object};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-const NULL: Option<object::Object> = Some(object::Object::NullObj(object::NullObj {}));
-const TRUE: Option<object::Object> = Some(object::Object::BooleanObj(object::BooleanObj { value: true }));
-const FALSE: Option<object::Object> = Some(object::Object::BooleanObj(object::BooleanObj { value: false }));
+const NULL: object::NullObj = object::NullObj {};
+const TRUE: object::BooleanObj = object::BooleanObj { value: true };
+const FALSE: object::BooleanObj = object::BooleanObj { value: false };
 
 pub(crate) fn eval(node: Option<ast::Node>, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
     match node {
@@ -154,7 +154,7 @@ fn eval_array_index_expression(array: Option<object::Object>, index: Option<obje
     let max = array_object.elements.len() - 1;
 
     if idx > max {
-        return NULL
+        return Some(object::Object::NullObj(NULL))
     }
 
     array_object.elements.get(idx).cloned()
@@ -251,24 +251,24 @@ fn eval_if_expression(ie: ast::IfExpression, env: Rc<RefCell<object::environment
     } else if ie.alternative.is_some() {
         eval(ie.alternative.map(|x| ast::Node::Statement(ast::Statement::BlockStatement(x))), Rc::clone(&env))
     } else {
-        NULL
+        Some(object::Object::NullObj(NULL))
     }
 }
 
 fn is_truthy(obj: Option<object::Object>) -> bool {
     match obj {
-        NULL => false,
-        TRUE => true,
-        FALSE => false,
+        Some(object::Object::NullObj(NULL)) => false,
+        Some(object::Object::BooleanObj(TRUE)) => true,
+        Some(object::Object::BooleanObj(FALSE)) => false,
         _ => true,
     }
 }
 
 fn native_bool_to_boolean_object(input: bool) -> Option<object::Object> {
     if input {
-        return TRUE
+        return Some(object::Object::BooleanObj(TRUE))
     }
-    FALSE
+    Some(object::Object::BooleanObj(FALSE))
 }
 
 fn eval_block_statement(block: ast::BlockStatement, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
@@ -298,10 +298,10 @@ fn eval_prefix_expression(operator: &str, right: Option<object::Object>) -> Opti
 
 fn eval_bang_operator_expression(right: Option<object::Object>) -> Option<object::Object> {
     match right {
-        TRUE => FALSE,
-        FALSE => TRUE,
-        NULL => TRUE,
-        _ => FALSE,
+        Some(object::Object::BooleanObj(TRUE)) => Some(object::Object::BooleanObj(FALSE)),
+        Some(object::Object::BooleanObj(FALSE)) => Some(object::Object::BooleanObj(TRUE)),
+        Some(object::Object::NullObj(NULL)) => Some(object::Object::BooleanObj(TRUE)),
+        _ => Some(object::Object::BooleanObj(FALSE)),
     }
 }
 
@@ -391,7 +391,9 @@ fn eval_integer_infix_expression(operator: &str, left: Option<object::Object>, r
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::object::{HasHashKey, Hashable};
     use crate::{lexer, object, parser};
+    use std::collections::BTreeMap;
 
     #[test]
     fn test_eval_integer_expression() {
@@ -611,7 +613,7 @@ mod tests {
     }
 
     fn test_null_object(obj: Option<object::Object>) -> bool {
-        if !matches!(obj, NULL) {
+        if !matches!(obj, Some(object::Object::NullObj(NULL))) {
             eprint!("object is not NULL. got={:?}\n", obj);
             return false
         }
@@ -1079,5 +1081,54 @@ mod tests {
         if should_panic {
             panic!()
         }
+    }
+
+    #[test]
+    fn test_hash_literals() {
+        let input = r#"let two = "two";
+        {
+            "one": 10 - 9,
+            two: 1 + 1,
+            "thr" + "ee": 6 / 2,
+            4: 4,
+            true: 5,
+            false: 6
+        }"#;
+
+        let evaluated = test_eval(input);
+        let result = match evaluated {
+            Some(object::Object::HashObj(inner)) => inner,
+            _ => panic!("Eval didn't return Hash. got={:?}", evaluated)
+        };
+
+        let mut expected = BTreeMap::new();
+        expected.insert(Hashable::StringObj(object::StringObj{ value: "one".to_string() }).hash_key(), 1);
+        expected.insert(Hashable::StringObj(object::StringObj{ value: "two".to_string() }).hash_key(), 2);
+        expected.insert(Hashable::StringObj(object::StringObj{ value: "three".to_string() }).hash_key(), 3);
+        expected.insert(Hashable::IntegerObj(object::IntegerObj{ value: 4 }).hash_key(), 4);
+        expected.insert(Hashable::BooleanObj(TRUE).hash_key(), 5);
+        expected.insert(Hashable::BooleanObj(FALSE).hash_key(), 6);
+
+        if result.pairs.len() != expected.len() {
+            panic!("Hash has wrong num of pairs. got={}", result.pairs.len())
+        }
+
+        let mut should_panic = false;
+
+        for (expected_key, expected_value) in expected.iter() {
+            let pair = match result.pairs.get(expected_key) {
+                Some(value) => value,
+                None => {
+                    should_panic = true;
+                    eprintln!("no pair for given key in pairs");
+                    continue
+                }
+            };
+
+            if !test_integer_object(Some(pair.value.clone()), *expected_value) {
+                should_panic = true
+            }
+        }
+
     }
 }

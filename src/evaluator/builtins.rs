@@ -57,7 +57,7 @@ impl Builtin {
                         return arr.elements.get(0).cloned().unwrap()
                     }
 
-                    NULL.unwrap()
+                    object::Object::NullObj(NULL)
                 }
             }),
 
@@ -88,7 +88,7 @@ impl Builtin {
                         return arr.elements.get(length-1).cloned().unwrap()
                     }
 
-                    NULL.unwrap()
+                    object::Object::NullObj(NULL)
                 }
             }),
 
@@ -121,7 +121,7 @@ impl Builtin {
                         return object::Object::ArrayObj(object::ArrayObj{ elements: new_elements })
                     }
 
-                    NULL.unwrap()
+                    object::Object::NullObj(NULL)
                 }
             }),
 

@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 pub(crate) mod environment;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
 pub(crate) enum ObjectType {
     IntegerObj,
     BooleanObj,
@@ -80,7 +80,7 @@ impl ObjectLike for Object {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
 pub(crate) struct IntegerObj {
     pub(crate) value: i32,
 }
@@ -95,7 +95,7 @@ impl ObjectLike for IntegerObj {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
 pub(crate) struct BooleanObj {
     pub(crate) value: bool,
 }
@@ -185,7 +185,7 @@ impl ObjectLike for FunctionObj {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
 pub(crate) struct StringObj {
     pub(crate) value: String,
 }
@@ -238,13 +238,13 @@ impl ObjectLike for ArrayObj {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
-struct HashKey {
+#[derive(Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
+pub(crate) struct HashKey {
     object_type: ObjectType,
     value: u64,
 }
 
-trait HasHashKey {
+pub(crate) trait HasHashKey {
     fn hash_key(&self) -> HashKey;
 }
 
@@ -270,14 +270,14 @@ impl HasHashKey for StringObj {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-struct HashPair {
+pub(crate) struct HashPair {
     key: Object,
-    value: Object,
+    pub(crate) value: Object,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-struct HashObj {
-    pairs: BTreeMap<HashKey, HashPair>
+pub(crate) struct HashObj {
+    pub(crate) pairs: BTreeMap<HashKey, HashPair>
 }
 
 impl ObjectLike for HashObj {
@@ -294,6 +294,23 @@ impl ObjectLike for HashObj {
         }
 
         format!("{{{}}}", pairs.join(", "))
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]
+pub(crate) enum Hashable {
+    BooleanObj(BooleanObj),
+    IntegerObj(IntegerObj),
+    StringObj(StringObj),
+}
+
+impl HasHashKey for Hashable {
+    fn hash_key(&self) -> HashKey {
+        match self {
+            Hashable::BooleanObj(inner) => inner.hash_key(),
+            Hashable::IntegerObj(inner) => inner.hash_key(),
+            Hashable::StringObj(inner) => inner.hash_key(),
+        }
     }
 }
 
