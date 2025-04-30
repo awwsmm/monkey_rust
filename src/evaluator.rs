@@ -125,6 +125,9 @@ pub(crate) fn eval(node: Option<ast::Node>, env: Rc<RefCell<object::environment:
             eval_index_expression(left, index)
         }
 
+        Some(ast::Node::Expression(ast::Expression::HashLiteral(node))) =>
+            eval_hash_literal(node, Rc::clone(&env)),
+
         _ => None
     }
 }
