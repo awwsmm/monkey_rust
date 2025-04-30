@@ -1648,4 +1648,101 @@ mod tests {
             panic!("hash.pairs has wrong length. got={}", hash.pairs.len())
         }
     }
+
+    #[test]
+    fn test_parsing_hash_literals_integer_keys() {
+        let input = r#"{6: 1, 5: 2, 4: 3}"#;
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let hash = match stmt.expression.as_ref() {
+            Some(Expression::HashLiteral(inner)) => inner,
+            _ => panic!("exp not ast::HashLiteral. got={:?}", stmt.expression)
+        };
+
+        let mut should_panic = false;
+
+        if hash.pairs.len() != 3 {
+            should_panic = true;
+            eprintln!("hash.pairs has wrong length. got={}", hash.pairs.len())
+        }
+
+        let mut expected = HashMap::new();
+        expected.insert(6, 1);
+        expected.insert(5, 2);
+        expected.insert(4, 3);
+
+        for (key, value) in hash.pairs.iter() {
+            let literal = match key {
+                Some(Expression::IntegerLiteral(inner)) => inner,
+                _ => panic!("key is not ast::IntegerLiteral. got={:?}", key)
+            };
+
+            let expected_value = expected.get(&literal.value).cloned().unwrap();
+
+            if !test_integer_literal(value, expected_value) {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_parsing_hash_literals_boolean_keys() {
+        let input = r#"{true: 1, false: 2}"#;
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let hash = match stmt.expression.as_ref() {
+            Some(Expression::HashLiteral(inner)) => inner,
+            _ => panic!("exp not ast::HashLiteral. got={:?}", stmt.expression)
+        };
+
+        let mut should_panic = false;
+
+        if hash.pairs.len() != 2 {
+            should_panic = true;
+            eprintln!("hash.pairs has wrong length. got={}", hash.pairs.len())
+        }
+
+        let mut expected = HashMap::new();
+        expected.insert(true, 1);
+        expected.insert(false, 2);
+
+        for (key, value) in hash.pairs.iter() {
+            let literal = match key {
+                Some(Expression::Boolean(inner)) => inner,
+                _ => panic!("key is not ast::Boolean. got={:?}", key)
+            };
+
+            let expected_value = expected.get(&literal.value).cloned().unwrap();
+
+            if !test_integer_literal(value, expected_value) {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
