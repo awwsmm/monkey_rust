@@ -176,6 +176,25 @@ fn eval_index_expression(left: Option<object::Object>, index: Option<object::Obj
     }
 }
 
+fn eval_hash_index_expression(hash: Option<object::Object>, index: Option<object::Object>) -> Option<object::Object> {
+    let hash_object = match hash {
+        Some(object::Object::HashObj(inner)) => inner,
+        _ => panic!(),
+    };
+
+    let key = match index.as_ref().map(|i| i.as_hashable()).flatten() {
+        Some(hashable) => hashable,
+        _ => return object::ErrorObj::new(format!("unusable as hash key: {:?}", index.map(|i| i.object_type())))
+    };
+
+    let pair = match hash_object.pairs.get(&key.hash_key()) {
+        Some(hash_pair) => hash_pair,
+        _ => return Some(object::Object::NullObj(NULL))
+    };
+
+    Some(pair.value.clone())
+}
+
 fn eval_array_index_expression(array: Option<object::Object>, index: Option<object::Object>) -> Option<object::Object> {
     let array_object = match array {
         Some(object::Object::ArrayObj(inner)) => inner,
