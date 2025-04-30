@@ -1163,6 +1163,54 @@ mod tests {
                 should_panic = true
             }
         }
+    }
 
+    #[test]
+    fn test_hash_index_expressions() {
+        struct Test {
+            input: String,
+            expected: Option<i32>,
+        }
+
+        impl Test {
+            fn new(input: &str, expected: Option<i32>) -> Self {
+                Self {
+                    input: input.to_owned(),
+                    expected,
+                }
+            }
+        }
+
+        let tests = vec![
+            Test::new(r#"{"foo": 5}["foo"]"#, Some(5)),
+            Test::new(r#"{"foo": 5}["bar"]"#, None),
+            Test::new(r#"let key = "foo"; {"foo": 5}[key]"#, Some(5)),
+            Test::new(r#"{}["foo"]"#, None),
+            Test::new(r#"{5: 5}[5]"#, Some(5)),
+            Test::new(r#"{true: 5}[true]"#, Some(5)),
+            Test::new(r#"{false: 5}[false]"#, Some(5)),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let evaluated = test_eval(tt.input);
+
+            match tt.expected {
+                Some(integer) =>
+                    if !test_integer_object(evaluated, integer) {
+                        should_panic = true
+                    }
+
+                None =>
+                    if !test_null_object(evaluated) {
+                        should_panic = true
+                    }
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
     }
 }
