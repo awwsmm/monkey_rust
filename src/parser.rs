@@ -1624,4 +1624,28 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_parsing_empty_hash_literal() {
+        let input = "{}";
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let hash = match stmt.expression.as_ref() {
+            Some(Expression::HashLiteral(inner)) => inner,
+            _ => panic!("exp not ast::HashLiteral. got={:?}", stmt.expression)
+        };
+
+        if hash.pairs.len() != 0 {
+            panic!("hash.pairs has wrong length. got={}", hash.pairs.len())
+        }
+    }
 }
