@@ -427,7 +427,7 @@ impl NodeLike for IndexExpression {
 #[derive(Clone, Debug, PartialEq)]
 struct HashLiteral {
     token: token::Token, // the '{' token
-    pairs: BTreeMap<Expression, Expression>,
+    pub(crate) pairs: BTreeMap<Expression, Expression>,
 }
 
 impl Display for HashLiteral {

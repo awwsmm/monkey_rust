@@ -1575,4 +1575,53 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_parsing_hash_literals_string_keys() {
+        let input = r#"{"one": 1, "two": 2, "three": 3}"#;
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        let stmt = match program.statements.get(0) {
+            Some(Statement::ExpressionStatement(inner)) => inner,
+            _ => panic!()
+        };
+
+        let hash = match stmt.expression.as_ref() {
+            Some(Expression::HashLiteral(inner)) => inner,
+            _ => panic!("exp not ast::HashLiteral. got={:?}", stmt.expression)
+        };
+
+        let mut should_panic = false;
+
+        if hash.pairs.len() != 3 {
+            should_panic = true;
+            eprintln!("hash.pairs has wrong length. got={}", hash.pairs.len())
+        }
+
+        let mut expected = HashMap::new();
+        expected.insert("one", 1);
+        expected.insert("two", 2);
+        expected.insert("three", 3);
+
+        for (key, value) in hash.pairs.iter() {
+            let literal = match key {
+                Some(Expression::StringLiteral(inner)) => inner,
+                _ => panic!("key is not ast::StringLiteral. got={:?}", key)
+            };
+
+            let expected_value = expected.get(literal.to_string().as_str()).cloned().unwrap();
+
+            if !test_integer_literal(value, expected_value) {
+                should_panic = true
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
