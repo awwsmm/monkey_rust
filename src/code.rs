@@ -1,5 +1,6 @@
 struct Instructions(Vec<u8>);
 
+#[derive(Clone, Copy)]
 enum Opcode {
     OpConstant,
 }
@@ -42,6 +43,30 @@ impl Into<Definition> for u8 {
     }
 }
 
+fn make(op: Opcode, operands: Vec<i32>) -> Vec<u8> {
+    let def: Definition = Into::<u8>::into(op).into();
+
+    let mut instruction_len = 1;
+    for w in def.operand_widths.iter() {
+        instruction_len += w
+    }
+
+    let mut instruction: Vec<u8> = vec![];
+    instruction.push(op.into());
+
+    let mut offset = 1;
+    for (i, o) in operands.into_iter().enumerate() {
+        let width = def.operand_widths.get(i).unwrap();
+        match width {
+            2 => u16::try_from(o).unwrap().to_be_bytes().iter().for_each(|b| instruction.push(*b)),
+            _ => panic!("unimplemented")
+        }
+        offset += width
+    }
+
+    instruction
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -74,7 +99,7 @@ mod tests {
 
             for (i, b) in tt.expected.iter().enumerate() {
                 if instruction.get(i) != tt.expected.get(i) {
-                    eprintln!("wrong byte at pos {}. want={}, got={}",
+                    eprintln!("wrong byte at pos {}. want={}, got={:?}",
                               i, b, instruction.get(i))
                 }
             }
