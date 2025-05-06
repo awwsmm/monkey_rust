@@ -1,4 +1,5 @@
-struct Instructions(Vec<u8>);
+#[derive(Clone)]
+pub(crate) struct Instructions(pub(crate) Vec<u8>);
 
 #[derive(Clone, Copy)]
 enum Opcode {

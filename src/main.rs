@@ -10,6 +10,7 @@ mod parser_tracing;
 mod object;
 mod evaluator;
 mod code;
+mod compiler;
 
 fn main() {
     let mut stdout = io::stdout();
