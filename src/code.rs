@@ -14,9 +14,30 @@ impl Into<u8> for Opcode {
 
 impl Into<Opcode> for u8 {
     fn into(self) -> Opcode {
+        <Self as Into<Definition>>::into(self).opcode
+    }
+}
+
+// additional "opcode" field not present in Go implementation makes Into<Opcode> cleaner
+struct Definition {
+    opcode: Opcode,
+    name: &'static str,
+    operand_widths: &'static [i32],
+}
+
+// series of "const" bindings is equivalent to "var definitions" in Go implementation
+const OP_CONSTANT: Definition = Definition{
+    opcode: Opcode::OpConstant,
+    name: "OpConstant",
+    operand_widths: &[2],
+};
+
+// equivalent of "func Lookup()" in Go implementation
+impl Into<Definition> for u8 {
+    fn into(self) -> Definition {
         match self {
-            0 => Opcode::OpConstant,
-            _ => panic!("unknown opcode discriminant: {}", self)
+            0 => OP_CONSTANT,
+            _ => panic!("opcode {} undefined", self)
         }
     }
 }
