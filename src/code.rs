@@ -41,3 +41,43 @@ impl Into<Definition> for u8 {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_make() {
+        struct Test {
+            op: Opcode,
+            operands: Vec<i32>,
+            expected: Vec<u8>,
+        }
+
+        impl Test {
+            fn new(op: Opcode, operands: Vec<i32>, expected: Vec<u8>) -> Self {
+                Self { op, operands, expected }
+            }
+        }
+
+        let tests = vec![
+            Test::new(Opcode::OpConstant, vec![65534], vec![Opcode::OpConstant.into(), 255, 254])
+        ];
+
+        for tt in tests.into_iter() {
+            let instruction: Vec<u8> = make(tt.op, tt.operands);
+
+            if instruction.len() != tt.expected.len() {
+                eprintln!("instruction has wrong length. want={}, got={}",
+                          tt.expected.len(), instruction.len())
+            }
+
+            for (i, b) in tt.expected.iter().enumerate() {
+                if instruction.get(i) != tt.expected.get(i) {
+                    eprintln!("wrong byte at pos {}. want={}, got={}",
+                              i, b, instruction.get(i))
+                }
+            }
+        }
+    }
+}
