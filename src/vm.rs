@@ -1,4 +1,3 @@
-use crate::code::Opcode;
 use crate::{code, compiler, object};
 
 const STACK_SIZE: usize = 2048;
@@ -29,18 +28,34 @@ impl VM {
         self.stack[self.sp-1].clone()
     }
 
-    fn run(&self) -> Option<compiler::Error> {
+    fn run(&mut self) -> Option<compiler::Error> {
         let mut ip = 0;
         while ip < self.instructions.0.len() {
-            let op = code::Opcode::from(self.instructions[ip]);
+            let op: code::Opcode = self.instructions.0[ip].into();
 
             match op {
-                Opcode::OpConstant => {
-                    let const_index = code::read_u16(self.instructions[ip+1..]);
-                    ip += 2
+                code::Opcode::OpConstant => {
+                    let const_index = code::read_u16(&self.instructions.0[ip+1..]);
+                    ip += 2;
+                    if let Some(err) = self.push(self.constants[const_index as usize].clone()) {
+                        return Some(err)
+                    }
                 }
             }
+
+            ip += 1
         }
+
+        None
+    }
+
+    fn push(&mut self, o: object::Object) -> Option<compiler::Error> {
+        if self.sp >= STACK_SIZE {
+            return compiler::Error::new("stack overflow")
+        }
+
+        self.stack[self.sp] = Some(Box::new(o));
+        self.sp += 1;
 
         None
     }
@@ -51,7 +66,7 @@ mod tests {
     use super::*;
     use crate::{ast, compiler, lexer, object, parser};
 
-    fn parse(input: &'static str) -> ast::Program {
+    fn parse(input: impl Into<String>) -> ast::Program {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
         p.parse_program()
@@ -88,9 +103,12 @@ mod tests {
         }
     }
 
-    fn run_vm_tests(tests: Vec<VMTestCase>) {
+    fn run_vm_tests(tests: Vec<VMTestCase>) -> bool {
+
+        let mut should_panic = false;
+
         for tt in tests.into_iter() {
-            let program = parse(&tt.input);
+            let program = parse(tt.input);
 
             let mut comp = compiler::Compiler::new();
             let err = comp.compile(ast::Node::Program(program));
@@ -98,7 +116,7 @@ mod tests {
                 panic!("compiler error: {}", err)
             }
 
-            let vm = VM::new(comp.bytecode());
+            let mut vm = VM::new(comp.bytecode());
             let err = vm.run();
             if let Some(err) = err {
                 panic!("vm error: {}", err)
@@ -106,8 +124,12 @@ mod tests {
 
             let stack_elem = vm.stack_top();
 
-            test_expected_object(tt.expected, stack_elem)
+            if !test_expected_object(tt.expected, stack_elem) {
+                should_panic = true
+            }
         }
+
+        should_panic
     }
 
     enum Expected {
@@ -146,6 +168,8 @@ mod tests {
             VMTestCase::new("1 + 2", 2), // FIXME
         ];
 
-        run_vm_tests(tests)
+        if !run_vm_tests(tests) {
+            panic!()
+        }
     }
 }

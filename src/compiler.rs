@@ -6,8 +6,8 @@ pub(crate) struct Error {
 }
 
 impl Error {
-    pub(crate) fn new(message: String) -> Option<Error> {
-        Some(Error{message})
+    pub(crate) fn new(message: impl Into<String>) -> Option<Error> {
+        Some(Error{message: message.into()})
     }
 }
 
