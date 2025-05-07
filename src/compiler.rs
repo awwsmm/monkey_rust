@@ -42,22 +42,42 @@ mod tests {
     fn test_instructions(
         expected: Vec<code::Instructions>,
         actual: code::Instructions,
-    ) -> Option<String> {
+    ) -> Option<Error> {
         let concatted = concat_instructions(expected);
 
         if actual.0.len() != concatted.0.len() {
-            return Some(format!("wrong instructions length.\nwant={}\ngot ={:?}",
-                concatted, actual))
+            return Some(
+                Error {
+                    message: format!("wrong instructions length.\nwant={:?}\ngot ={:?}",
+                                     concatted, actual)
+                }
+            )
         }
 
-        for (i, ins) in concatted.0.iter() {
-            if actual.get(i) != ins {
-                return Some(format!("wrong instruction at {}.\nwant={}\ngot ={:?}",
-                    i, concatted, actual))
+        for (i, ins) in concatted.0.iter().enumerate() {
+            if actual.0.get(i) != Some(ins) {
+                return Some(
+                    Error {
+                        message: format!("wrong instruction at {}.\nwant={:?}\ngot ={:?}",
+                                         i, concatted, actual)
+                    }
+                )
             }
         }
 
         None
+    }
+
+    fn concat_instructions(s: Vec<code::Instructions>) -> code::Instructions {
+        let mut out = code::Instructions(vec![]);
+
+        for ins in s.into_iter() {
+            for byte in ins.0 {
+                out.0.push(byte)
+            }
+        }
+
+        out
     }
 
     fn parse(input: &'static str) -> ast::Program {
