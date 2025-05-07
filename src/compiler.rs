@@ -60,7 +60,9 @@ impl Compiler {
                 }
             }
 
-            ast::Node::Expression(ast::Expression::IntegerLiteral(node)) => todo!("What now?!"),
+            ast::Node::Expression(ast::Expression::IntegerLiteral(node)) => {
+                let integer = object::IntegerObj{ value: node.value };
+            }
 
             _ => ()
         }
