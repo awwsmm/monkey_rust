@@ -42,7 +42,28 @@ impl VM {
                     }
                 }
 
-                code::Opcode::OpAdd => (),
+                code::Opcode::OpAdd => {
+                    let right = self.pop();
+                    let left = self.pop();
+                    let left_value = match left {
+                        Some(boxed_object) => {
+                            match *boxed_object {
+                                object::Object::IntegerObj(integer_obj) => integer_obj.value,
+                                _ => panic!()
+                            }
+                        }
+                        _ => panic!()
+                    };
+                    let right_value = match right {
+                        Some(boxed_object) => {
+                            match *boxed_object {
+                                object::Object::IntegerObj(integer_obj) => integer_obj.value,
+                                _ => panic!()
+                            }
+                        }
+                        _ => panic!()
+                    };
+                },
             }
 
             ip += 1
