@@ -8,16 +8,16 @@ mod tests {
         p.parse_program()
     }
 
-    fn test_integer_object(expected: i32, actual: object::Object) -> Option<crate::compiler::Error> {
+    fn test_integer_object(expected: i32, actual: object::Object) -> Option<compiler::Error> {
         let result = match actual {
             object::Object::IntegerObj(integer_obj) => integer_obj,
-            _ => return crate::compiler::Error::new(format!(
+            _ => return compiler::Error::new(format!(
                 "object is not Integer. got={:?}", actual
             )),
         };
 
         if result.value != expected {
-            return crate::compiler::Error::new(format!(
+            return compiler::Error::new(format!(
                 "object has wrong value. got={}, want={}", result.value, expected
             ))
         }
@@ -28,6 +28,15 @@ mod tests {
     struct VMTestCase {
         input: String,
         expected: Expected,
+    }
+
+    impl VMTestCase {
+        fn new(str: impl Into<String>, exp: impl Into<Expected>) -> Self {
+            Self {
+                input: str.into(),
+                expected: exp.into(),
+            }
+        }
     }
 
     fn run_vm_tests(tests: Vec<VMTestCase>) {
@@ -78,5 +87,16 @@ mod tests {
         }
 
         should_panic
+    }
+
+    #[test]
+    fn test_integer_arithmetic() {
+        let tests = vec![
+            VMTestCase::new("1", 1),
+            VMTestCase::new("2", 2),
+            VMTestCase::new("1 + 2", 2), // FIXME
+        ];
+
+        run_vm_tests(tests)
     }
 }
