@@ -106,4 +106,31 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_instructions_string() {
+        let instructions = vec![
+            make(Opcode::OpConstant, vec![1]),
+            make(Opcode::OpConstant, vec![2]),
+            make(Opcode::OpConstant, vec![65535]),
+        ];
+
+        let expected = r#"0000 OpConstant 1
+0003 OpConstant 2
+0006 OpConstant 65535
+"#;
+        let mut concatted = Instructions(vec![]);
+        for ins in instructions.iter() {
+            for byte in ins.iter() {
+                concatted.0.push(*byte)
+            }
+        }
+
+        let mut should_panic = false;
+
+        if concatted.to_string() != expected {
+            eprintln!("instructions wrongly formatted.\nwant={}\ngot={}",
+                expected, concatted.to_string())
+        }
+    }
 }
