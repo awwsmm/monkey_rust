@@ -76,6 +76,11 @@ impl Compiler {
             constants: self.constants.clone(),
         }
     }
+
+    fn add_constant(&mut self, obj: object::Object) -> usize {
+        self.constants.push(obj);
+        self.constants.len() - 1
+    }
 }
 
 struct Bytecode {
