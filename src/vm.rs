@@ -20,10 +20,18 @@ impl VM {
             sp: 0,
         }
     }
+
+    fn stack_top(&self) -> Option<Box<object::Object>> {
+        if self.sp == 0 {
+            return None
+        }
+        self.stack[self.sp-1].clone()
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::{ast, compiler, lexer, object, parser};
 
     fn parse(input: &'static str) -> ast::Program {
@@ -32,9 +40,9 @@ mod tests {
         p.parse_program()
     }
 
-    fn test_integer_object(expected: i32, actual: object::Object) -> Option<compiler::Error> {
-        let result = match actual {
-            object::Object::IntegerObj(integer_obj) => integer_obj,
+    fn test_integer_object(expected: i32, actual: Option<Box<object::Object>>) -> Option<compiler::Error> {
+        let result = match actual.clone().map(|bo| *bo) {
+            Some(object::Object::IntegerObj(integer_obj)) => integer_obj,
             _ => return compiler::Error::new(format!(
                 "object is not Integer. got={:?}", actual
             )),
@@ -73,7 +81,7 @@ mod tests {
                 panic!("compiler error: {}", err)
             }
 
-            let vm = new(comp.bytecode());
+            let vm = VM::new(comp.bytecode());
             let err = vm.run();
             if let Some(err) = err {
                 panic!("vm error: {}", err)
@@ -97,7 +105,7 @@ mod tests {
         }
     }
 
-    fn test_expected_object(expected: Expected, actual: object::Object) -> bool {
+    fn test_expected_object(expected: Expected, actual: Option<Box<object::Object>>) -> bool {
         let mut should_panic = false;
 
         match expected {
