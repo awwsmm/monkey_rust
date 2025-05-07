@@ -81,6 +81,19 @@ impl Compiler {
         self.constants.push(obj);
         self.constants.len() - 1
     }
+
+    fn emit(&mut self, op: code::Opcode, operands: Vec<i32>) -> usize {
+        let ins = code::make(op, &operands);
+        self.add_instruction(ins)
+    }
+
+    fn add_instruction(&mut self, ins: Vec<u8>) -> usize {
+        let pos_new_instruction = self.instructions.0.len();
+        for byte in ins.iter() {
+            self.instructions.0.push(*byte)
+        }
+        pos_new_instruction
+    }
 }
 
 struct Bytecode {
