@@ -42,7 +42,7 @@ impl VM {
                     }
                 }
 
-                code::Opcode::OpAdd => todo!()
+                code::Opcode::OpAdd => (),
             }
 
             ip += 1

@@ -58,6 +58,11 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
+
+                match node.operator.as_str() {
+                    "+" => self.emit(code::Opcode::OpAdd, vec![]),
+                    _ => return Error::new(format!("unknown operator {}", node.operator))
+                };
             }
 
             ast::Node::Expression(ast::Expression::IntegerLiteral(node)) => {
