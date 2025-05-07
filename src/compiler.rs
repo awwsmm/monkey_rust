@@ -233,6 +233,7 @@ mod tests {
                 vec![
                     code::make(code::Opcode::OpConstant, &vec![0]),
                     code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpAdd, &vec![]),
                 ],
             )
         ];
