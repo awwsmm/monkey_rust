@@ -98,9 +98,9 @@ impl Compiler {
     }
 }
 
-struct Bytecode {
-    instructions: code::Instructions,
-    constants: Vec<object::Object>,
+pub(crate) struct Bytecode {
+    pub(crate) instructions: code::Instructions,
+    pub(crate) constants: Vec<object::Object>,
 }
 
 #[cfg(test)]

@@ -1,3 +1,27 @@
+use crate::{code, compiler, object};
+
+const STACK_SIZE: usize = 2048;
+
+struct VM {
+    constants: Vec<object::Object>,
+    instructions: code::Instructions,
+
+    stack: [Option<Box<object::Object>>; STACK_SIZE],
+    sp: usize, // Always points to the next value. Top of stack is stack[sp-1
+}
+
+impl VM {
+    fn new(bytecode: compiler::Bytecode) -> Self {
+        Self {
+            instructions: bytecode.instructions,
+            constants: bytecode.constants,
+
+            stack: [const { None }; STACK_SIZE],
+            sp: 0,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{ast, compiler, lexer, object, parser};
