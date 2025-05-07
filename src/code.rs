@@ -52,8 +52,14 @@ impl Into<Definition> for u8 {
     }
 }
 
-pub(crate) fn make(op: Opcode, operands: Vec<i32>) -> Vec<u8> {
-    let def: Definition = Into::<u8>::into(op).into();
+impl Into<Definition> for Opcode {
+    fn into(self) -> Definition {
+        Into::<u8>::into(self).into()
+    }
+}
+
+pub(crate) fn make(op: Opcode, operands: &Vec<i32>) -> Vec<u8> {
+    let def: Definition = op.into();
 
     let mut instruction_len = 1;
     for w in def.operand_widths.iter() {
@@ -64,10 +70,10 @@ pub(crate) fn make(op: Opcode, operands: Vec<i32>) -> Vec<u8> {
     instruction.push(op.into());
 
     let mut offset = 1;
-    for (i, o) in operands.into_iter().enumerate() {
+    for (i, o) in operands.iter().enumerate() {
         let width = def.operand_widths.get(i).unwrap();
         match width {
-            2 => u16::try_from(o).unwrap().to_be_bytes().iter().for_each(|b| instruction.push(*b)),
+            2 => u16::try_from(*o).unwrap().to_be_bytes().iter().for_each(|b| instruction.push(*b)),
             _ => panic!("unimplemented")
         }
         offset += width
@@ -99,7 +105,7 @@ mod tests {
         ];
 
         for tt in tests.into_iter() {
-            let instruction: Vec<u8> = make(tt.op, tt.operands);
+            let instruction: Vec<u8> = make(tt.op, &tt.operands);
 
             if instruction.len() != tt.expected.len() {
                 eprintln!("instruction has wrong length. want={}, got={}",
@@ -118,9 +124,9 @@ mod tests {
     #[test]
     fn test_instructions_string() {
         let instructions = vec![
-            make(Opcode::OpConstant, vec![1]),
-            make(Opcode::OpConstant, vec![2]),
-            make(Opcode::OpConstant, vec![65535]),
+            make(Opcode::OpConstant, &vec![1]),
+            make(Opcode::OpConstant, &vec![2]),
+            make(Opcode::OpConstant, &vec![65535]),
         ];
 
         let expected = r#"0000 OpConstant 1
@@ -144,6 +150,45 @@ mod tests {
 
         if should_panic {
             panic!()
+        }
+    }
+
+    #[test]
+    fn test_read_operands() {
+        struct Test {
+            op: Opcode,
+            operands: Vec<i32>,
+            bytes_read: usize,
+        }
+
+        impl Test {
+            fn new(op: Opcode, operands: Vec<i32>, bytes_read: usize) -> Self {
+                Self { op, operands, bytes_read }
+            }
+        }
+
+        let tests = vec![
+            Test::new(Opcode::OpConstant, vec![65535], 2),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            let instruction = make(tt.op, &tt.operands);
+
+            let def: Definition = tt.op.into();
+
+            let (operands_read, n) = read_operands(def, &instruction[1..]);
+            if n != tt.bytes_read {
+                panic!("n wrong. want={}, got={}", tt.bytes_read, n)
+            }
+
+            for (i, want) in tt.operands.iter().enumerate() {
+                if operands_read.get(i) != want {
+                    should_panic = true;
+                    eprintln!("operand wrong. want={}, got={}", want, operands_read.get(i))
+                }
+            }
         }
     }
 }

@@ -176,8 +176,8 @@ mod tests {
                 "1 + 2",
                 vec![1.into(), 2.into()],
                 vec![
-                    code::make(code::Opcode::OpConstant, vec![0]),
-                    code::make(code::Opcode::OpConstant, vec![1]),
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
                 ],
             )
         ];
