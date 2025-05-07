@@ -1,3 +1,4 @@
+use crate::code::Opcode;
 use crate::{code, compiler, object};
 
 const STACK_SIZE: usize = 2048;
@@ -26,6 +27,19 @@ impl VM {
             return None
         }
         self.stack[self.sp-1].clone()
+    }
+
+    fn run(&self) -> Option<compiler::Error> {
+        let mut ip = 0;
+        while ip < self.instructions.0.len() {
+            let op = code::Opcode::from(self.instructions[ip]);
+
+            match op {
+                Opcode::OpConstant => todo!()
+            }
+        }
+
+        None
     }
 }
 
