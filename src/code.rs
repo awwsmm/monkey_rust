@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct Instructions(pub(crate) Vec<u8>);
 
 #[derive(Clone, Copy)]

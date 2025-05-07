@@ -39,6 +39,27 @@ mod tests {
     use super::*;
     use crate::{lexer, parser};
 
+    fn test_instructions(
+        expected: Vec<code::Instructions>,
+        actual: code::Instructions,
+    ) -> Option<String> {
+        let concatted = concat_instructions(expected);
+
+        if actual.0.len() != concatted.0.len() {
+            return Some(format!("wrong instructions length.\nwant={}\ngot ={:?}",
+                concatted, actual))
+        }
+
+        for (i, ins) in concatted.0.iter() {
+            if actual.get(i) != ins {
+                return Some(format!("wrong instruction at {}.\nwant={}\ngot ={:?}",
+                    i, concatted, actual))
+            }
+        }
+
+        None
+    }
+
     fn parse(input: &'static str) -> ast::Program {
         let l = lexer::Lexer::new(input);
         let mut p = parser::Parser::new(l);
