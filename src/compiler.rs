@@ -17,20 +17,20 @@ impl Display for Error {
     }
 }
 
-struct Compiler {
+pub(crate) struct Compiler {
     instructions: code::Instructions,
     constants: Vec<object::Object>,
 }
 
 impl Compiler {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             instructions: code::Instructions(vec![]),
             constants: vec![],
         }
     }
 
-    fn compile(&mut self, node: ast::Node) -> Option<Error> {
+    pub(crate) fn compile(&mut self, node: ast::Node) -> Option<Error> {
         match node {
             ast::Node::Program(node) => {
                 for s in node.statements.iter() {
@@ -72,7 +72,7 @@ impl Compiler {
         None
     }
 
-    fn bytecode(&self) -> Bytecode {
+    pub(crate) fn bytecode(&self) -> Bytecode {
         Bytecode {
             instructions: self.instructions.clone(),
             constants: self.constants.clone(),
