@@ -1,13 +1,10 @@
-use crate::{ast, evaluator, lexer, object, parser};
-use std::cell::RefCell;
+use crate::object::ObjectLike;
+use crate::{ast, compiler, lexer, parser, vm};
 use std::io::{BufRead, Write};
-use std::rc::Rc;
 
 const PROMPT: &'static [u8] = ">> ".as_bytes();
 
 pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
-    let env = Rc::new(RefCell::new(object::environment::Environment::new(None)));
-
     loop {
         writer.write(PROMPT).unwrap();
         writer.flush().unwrap();
@@ -28,10 +25,23 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
             continue
         }
 
-        let evaluated = evaluator::eval(Some(ast::Node::Program(program)), Rc::clone(&env));
-        if let Some(evaluated) = evaluated {
-            write!(writer, "{}\n", evaluated.inner().inspect()).unwrap();
+        let mut comp = compiler::Compiler::new();
+        let err = comp.compile(ast::Node::Program(program));
+        if let Some(err) = err {
+            write!(writer, "Woops! Compilation failed:\n {}\n", err).unwrap();
+            continue
         }
+
+        let mut machine = vm::VM::new(comp.bytecode());
+        let err = machine.run();
+        if let Some(err) = err {
+            write!(writer, "Woops! Executing bytecode failed:\n {}\n", err).unwrap();
+            continue
+        }
+
+        let stack_top = machine.stack_top();
+        write!(writer, "{}\n", stack_top.unwrap().inspect()).unwrap();
+
     }
 }
 

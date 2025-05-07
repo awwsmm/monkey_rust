@@ -2,7 +2,7 @@ use crate::{code, compiler, object};
 
 const STACK_SIZE: usize = 2048;
 
-struct VM {
+pub(crate) struct VM {
     constants: Vec<object::Object>,
     instructions: code::Instructions,
 
@@ -11,7 +11,7 @@ struct VM {
 }
 
 impl VM {
-    fn new(bytecode: compiler::Bytecode) -> Self {
+    pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
         Self {
             instructions: bytecode.instructions,
             constants: bytecode.constants,
@@ -21,14 +21,14 @@ impl VM {
         }
     }
 
-    fn stack_top(&self) -> Option<Box<object::Object>> {
+    pub(crate) fn stack_top(&self) -> Option<Box<object::Object>> {
         if self.sp == 0 {
             return None
         }
         self.stack[self.sp-1].clone()
     }
 
-    fn run(&mut self) -> Option<compiler::Error> {
+    pub(crate) fn run(&mut self) -> Option<compiler::Error> {
         let mut ip = 0;
         while ip < self.instructions.0.len() {
             let op: code::Opcode = self.instructions.0[ip].into();
