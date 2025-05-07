@@ -35,7 +35,10 @@ impl VM {
             let op = code::Opcode::from(self.instructions[ip]);
 
             match op {
-                Opcode::OpConstant => todo!()
+                Opcode::OpConstant => {
+                    let const_index = code::read_u16(self.instructions[ip+1..]);
+                    ip += 2
+                }
             }
         }
 

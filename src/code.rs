@@ -129,7 +129,7 @@ fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<usize>, usize) {
     (operands, offset)
 }
 
-fn read_u16(ins: &[u8]) -> u16 {
+pub(crate) fn read_u16(ins: &[u8]) -> u16 {
     // https://stackoverflow.com/a/50244328/2925434
     ((ins[0] as u16) << 8) | ins[1] as u16
 }
