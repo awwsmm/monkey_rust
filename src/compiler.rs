@@ -30,7 +30,41 @@ impl Compiler {
         }
     }
 
-    fn compile(&self, node: ast::Program) -> Option<Error> {
+    fn compile(&self, node: ast::Node) -> Option<Error> {
+        match node {
+            ast::Node::Program(node) => {
+                for s in node.statements.iter() {
+                    let err = self.compile(ast::Node::Statement(s.clone()));
+                    if err.is_some() {
+                        return err
+                    }
+                }
+            }
+
+            ast::Node::Statement(ast::Statement::ExpressionStatement(node)) => {
+                let err = self.compile(ast::Node::Expression(node.expression?));
+                if err.is_some() {
+                    return err
+                }
+            }
+
+            ast::Node::Expression(ast::Expression::InfixExpression(node)) => {
+                let err = self.compile(ast::Node::Expression(*node.left?));
+                if err.is_some() {
+                    return err
+                }
+
+                let err = self.compile(ast::Node::Expression(*node.right?));
+                if err.is_some() {
+                    return err
+                }
+            }
+
+            ast::Node::Expression(ast::Expression::IntegerLiteral(node)) => todo!("What now?!"),
+
+            _ => ()
+        }
+
         None
     }
 
@@ -190,7 +224,7 @@ mod tests {
             let program = parse(tt.input);
 
             let compiler = Compiler::new();
-            let mut err = compiler.compile(program);
+            let mut err = compiler.compile(ast::Node::Program(program));
             if let Some(err) = err {
                 panic!("compiler error: {}", err.message)
             }
