@@ -61,6 +61,12 @@ impl VM {
 
         None
     }
+
+    fn pop(&mut self) -> Option<Box<object::Object>> {
+        let o = self.stack[self.sp-1].clone();
+        self.sp -= 1;
+        o
+    }
 }
 
 #[cfg(test)]
