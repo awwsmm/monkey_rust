@@ -1,7 +1,7 @@
 mod builtins;
 
 use crate::ast::HashLiteral;
-use crate::object::{HasHashKey, Hashable, IsError, ObjectLike};
+use crate::object::{HasHashKey, IsError, ObjectLike};
 use crate::{ast, object};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -1187,6 +1187,10 @@ mod tests {
             if !test_integer_object(Some(pair.value.clone()), *expected_value) {
                 should_panic = true
             }
+        }
+
+        if should_panic {
+            panic!()
         }
     }
 

@@ -350,6 +350,10 @@ mod tests {
             should_panic = true;
             eprintln!("strings with different content have same hash keys")
         }
+
+        if should_panic {
+            panic!()
+        }
     }
 
     #[test]
@@ -375,6 +379,10 @@ mod tests {
             should_panic = true;
             eprintln!("booleans with different values have same hash keys")
         }
+
+        if should_panic {
+            panic!()
+        }
     }
 
     #[test]
@@ -399,6 +407,10 @@ mod tests {
         if hello1.hash_key() == diff1.hash_key() {
             should_panic = true;
             eprintln!("integers with different values have same hash keys")
+        }
+
+        if should_panic {
+            panic!()
         }
     }
 }

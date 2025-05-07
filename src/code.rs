@@ -2,7 +2,7 @@
 pub(crate) struct Instructions(pub(crate) Vec<u8>);
 
 #[derive(Clone, Copy)]
-enum Opcode {
+pub(crate) enum Opcode {
     OpConstant,
 }
 
@@ -44,7 +44,7 @@ impl Into<Definition> for u8 {
     }
 }
 
-fn make(op: Opcode, operands: Vec<i32>) -> Vec<u8> {
+pub(crate) fn make(op: Opcode, operands: Vec<i32>) -> Vec<u8> {
     let def: Definition = Into::<u8>::into(op).into();
 
     let mut instruction_len = 1;
