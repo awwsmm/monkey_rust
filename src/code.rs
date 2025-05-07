@@ -1,5 +1,13 @@
+use std::fmt::{Display, Formatter};
+
 #[derive(Clone, Debug)]
 pub(crate) struct Instructions(pub(crate) Vec<u8>);
+
+impl Display for Instructions {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", "")
+    }
+}
 
 #[derive(Clone, Copy)]
 pub(crate) enum Opcode {
@@ -129,8 +137,13 @@ mod tests {
         let mut should_panic = false;
 
         if concatted.to_string() != expected {
-            eprintln!("instructions wrongly formatted.\nwant={}\ngot={}",
+            should_panic = true;
+            eprintln!("instructions wrongly formatted.\nwant={:?}\ngot={:?}",
                 expected, concatted.to_string())
+        }
+
+        if should_panic {
+            panic!()
         }
     }
 }
