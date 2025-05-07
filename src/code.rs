@@ -162,7 +162,8 @@ mod tests {
         }
 
         let tests = vec![
-            Test::new(Opcode::OpConstant, vec![65534], vec![Opcode::OpConstant.into(), 255, 254])
+            Test::new(Opcode::OpConstant, vec![65534], vec![Opcode::OpConstant.into(), 255, 254]),
+            Test::new(Opcode::OpAdd, vec![], vec![Opcode::OpAdd.into()]),
         ];
 
         for tt in tests.into_iter() {

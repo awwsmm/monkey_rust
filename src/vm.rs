@@ -41,6 +41,8 @@ impl VM {
                         return Some(err)
                     }
                 }
+
+                code::Opcode::OpAdd => todo!()
             }
 
             ip += 1
