@@ -37,6 +37,13 @@ struct Bytecode {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{lexer, parser};
+
+    fn parse(input: &'static str) -> ast::Program {
+        let l = lexer::Lexer::new(input);
+        let mut p = parser::Parser::new(l);
+        p.parse_program()
+    }
 
     enum Expected {
         Integer(Integer),
