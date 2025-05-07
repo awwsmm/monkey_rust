@@ -13,6 +13,7 @@ impl Instructions {
         }
 
         match operand_count {
+            0 => return String::from(def.name),
             1 => return format!("{} {}", def.name, operands[0]),
             _ => ()
         }
@@ -192,8 +193,8 @@ mod tests {
         ];
 
         let expected = r#"0000 OpAdd
-0003 OpConstant 2
-0006 OpConstant 65535
+0001 OpConstant 2
+0004 OpConstant 65535
 "#;
         let mut concatted = Instructions(vec![]);
         for ins in instructions.iter() {
@@ -206,7 +207,7 @@ mod tests {
 
         if concatted.to_string() != expected {
             should_panic = true;
-            eprintln!("instructions wrongly formatted.\nwant={:?}\ngot={:?}",
+            eprintln!("instructions wrongly formatted.\nwant={:?}\ngot ={:?}",
                 expected, concatted.to_string())
         }
 
