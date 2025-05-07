@@ -126,7 +126,7 @@ mod tests {
 
             let stack_elem = vm.stack_top();
 
-            if !test_expected_object(tt.expected, stack_elem) {
+            if test_expected_object(tt.expected, stack_elem) {
                 should_panic = true
             }
         }
@@ -167,10 +167,10 @@ mod tests {
         let tests = vec![
             VMTestCase::new("1", 1),
             VMTestCase::new("2", 2),
-            VMTestCase::new("1 + 2", 2), // FIXME
+            VMTestCase::new("1 + 2", 3),
         ];
 
-        if !run_vm_tests(tests) {
+        if run_vm_tests(tests) {
             panic!()
         }
     }
