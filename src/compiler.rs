@@ -1,12 +1,12 @@
 use crate::{ast, code, object};
 use std::fmt::{Display, Formatter};
 
-struct Error {
+pub(crate) struct Error {
     message: String
 }
 
 impl Error {
-    fn new(message: String) -> Option<Error> {
+    pub(crate) fn new(message: String) -> Option<Error> {
         Some(Error{message})
     }
 }
@@ -106,7 +106,6 @@ struct Bytecode {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::object::Object;
     use crate::{lexer, parser};
 
     fn test_constants(
@@ -137,7 +136,7 @@ mod tests {
 
     fn test_integer_object(expected: i32, actual: object::Object) -> Option<Error> {
         let result = match actual {
-            Object::IntegerObj(integer_obj) => integer_obj,
+            object::Object::IntegerObj(integer_obj) => integer_obj,
             _ => return Error::new(format!(
                 "object is not Integer. got={:?}", actual
             )),

@@ -11,6 +11,7 @@ mod object;
 mod evaluator;
 mod code;
 mod compiler;
+mod vm;
 
 fn main() {
     let mut stdout = io::stdout();
