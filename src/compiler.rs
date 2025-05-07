@@ -4,6 +4,12 @@ struct Error {
     message: String
 }
 
+impl Error {
+    fn new(message: String) -> Option<Error> {
+        Some(Error{message})
+    }
+}
+
 struct Compiler {
     instructions: code::Instructions,
     constants: Vec<object::Object>,
@@ -39,6 +45,32 @@ mod tests {
     use super::*;
     use crate::{lexer, parser};
 
+    fn test_constants(
+        expected: Vec<Expected>,
+        actual: Vec<object::Object>,
+    ) -> Option<Error> {
+        if expected.len() != actual.len() {
+            return Error::new(format!(
+                "wrong number of constants. got={}, want={}", actual.len(), expected.len()
+            ))
+        }
+
+        for (i, constant) in expected.into_iter().enumerate() {
+            match constant {
+                Expected::Integer(Integer(constant)) => {
+                    let err = test_integer_object(constant, actual.get(i));
+                    if let Some(err) = err {
+                        return Error::new(format!(
+                            "constant {} - test_integer_object failed: {}", i, err
+                        ))
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
     fn test_instructions(
         expected: Vec<code::Instructions>,
         actual: code::Instructions,
@@ -46,22 +78,16 @@ mod tests {
         let concatted = concat_instructions(expected);
 
         if actual.0.len() != concatted.0.len() {
-            return Some(
-                Error {
-                    message: format!("wrong instructions length.\nwant={:?}\ngot ={:?}",
-                                     concatted, actual)
-                }
-            )
+            return Error::new(format!(
+                "wrong instructions length.\nwant={:?}\ngot ={:?}", concatted, actual
+            ))
         }
 
         for (i, ins) in concatted.0.iter().enumerate() {
             if actual.0.get(i) != Some(ins) {
-                return Some(
-                    Error {
-                        message: format!("wrong instruction at {}.\nwant={:?}\ngot ={:?}",
-                                         i, concatted, actual)
-                    }
-                )
+                return Error::new(format!(
+                    "wrong instruction at {}.\nwant={:?}\ngot ={:?}", i, concatted, actual
+                ))
             }
         }
 
