@@ -32,7 +32,7 @@ impl Into<Opcode> for u8 {
 struct Definition {
     opcode: Opcode,
     name: &'static str,
-    operand_widths: &'static [i32],
+    operand_widths: &'static [usize],
 }
 
 // series of "const" bindings is equivalent to "var definitions" in Go implementation
@@ -80,6 +80,27 @@ pub(crate) fn make(op: Opcode, operands: &Vec<i32>) -> Vec<u8> {
     }
 
     instruction
+}
+
+fn read_operands(def: Definition, ins: &[u8]) -> (Vec<i32>, usize) {
+    let mut operands = vec![];
+    let mut offset = 0;
+
+    for (i, width) in def.operand_widths.iter().enumerate() {
+        match *width {
+            2 => operands.push(read_u16(&ins[offset..]) as i32),
+            _ => panic!()
+        }
+
+        offset += width
+    }
+
+    (operands, offset)
+}
+
+fn read_u16(ins: &[u8]) -> u16 {
+    // https://stackoverflow.com/a/50244328/2925434
+    ((ins[0] as u16) << 8) | ins[1] as u16
 }
 
 #[cfg(test)]
@@ -184,9 +205,9 @@ mod tests {
             }
 
             for (i, want) in tt.operands.iter().enumerate() {
-                if operands_read.get(i) != want {
+                if operands_read.get(i) != Some(want) {
                     should_panic = true;
-                    eprintln!("operand wrong. want={}, got={}", want, operands_read.get(i))
+                    eprintln!("operand wrong. want={}, got={:?}", want, operands_read.get(i))
                 }
             }
         }
