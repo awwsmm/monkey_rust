@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter};
 pub(crate) struct Instructions(pub(crate) Vec<u8>);
 
 impl Instructions {
-    fn fmt_instruction(&self, def: Definition, operands: Vec<i32>) -> String {
+    fn fmt_instruction(&self, def: Definition, operands: Vec<usize>) -> String {
         let operand_count = def.operand_widths.len();
 
         if operands.len() != operand_count {
@@ -89,7 +89,7 @@ impl Into<Definition> for Opcode {
     }
 }
 
-pub(crate) fn make(op: Opcode, operands: &Vec<i32>) -> Vec<u8> {
+pub(crate) fn make(op: Opcode, operands: &Vec<usize>) -> Vec<u8> {
     let def: Definition = op.into();
 
     let mut instruction_len = 1;
@@ -113,13 +113,13 @@ pub(crate) fn make(op: Opcode, operands: &Vec<i32>) -> Vec<u8> {
     instruction
 }
 
-fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<i32>, usize) {
+fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<usize>, usize) {
     let mut operands = vec![];
     let mut offset = 0;
 
     for (i, width) in def.operand_widths.iter().enumerate() {
         match *width {
-            2 => operands.push(read_u16(&ins[offset..]) as i32),
+            2 => operands.push(read_u16(&ins[offset..]) as usize),
             _ => panic!()
         }
 
@@ -142,12 +142,12 @@ mod tests {
     fn test_make() {
         struct Test {
             op: Opcode,
-            operands: Vec<i32>,
+            operands: Vec<usize>,
             expected: Vec<u8>,
         }
 
         impl Test {
-            fn new(op: Opcode, operands: Vec<i32>, expected: Vec<u8>) -> Self {
+            fn new(op: Opcode, operands: Vec<usize>, expected: Vec<u8>) -> Self {
                 Self { op, operands, expected }
             }
         }
@@ -209,12 +209,12 @@ mod tests {
     fn test_read_operands() {
         struct Test {
             op: Opcode,
-            operands: Vec<i32>,
+            operands: Vec<usize>,
             bytes_read: usize,
         }
 
         impl Test {
-            fn new(op: Opcode, operands: Vec<i32>, bytes_read: usize) -> Self {
+            fn new(op: Opcode, operands: Vec<usize>, bytes_read: usize) -> Self {
                 Self { op, operands, bytes_read }
             }
         }

@@ -30,7 +30,7 @@ impl Compiler {
         }
     }
 
-    fn compile(&self, node: ast::Node) -> Option<Error> {
+    fn compile(&mut self, node: ast::Node) -> Option<Error> {
         match node {
             ast::Node::Program(node) => {
                 for s in node.statements.iter() {
@@ -61,7 +61,9 @@ impl Compiler {
             }
 
             ast::Node::Expression(ast::Expression::IntegerLiteral(node)) => {
-                let integer = object::IntegerObj{ value: node.value };
+                let integer = object::Object::IntegerObj(object::IntegerObj{ value: node.value });
+                let constant = self.add_constant(integer);
+                self.emit(code::Opcode::OpConstant, vec![constant]);
             }
 
             _ => ()
@@ -82,7 +84,7 @@ impl Compiler {
         self.constants.len() - 1
     }
 
-    fn emit(&mut self, op: code::Opcode, operands: Vec<i32>) -> usize {
+    fn emit(&mut self, op: code::Opcode, operands: Vec<usize>) -> usize {
         let ins = code::make(op, &operands);
         self.add_instruction(ins)
     }
@@ -243,7 +245,7 @@ mod tests {
         for tt in tests.into_iter() {
             let program = parse(tt.input);
 
-            let compiler = Compiler::new();
+            let mut compiler = Compiler::new();
             let mut err = compiler.compile(ast::Node::Program(program));
             if let Some(err) = err {
                 panic!("compiler error: {}", err.message)
