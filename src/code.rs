@@ -186,12 +186,12 @@ mod tests {
     #[test]
     fn test_instructions_string() {
         let instructions = vec![
-            make(Opcode::OpConstant, &vec![1]),
+            make(Opcode::OpAdd, &vec![]),
             make(Opcode::OpConstant, &vec![2]),
             make(Opcode::OpConstant, &vec![65535]),
         ];
 
-        let expected = r#"0000 OpConstant 1
+        let expected = r#"0000 OpAdd
 0003 OpConstant 2
 0006 OpConstant 65535
 "#;
