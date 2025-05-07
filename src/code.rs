@@ -3,9 +3,40 @@ use std::fmt::{Display, Formatter};
 #[derive(Clone, Debug)]
 pub(crate) struct Instructions(pub(crate) Vec<u8>);
 
+impl Instructions {
+    fn fmt_instruction(&self, def: Definition, operands: Vec<i32>) -> String {
+        let operand_count = def.operand_widths.len();
+
+        if operands.len() != operand_count {
+            return format!("ERROR: operand len {} does not match defined {}\n",
+            operands.len(), operand_count)
+        }
+
+        match operand_count {
+            1 => return format!("{} {}", def.name, operands[0]),
+            _ => ()
+        }
+
+        format!("ERROR: unhandled operand_count for {}\n", def.name)
+    }
+}
+
 impl Display for Instructions {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", "")
+        let mut out = vec![];
+
+        let mut i = 0;
+        while i < self.0.len() {
+            let def: Definition = self.0[i].into();
+
+            let (operands, read) = read_operands(&def, &self.0[i+1..]);
+
+            out.push(format!("{:04} {}\n", i, self.fmt_instruction(def, operands)));
+
+            i += 1 + read
+        }
+
+        write!(f, "{}", out.join(""))
     }
 }
 
@@ -82,7 +113,7 @@ pub(crate) fn make(op: Opcode, operands: &Vec<i32>) -> Vec<u8> {
     instruction
 }
 
-fn read_operands(def: Definition, ins: &[u8]) -> (Vec<i32>, usize) {
+fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<i32>, usize) {
     let mut operands = vec![];
     let mut offset = 0;
 
@@ -199,7 +230,7 @@ mod tests {
 
             let def: Definition = tt.op.into();
 
-            let (operands_read, n) = read_operands(def, &instruction[1..]);
+            let (operands_read, n) = read_operands(&def, &instruction[1..]);
             if n != tt.bytes_read {
                 panic!("n wrong. want={}, got={}", tt.bytes_read, n)
             }

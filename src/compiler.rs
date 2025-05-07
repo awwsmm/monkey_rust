@@ -104,14 +104,14 @@ mod tests {
 
         if actual.0.len() != concatted.0.len() {
             return Error::new(format!(
-                "wrong instructions length.\nwant={:?}\ngot ={:?}", concatted, actual
+                "wrong instructions length.\nwant=\n{}\ngot =\n{}", concatted, actual
             ))
         }
 
         for (i, ins) in concatted.0.iter().enumerate() {
             if actual.0.get(i) != Some(ins) {
                 return Error::new(format!(
-                    "wrong instruction at {}.\nwant={:?}\ngot ={:?}", i, concatted, actual
+                    "wrong instruction at {}.\nwant=\n{}\ngot =\n{}", i, concatted, actual
                 ))
             }
         }
