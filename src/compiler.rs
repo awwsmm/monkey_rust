@@ -1,4 +1,5 @@
 use crate::{ast, code, object};
+use std::fmt::{Display, Formatter};
 
 struct Error {
     message: String
@@ -7,6 +8,12 @@ struct Error {
 impl Error {
     fn new(message: String) -> Option<Error> {
         Some(Error{message})
+    }
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
     }
 }
 
@@ -23,7 +30,7 @@ impl Compiler {
         }
     }
 
-    fn compile(&self, node: ast::Node) -> Option<Error> {
+    fn compile(&self, node: ast::Program) -> Option<Error> {
         None
     }
 
@@ -43,6 +50,7 @@ struct Bytecode {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::object::Object;
     use crate::{lexer, parser};
 
     fn test_constants(
@@ -58,7 +66,7 @@ mod tests {
         for (i, constant) in expected.into_iter().enumerate() {
             match constant {
                 Expected::Integer(Integer(constant)) => {
-                    let err = test_integer_object(constant, actual.get(i));
+                    let err = test_integer_object(constant, actual.get(i).cloned()?);
                     if let Some(err) = err {
                         return Error::new(format!(
                             "constant {} - test_integer_object failed: {}", i, err
@@ -66,6 +74,23 @@ mod tests {
                     }
                 }
             }
+        }
+
+        None
+    }
+
+    fn test_integer_object(expected: i32, actual: object::Object) -> Option<Error> {
+        let result = match actual {
+            Object::IntegerObj(integer_obj) => integer_obj,
+            _ => return Error::new(format!(
+                "object is not Integer. got={:?}", actual
+            )),
+        };
+
+        if result.value != expected {
+            return Error::new(format!(
+                "object has wrong value. got={}, want={}", result.value, expected
+            ))
         }
 
         None
@@ -152,6 +177,7 @@ mod tests {
                 vec![1.into(), 2.into()],
                 vec![
                     code::make(code::Opcode::OpConstant, vec![0]),
+                    code::make(code::Opcode::OpConstant, vec![1]),
                 ],
             )
         ];
