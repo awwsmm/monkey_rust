@@ -46,6 +46,9 @@ pub(crate) enum Opcode {
     OpConstant,
     OpAdd,
     OpPop,
+    OpSub,
+    OpMul,
+    OpDiv,
 }
 
 impl Into<u8> for Opcode {
@@ -54,6 +57,9 @@ impl Into<u8> for Opcode {
             Opcode::OpConstant => 0,
             Opcode::OpAdd => 1,
             Opcode::OpPop => 2,
+            Opcode::OpSub => 3,
+            Opcode::OpMul => 4,
+            Opcode::OpDiv => 5,
         }
     }
 }
@@ -90,6 +96,24 @@ const OP_POP: Definition = Definition{
     operand_widths: &[],
 };
 
+const OP_SUB: Definition = Definition{
+    opcode: Opcode::OpSub,
+    name: "OpSub",
+    operand_widths: &[],
+};
+
+const OP_MUL: Definition = Definition{
+    opcode: Opcode::OpMul,
+    name: "OpMul",
+    operand_widths: &[],
+};
+
+const OP_DIV: Definition = Definition{
+    opcode: Opcode::OpDiv,
+    name: "OpDiv",
+    operand_widths: &[],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
@@ -97,6 +121,9 @@ impl Into<Definition> for u8 {
             0 => OP_CONSTANT,
             1 => OP_ADD,
             2 => OP_POP,
+            3 => OP_SUB,
+            4 => OP_MUL,
+            5 => OP_DIV,
             _ => panic!("opcode {} undefined", self)
         }
     }

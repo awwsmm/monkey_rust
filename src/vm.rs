@@ -73,6 +73,12 @@ impl VM {
                 code::Opcode::OpPop => {
                     self.pop();
                 }
+
+                code::Opcode::OpSub => (), // TODO
+
+                code::Opcode::OpMul => (), // TODO
+
+                code::Opcode::OpDiv => (), // TODO
             }
 
             ip += 1
