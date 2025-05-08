@@ -39,8 +39,8 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
             continue
         }
 
-        let stack_top = machine.stack_top();
-        write!(writer, "{}\n", stack_top.unwrap().inspect()).unwrap();
+        let last_popped = machine.last_popped_stack_elem();
+        write!(writer, "{}\n", last_popped.unwrap().inspect()).unwrap();
 
     }
 }

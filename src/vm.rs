@@ -98,7 +98,7 @@ impl VM {
         o
     }
 
-    fn last_popped_stack_elem(&self) -> Option<&object::Object> {
+    pub(crate) fn last_popped_stack_elem(&self) -> Option<&object::Object> {
         self.stack[self.sp].as_ref()
     }
 }
