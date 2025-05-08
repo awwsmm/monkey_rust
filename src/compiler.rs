@@ -253,6 +253,36 @@ mod tests {
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
+            CompilerTestCase::new(
+                "1 - 2",
+                vec![1.into(), 2.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpSub, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "1 * 2",
+                vec![1.into(), 2.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpMul, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "2 / 1",
+                vec![2.into(), 1.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpDiv, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
         ];
 
         run_compiler_tests(tests)
