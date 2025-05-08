@@ -46,6 +46,7 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
+                self.emit(code::Opcode::OpPop, vec![]);
             }
 
             ast::Node::Expression(ast::Expression::InfixExpression(node)) => {

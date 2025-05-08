@@ -67,6 +67,8 @@ impl VM {
                     let result = left_value + right_value;
                     self.push(object::Object::IntegerObj(object::IntegerObj { value: result }));
                 },
+
+                code::Opcode::OpPop => () // TODO
             }
 
             ip += 1
