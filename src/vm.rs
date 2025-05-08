@@ -162,7 +162,7 @@ mod tests {
                 panic!("vm error: {}", err)
             }
 
-            let stack_elem = vm.stack_top();
+            let stack_elem = vm.last_popped_stack_elem();
 
             if test_expected_object(tt.expected, stack_elem) {
                 should_panic = true
