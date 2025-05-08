@@ -45,6 +45,7 @@ impl Display for Instructions {
 pub(crate) enum Opcode {
     OpConstant,
     OpAdd,
+    OpPop,
 }
 
 impl Into<u8> for Opcode {
@@ -52,6 +53,7 @@ impl Into<u8> for Opcode {
         match self {
             Opcode::OpConstant => 0,
             Opcode::OpAdd => 1,
+            Opcode::OpPop => 2,
         }
     }
 }
@@ -82,12 +84,19 @@ const OP_ADD: Definition = Definition{
     operand_widths: &[],
 };
 
+const OP_POP: Definition = Definition{
+    opcode: Opcode::OpPop,
+    name: "OpPop",
+    operand_widths: &[],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
         match self {
             0 => OP_CONSTANT,
             1 => OP_ADD,
+            2 => OP_POP,
             _ => panic!("opcode {} undefined", self)
         }
     }
