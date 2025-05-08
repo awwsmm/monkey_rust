@@ -62,6 +62,9 @@ impl Compiler {
 
                 match node.operator.as_str() {
                     "+" => self.emit(code::Opcode::OpAdd, vec![]),
+                    "-" => self.emit(code::Opcode::OpSub, vec![]),
+                    "*" => self.emit(code::Opcode::OpMul, vec![]),
+                    "/" => self.emit(code::Opcode::OpDiv, vec![]),
                     _ => return Error::new(format!("unknown operator {}", node.operator))
                 };
             }
