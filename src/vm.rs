@@ -6,8 +6,9 @@ pub(crate) struct VM {
     constants: Vec<object::Object>,
     instructions: code::Instructions,
 
-    stack: [Option<Box<object::Object>>; STACK_SIZE],
-    sp: usize, // Always points to the next value. Top of stack is stack[sp-1
+    stack: [Option<object::Object>; STACK_SIZE],
+    sp: usize, // Always points to the next value. Top of stack is stack[sp-1]
+    last_popped_stack_elem: Option<object::Object>,
 }
 
 impl VM {
@@ -18,14 +19,15 @@ impl VM {
 
             stack: [const { None }; STACK_SIZE],
             sp: 0,
+            last_popped_stack_elem: None,
         }
     }
 
-    pub(crate) fn stack_top(&self) -> Option<Box<object::Object>> {
+    pub(crate) fn stack_top(&self) -> Option<&object::Object> {
         if self.sp == 0 {
             return None
         }
-        self.stack[self.sp-1].clone()
+        self.stack[self.sp-1].as_ref()
     }
 
     pub(crate) fn run(&mut self) -> Option<compiler::Error> {
@@ -47,7 +49,7 @@ impl VM {
                     let left = self.pop();
                     let left_value = match left {
                         Some(boxed_object) => {
-                            match *boxed_object {
+                            match boxed_object {
                                 object::Object::IntegerObj(integer_obj) => integer_obj.value,
                                 _ => panic!()
                             }
@@ -56,7 +58,7 @@ impl VM {
                     };
                     let right_value = match right {
                         Some(boxed_object) => {
-                            match *boxed_object {
+                            match boxed_object {
                                 object::Object::IntegerObj(integer_obj) => integer_obj.value,
                                 _ => panic!()
                             }
@@ -82,16 +84,20 @@ impl VM {
             return compiler::Error::new("stack overflow")
         }
 
-        self.stack[self.sp] = Some(Box::new(o));
+        self.stack[self.sp] = Some(o);
         self.sp += 1;
 
         None
     }
 
-    fn pop(&mut self) -> Option<Box<object::Object>> {
+    fn pop(&mut self) -> Option<object::Object> {
         let o = self.stack[self.sp-1].clone();
         self.sp -= 1;
         o
+    }
+
+    fn last_popped_stack_elem(&self) -> Option<&object::Object> {
+        self.stack[self.sp].as_ref()
     }
 }
 
@@ -106,8 +112,8 @@ mod tests {
         p.parse_program()
     }
 
-    fn test_integer_object(expected: i32, actual: Option<Box<object::Object>>) -> Option<compiler::Error> {
-        let result = match actual.clone().map(|bo| *bo) {
+    fn test_integer_object(expected: i32, actual: Option<&object::Object>) -> Option<compiler::Error> {
+        let result = match actual {
             Some(object::Object::IntegerObj(integer_obj)) => integer_obj,
             _ => return compiler::Error::new(format!(
                 "object is not Integer. got={:?}", actual
@@ -178,7 +184,7 @@ mod tests {
         }
     }
 
-    fn test_expected_object(expected: Expected, actual: Option<Box<object::Object>>) -> bool {
+    fn test_expected_object(expected: Expected, actual: Option<&object::Object>) -> bool {
         let mut should_panic = false;
 
         match expected {
