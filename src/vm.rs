@@ -1,3 +1,4 @@
+use crate::code::Opcode;
 use crate::{code, compiler, object};
 
 const STACK_SIZE: usize = 2048;
@@ -78,6 +79,24 @@ impl VM {
         }
 
         None
+    }
+
+    fn execute_integer_comparison(&mut self, op: code::Opcode, left: object::Object, right: object::Object) -> Option<compiler::Error> {
+        let left_value = match left {
+            object::Object::IntegerObj(integer_obj) => integer_obj.value,
+            _ => panic!()
+        };
+        let right_value = match right {
+            object::Object::IntegerObj(integer_obj) => integer_obj.value,
+            _ => panic!()
+        };
+
+        match op {
+            Opcode::OpEqual => self.push(native_bool_to_boolean_object(right_value == left_value)),
+            Opcode::OpNotEqual => self.push(native_bool_to_boolean_object(right_value != left_value)),
+            Opcode::OpGreaterThan => self.push(native_bool_to_boolean_object(left_value > right_value)),
+            _ => compiler::Error::new(format!("unknown operator: {:?}", op))
+        }
     }
 
     fn execute_comparison(&mut self, op: code::Opcode) -> Option<compiler::Error> {
