@@ -65,6 +65,9 @@ impl Compiler {
                     "-" => self.emit(code::Opcode::OpSub, vec![]),
                     "*" => self.emit(code::Opcode::OpMul, vec![]),
                     "/" => self.emit(code::Opcode::OpDiv, vec![]),
+                    ">" => self.emit(code::Opcode::OpGreaterThan, vec![]),
+                    "==" => self.emit(code::Opcode::OpEqual, vec![]),
+                    "!=" => self.emit(code::Opcode::OpNotEqual, vec![]),
                     _ => return Error::new(format!("unknown operator {}", node.operator))
                 };
             }
