@@ -145,6 +145,8 @@ mod tests {
                         ))
                     }
                 }
+
+                _ => () // TODO
             }
         }
 
@@ -211,13 +213,21 @@ mod tests {
 
     enum Expected {
         Integer(Integer),
+        Boolean(Boolean),
     }
 
     struct Integer(i32);
+    struct Boolean(bool);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
             Expected::Integer(Integer(self))
+        }
+    }
+
+    impl Into<Expected> for bool {
+        fn into(self) -> Expected {
+            Expected::Boolean(Boolean(self))
         }
     }
 
@@ -294,6 +304,14 @@ mod tests {
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
+        ];
+
+        run_compiler_tests(tests)
+    }
+
+    #[test]
+    fn test_boolean_expressions() {
+        let tests = vec![
             CompilerTestCase::new(
                 "true",
                 vec![],
@@ -307,6 +325,66 @@ mod tests {
                 vec![],
                 vec![
                     code::make(code::Opcode::OpFalse, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "1 > 2",
+                vec![1.into(), 2.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpGreaterThan, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "1 < 2",
+                vec![2.into(), 1.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpGreaterThan, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "1 == 2",
+                vec![1.into(), 2.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpEqual, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "1 != 2",
+                vec![1.into(), 2.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpNotEqual, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "true == false",
+                vec![],
+                vec![
+                    code::make(code::Opcode::OpTrue, &vec![]),
+                    code::make(code::Opcode::OpFalse, &vec![]),
+                    code::make(code::Opcode::OpEqual, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "true != false",
+                vec![],
+                vec![
+                    code::make(code::Opcode::OpTrue, &vec![]),
+                    code::make(code::Opcode::OpFalse, &vec![]),
+                    code::make(code::Opcode::OpNotEqual, &vec![]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
