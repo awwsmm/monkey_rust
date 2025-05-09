@@ -214,6 +214,15 @@ mod tests {
             VMTestCase::new("1", 1),
             VMTestCase::new("2", 2),
             VMTestCase::new("1 + 2", 3),
+            VMTestCase::new("1 - 2", -1),
+            VMTestCase::new("1 * 2", 2),
+            VMTestCase::new("4 / 2", 2),
+            VMTestCase::new("50 / 2 * 2 + 10 - 5", 55),
+            VMTestCase::new("5 + 5 + 5 + 5 - 10", 10),
+            VMTestCase::new("2 * 2 * 2 * 2 * 2", 32),
+            VMTestCase::new("5 * 2 + 10", 20),
+            VMTestCase::new("5 + 2 * 10", 25),
+            VMTestCase::new("5 * (2 + 10)", 60),
         ];
 
         if run_vm_tests(tests) {
