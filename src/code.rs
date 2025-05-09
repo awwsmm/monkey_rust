@@ -51,6 +51,9 @@ pub(crate) enum Opcode {
     OpDiv,
     OpTrue,
     OpFalse,
+    OpEqual,
+    OpNotEqual,
+    OpGreaterThan,
 }
 
 impl Into<u8> for Opcode {
@@ -64,6 +67,9 @@ impl Into<u8> for Opcode {
             Opcode::OpDiv => 5,
             Opcode::OpTrue => 6,
             Opcode::OpFalse => 7,
+            Opcode::OpEqual => 8,
+            Opcode::OpNotEqual => 9,
+            Opcode::OpGreaterThan => 10,
         }
     }
 }
@@ -130,6 +136,24 @@ const OP_FALSE: Definition = Definition{
     operand_widths: &[],
 };
 
+const OP_EQUAL: Definition = Definition{
+    opcode: Opcode::OpEqual,
+    name: "OpEqual",
+    operand_widths: &[],
+};
+
+const OP_NOT_EQUAL: Definition = Definition{
+    opcode: Opcode::OpNotEqual,
+    name: "OpNotEqual",
+    operand_widths: &[],
+};
+
+const OP_GREATER_THAN: Definition = Definition{
+    opcode: Opcode::OpGreaterThan,
+    name: "OpGreaterThan",
+    operand_widths: &[],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
@@ -142,6 +166,9 @@ impl Into<Definition> for u8 {
             5 => OP_DIV,
             6 => OP_TRUE,
             7 => OP_FALSE,
+            8 => OP_EQUAL,
+            9 => OP_NOT_EQUAL,
+            10 => OP_GREATER_THAN,
             _ => panic!("opcode {} undefined", self)
         }
     }
