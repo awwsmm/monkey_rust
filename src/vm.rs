@@ -1,3 +1,4 @@
+use crate::object::ObjectLike;
 use crate::{code, compiler, object};
 
 const STACK_SIZE: usize = 2048;
@@ -62,6 +63,11 @@ impl VM {
                         return Some(err)
                     }
 
+                code::Opcode::OpMinus =>
+                    if let Some(err) = self.execute_minus_operator() {
+                        return Some(err)
+                    }
+
                 code::Opcode::OpPop => {
                     self.pop();
                 }
@@ -83,6 +89,22 @@ impl VM {
         }
 
         None
+    }
+
+    fn execute_minus_operator(&mut self) -> Option<compiler::Error> {
+        let operand = self.pop();
+
+        if operand.as_ref()?.object_type() != object::ObjectType::IntegerObj {
+            return compiler::Error::new(format!(
+                "unsupported type for negation: {:?}", operand.as_ref()?.object_type()
+            ))
+        }
+
+        let value = match operand {
+            Some(object::Object::IntegerObj(integer_obj)) => integer_obj.value,
+            _ => panic!(),
+        };
+        self.push(object::Object::IntegerObj(object::IntegerObj{ value: -value }))
     }
 
     fn execute_bang_operator(&mut self) -> Option<compiler::Error> {
