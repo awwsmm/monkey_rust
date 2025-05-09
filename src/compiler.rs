@@ -50,6 +50,21 @@ impl Compiler {
             }
 
             ast::Node::Expression(ast::Expression::InfixExpression(node)) => {
+                if node.operator == "<" {
+                    let err = self.compile(ast::Node::Expression(*node.right?));
+                    if err.is_some() {
+                        return err
+                    }
+
+                    let err = self.compile(ast::Node::Expression(*node.left?));
+                    if err.is_some() {
+                        return err
+                    }
+
+                    self.emit(code::Opcode::OpGreaterThan, vec![]);
+                    return None
+                }
+
                 let err = self.compile(ast::Node::Expression(*node.left?));
                 if err.is_some() {
                     return err
