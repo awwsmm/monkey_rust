@@ -75,6 +75,14 @@ impl Compiler {
                 self.emit(code::Opcode::OpConstant, vec![constant]);
             }
 
+            ast::Node::Expression(ast::Expression::Boolean(node)) => {
+                if node.value {
+                    self.emit(code::Opcode::OpTrue, vec![])
+                } else {
+                    self.emit(code::Opcode::OpFalse, vec![])
+                };
+            }
+
             _ => ()
         }
 
