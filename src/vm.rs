@@ -60,6 +60,23 @@ impl VM {
         None
     }
 
+    fn execute_binary_operation(&mut self, op: code::Opcode) -> Option<compiler::Error> {
+        let right = self.pop();
+        let left = self.pop();
+
+        let left_type = left.as_ref()?.inner().object_type();
+        let right_type = right.as_ref()?.inner().object_type();
+
+        if left_type == object::ObjectType::IntegerObj && right_type == object::ObjectType::IntegerObj {
+            return self.execute_binary_integer_operation(op, left, right)
+        }
+
+        compiler::Error::new(format!(
+            "unsupported types for binary operation: {:?} {:?}",
+            left_type, right_type
+        ))
+    }
+
     fn push(&mut self, o: object::Object) -> Option<compiler::Error> {
         if self.sp >= STACK_SIZE {
             return compiler::Error::new("stack overflow")
