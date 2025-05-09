@@ -227,10 +227,35 @@ mod tests {
                 }
             }
 
+            Expected::Boolean(Boolean(expected)) => {
+                let err = test_boolean_object(expected, actual);
+                if let Some(err) = err {
+                    should_panic = true;
+                    eprintln!("test_boolean_object failed: {}", err)
+                }
+            }
+
             _ => () // TODO
         }
 
         should_panic
+    }
+
+    fn test_boolean_object(expected: bool, actual: Option<&object::Object>) -> Option<compiler::Error> {
+        let result = match actual {
+            Some(object::Object::BooleanObj(boolean_obj)) => boolean_obj,
+            _ => return compiler::Error::new(format!(
+                "object is not Boolean. got={:?}", actual
+            ))
+        };
+
+        if result.value != expected {
+            return compiler::Error::new(format!(
+                "object has wrong value. got={}, want={}", result.value, expected
+            ))
+        };
+
+        None
     }
 
     #[test]
