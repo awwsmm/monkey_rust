@@ -37,48 +37,21 @@ impl VM {
 
             match op {
                 code::Opcode::OpConstant => {
-                    let const_index = code::read_u16(&self.instructions.0[ip+1..]);
+                    let const_index = code::read_u16(&self.instructions.0[ip + 1..]);
                     ip += 2;
                     if let Some(err) = self.push(self.constants[const_index as usize].clone()) {
                         return Some(err)
                     }
                 }
 
-                code::Opcode::OpAdd => {
-                    let right = self.pop();
-                    let left = self.pop();
-                    let left_value = match left {
-                        Some(boxed_object) => {
-                            match boxed_object {
-                                object::Object::IntegerObj(integer_obj) => integer_obj.value,
-                                _ => panic!()
-                            }
-                        }
-                        _ => panic!()
-                    };
-                    let right_value = match right {
-                        Some(boxed_object) => {
-                            match boxed_object {
-                                object::Object::IntegerObj(integer_obj) => integer_obj.value,
-                                _ => panic!()
-                            }
-                        }
-                        _ => panic!()
-                    };
-
-                    let result = left_value + right_value;
-                    self.push(object::Object::IntegerObj(object::IntegerObj { value: result }));
-                }
+                code::Opcode::OpAdd | code::Opcode::OpSub | code::Opcode::OpMul | code::Opcode::OpDiv =>
+                    if let Some(err) = self.execute_binary_operation(op) {
+                        return Some(err)
+                    }
 
                 code::Opcode::OpPop => {
                     self.pop();
                 }
-
-                code::Opcode::OpSub => (), // TODO
-
-                code::Opcode::OpMul => (), // TODO
-
-                code::Opcode::OpDiv => (), // TODO
             }
 
             ip += 1

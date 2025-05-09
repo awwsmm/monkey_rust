@@ -163,7 +163,7 @@ fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<usize>, usize) {
     let mut operands = vec![];
     let mut offset = 0;
 
-    for (i, width) in def.operand_widths.iter().enumerate() {
+    for width in def.operand_widths.iter() {
         match *width {
             2 => operands.push(read_u16(&ins[offset..]) as usize),
             _ => panic!()
