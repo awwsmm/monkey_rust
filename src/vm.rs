@@ -298,6 +298,23 @@ mod tests {
         let tests = vec![
             VMTestCase::new("true", true),
             VMTestCase::new("false", false),
+		    VMTestCase::new("1 < 2", true),
+		    VMTestCase::new("1 > 2", false),
+		    VMTestCase::new("1 < 1", false),
+		    VMTestCase::new("1 > 1", false),
+		    VMTestCase::new("1 == 1", true),
+		    VMTestCase::new("1 != 1", false),
+		    VMTestCase::new("1 == 2", false),
+		    VMTestCase::new("1 != 2", true),
+		    VMTestCase::new("true == true", true),
+		    VMTestCase::new("false == false", true),
+		    VMTestCase::new("true == false", false),
+		    VMTestCase::new("true != false", true),
+		    VMTestCase::new("false != true", true),
+		    VMTestCase::new("(1 < 2) == true", true),
+		    VMTestCase::new("(1 < 2) == false", false),
+		    VMTestCase::new("(1 > 2) == true", false),
+		    VMTestCase::new("(1 > 2) == false", true),
         ];
 
         if run_vm_tests(tests) {
