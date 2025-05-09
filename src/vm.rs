@@ -80,6 +80,26 @@ impl VM {
         None
     }
 
+    fn execute_comparison(&mut self, op: code::Opcode) -> Option<compiler::Error> {
+        let right = self.pop();
+        let left = self.pop();
+
+        let left_type = left.as_ref()?.inner().object_type();
+        let right_type = right.as_ref()?.inner().object_type();
+
+        if left_type == object::ObjectType::IntegerObj && right_type == object::ObjectType::IntegerObj {
+            return self.execute_integer_comparison(op, left?, right?)
+        }
+
+        match op {
+            code::Opcode::OpEqual => self.push(native_bool_to_boolean_object(right == left)),
+            code::Opcode::OpNotEqual => self.push(native_bool_to_boolean_object(right != left)),
+            _ => compiler::Error::new(format!(
+                "unknown operator: {:?} ({:?} {:?})", op, left_type, right_type
+            ))
+        }
+    }
+
     fn execute_binary_operation(&mut self, op: code::Opcode) -> Option<compiler::Error> {
         let right = self.pop();
         let left = self.pop();
