@@ -56,6 +56,16 @@ impl VM {
                     self.pop();
                 }
 
+                code::Opcode::OpTrue =>
+                    if let Some(err) = self.push(TRUE) {
+                        return Some(err)
+                    }
+
+                code::Opcode::OpFalse =>
+                    if let Some(err) = self.push(FALSE) {
+                        return Some(err)
+                    }
+
                 _ => () // TODO
             }
 
