@@ -11,6 +11,9 @@ pub(crate) struct VM {
     last_popped_stack_elem: Option<object::Object>,
 }
 
+const TRUE: object::Object = object::Object::BooleanObj(object::BooleanObj{ value: true });
+const FALSE: object::Object = object::Object::BooleanObj(object::BooleanObj{ value: false });
+
 impl VM {
     pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
         Self {
