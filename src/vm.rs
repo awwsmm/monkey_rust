@@ -1,4 +1,3 @@
-use crate::code::Opcode;
 use crate::{code, compiler, object};
 
 const STACK_SIZE: usize = 2048;
@@ -81,6 +80,14 @@ impl VM {
         None
     }
 
+    fn native_bool_to_boolean_object(input: bool) -> object::Object {
+        if input {
+            TRUE
+        } else {
+            FALSE
+        }
+    }
+
     fn execute_integer_comparison(&mut self, op: code::Opcode, left: object::Object, right: object::Object) -> Option<compiler::Error> {
         let left_value = match left {
             object::Object::IntegerObj(integer_obj) => integer_obj.value,
@@ -92,9 +99,9 @@ impl VM {
         };
 
         match op {
-            Opcode::OpEqual => self.push(native_bool_to_boolean_object(right_value == left_value)),
-            Opcode::OpNotEqual => self.push(native_bool_to_boolean_object(right_value != left_value)),
-            Opcode::OpGreaterThan => self.push(native_bool_to_boolean_object(left_value > right_value)),
+            code::Opcode::OpEqual => self.push(Self::native_bool_to_boolean_object(right_value == left_value)),
+            code::Opcode::OpNotEqual => self.push(Self::native_bool_to_boolean_object(right_value != left_value)),
+            code::Opcode::OpGreaterThan => self.push(Self::native_bool_to_boolean_object(left_value > right_value)),
             _ => compiler::Error::new(format!("unknown operator: {:?}", op))
         }
     }
@@ -111,8 +118,8 @@ impl VM {
         }
 
         match op {
-            code::Opcode::OpEqual => self.push(native_bool_to_boolean_object(right == left)),
-            code::Opcode::OpNotEqual => self.push(native_bool_to_boolean_object(right != left)),
+            code::Opcode::OpEqual => self.push(Self::native_bool_to_boolean_object(right == left)),
+            code::Opcode::OpNotEqual => self.push(Self::native_bool_to_boolean_object(right != left)),
             _ => compiler::Error::new(format!(
                 "unknown operator: {:?} ({:?} {:?})", op, left_type, right_type
             ))
