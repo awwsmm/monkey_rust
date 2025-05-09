@@ -337,6 +337,10 @@ mod tests {
             VMTestCase::new("5 * 2 + 10", 20),
             VMTestCase::new("5 + 2 * 10", 25),
             VMTestCase::new("5 * (2 + 10)", 60),
+		    VMTestCase::new("-5", -5),
+		    VMTestCase::new("-10", -10),
+		    VMTestCase::new("-50 + 100 + -50", 0),
+		    VMTestCase::new("(5 + 10 * 2 + 15 / 3) * 2 + -10", 50),
         ];
 
         if run_vm_tests(tests) {
@@ -366,6 +370,12 @@ mod tests {
 		    VMTestCase::new("(1 < 2) == false", false),
 		    VMTestCase::new("(1 > 2) == true", false),
 		    VMTestCase::new("(1 > 2) == false", true),
+		    VMTestCase::new("!true", false),
+		    VMTestCase::new("!false", true),
+		    VMTestCase::new("!5", false),
+		    VMTestCase::new("!!true", true),
+		    VMTestCase::new("!!false", false),
+		    VMTestCase::new("!!5", true),
         ];
 
         if run_vm_tests(tests) {
