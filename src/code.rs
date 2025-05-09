@@ -41,7 +41,7 @@ impl Display for Instructions {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub(crate) enum Opcode {
     OpConstant,
     OpAdd,

@@ -68,13 +68,36 @@ impl VM {
         let right_type = right.as_ref()?.inner().object_type();
 
         if left_type == object::ObjectType::IntegerObj && right_type == object::ObjectType::IntegerObj {
-            return self.execute_binary_integer_operation(op, left, right)
+            return self.execute_binary_integer_operation(op, left?, right?)
         }
 
         compiler::Error::new(format!(
             "unsupported types for binary operation: {:?} {:?}",
             left_type, right_type
         ))
+    }
+
+    fn execute_binary_integer_operation(&mut self, op: code::Opcode, left: object::Object, right: object::Object) -> Option<compiler::Error> {
+        let left_value = match left {
+            object::Object::IntegerObj(integer_obj) => integer_obj.value,
+            _ => panic!()
+        };
+        let right_value = match right {
+            object::Object::IntegerObj(integer_obj) => integer_obj.value,
+            _ => panic!()
+        };
+
+        let result = match op {
+            code::Opcode::OpAdd => left_value + right_value,
+            code::Opcode::OpSub => left_value - right_value,
+            code::Opcode::OpMul => left_value * right_value,
+            code::Opcode::OpDiv => left_value / right_value,
+            _ => return compiler::Error::new(format!(
+                "unknown integer operator: {:?}", op
+            ))
+        };
+
+        self.push(object::Object::IntegerObj(object::IntegerObj { value: result }))
     }
 
     fn push(&mut self, o: object::Object) -> Option<compiler::Error> {
