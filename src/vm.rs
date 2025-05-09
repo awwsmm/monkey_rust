@@ -52,6 +52,8 @@ impl VM {
                 code::Opcode::OpPop => {
                     self.pop();
                 }
+
+                _ => () // TODO
             }
 
             ip += 1
