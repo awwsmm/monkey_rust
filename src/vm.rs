@@ -57,6 +57,11 @@ impl VM {
                         return Some(err)
                     }
 
+                code::Opcode::OpBang =>
+                    if let Some(err) = self.execute_bang_operator() {
+                        return Some(err)
+                    }
+
                 code::Opcode::OpPop => {
                     self.pop();
                 }
@@ -78,6 +83,16 @@ impl VM {
         }
 
         None
+    }
+
+    fn execute_bang_operator(&mut self) -> Option<compiler::Error> {
+        let operand = self.pop();
+
+        match operand {
+            Some(TRUE) => self.push(FALSE),
+            Some(FALSE) => self.push(TRUE),
+            _ => self.push(FALSE),
+        }
     }
 
     fn native_bool_to_boolean_object(input: bool) -> object::Object {
