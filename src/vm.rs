@@ -197,13 +197,21 @@ mod tests {
 
     enum Expected {
         Integer(Integer),
+        Boolean(Boolean),
     }
 
     struct Integer(i32);
+    struct Boolean(bool);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
             Expected::Integer(Integer(self))
+        }
+    }
+
+    impl Into<Expected> for bool {
+        fn into(self) -> Expected {
+            Expected::Boolean(Boolean(self))
         }
     }
 
@@ -218,6 +226,8 @@ mod tests {
                     eprintln!("test_integer_object failed: {}", err)
                 }
             }
+
+            _ => () // TODO
         }
 
         should_panic
@@ -238,6 +248,18 @@ mod tests {
             VMTestCase::new("5 * 2 + 10", 20),
             VMTestCase::new("5 + 2 * 10", 25),
             VMTestCase::new("5 * (2 + 10)", 60),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_boolean_expressions() {
+        let tests = vec![
+            VMTestCase::new("true", true),
+            VMTestCase::new("false", false),
         ];
 
         if run_vm_tests(tests) {
