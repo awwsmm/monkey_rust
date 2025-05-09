@@ -49,6 +49,19 @@ impl Compiler {
                 self.emit(code::Opcode::OpPop, vec![]);
             }
 
+            ast::Node::Expression(ast::Expression::PrefixExpression(node)) => {
+                let err = self.compile(ast::Node::Expression(*node.right?));
+                if err.is_some() {
+                    return err
+                }
+
+                match node.operator.as_str() {
+                    "!" => self.emit(code::Opcode::OpBang, vec![]),
+                    "-" => self.emit(code::Opcode::OpMinus, vec![]),
+                    _ => return Error::new(format!("unknown operator {}", node.operator)),
+                };
+            }
+
             ast::Node::Expression(ast::Expression::InfixExpression(node)) => {
                 if node.operator == "<" {
                     let err = self.compile(ast::Node::Expression(*node.right?));
