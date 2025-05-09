@@ -415,6 +415,15 @@ mod tests {
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
+            CompilerTestCase::new(
+                "!true",
+                vec![],
+                vec![
+                    code::make(code::Opcode::OpTrue, &vec![]),
+                    code::make(code::Opcode::OpBang, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
         ];
 
         run_compiler_tests(tests)
