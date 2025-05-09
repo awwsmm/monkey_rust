@@ -52,6 +52,11 @@ impl VM {
                         return Some(err)
                     }
 
+                code::Opcode::OpEqual | code::Opcode::OpNotEqual | code::Opcode::OpGreaterThan =>
+                    if let Some(err) = self.execute_comparison(op) {
+                        return Some(err)
+                    }
+
                 code::Opcode::OpPop => {
                     self.pop();
                 }
