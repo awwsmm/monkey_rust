@@ -49,6 +49,13 @@ impl Compiler {
                 self.emit(code::Opcode::OpPop, vec![]);
             }
 
+            ast::Node::Expression(ast::Expression::IfExpression(node)) => {
+                let err = self.compile(ast::Node::Expression(*node.condition?));
+                if err.is_some() {
+                    return err
+                }
+            }
+
             ast::Node::Expression(ast::Expression::PrefixExpression(node)) => {
                 let err = self.compile(ast::Node::Expression(*node.right?));
                 if err.is_some() {
