@@ -54,6 +54,13 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
+
+                self.emit(code::Opcode::OpJumpNotTruthy, vec![9999]);
+
+                let err = self.compile(ast::Node::Statement(ast::Statement::BlockStatement(node.consequence?)));
+                if err.is_some() {
+                    return err
+                }
             }
 
             ast::Node::Expression(ast::Expression::PrefixExpression(node)) => {
