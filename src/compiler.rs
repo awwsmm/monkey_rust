@@ -465,4 +465,30 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_comditionals() {
+        let tests = vec![
+            CompilerTestCase::new(
+                "if (true) { 10 }; 3333;",
+                vec![10.into(), 3333.into()],
+                vec![
+                    // 0000
+                    code::make(code::Opcode::OpTrue, &vec![]),
+                    // 0001
+                    code::make(code::Opcode::OpJumpNotTruthy, &vec![7]),
+                    // 0004
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    // 0007
+                    code::make(code::Opcode::OpPop, &vec![]),
+                    // 0008
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    // 0011
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
 }
