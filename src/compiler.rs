@@ -77,7 +77,7 @@ impl Compiler {
                     return err
                 }
 
-                self.emit(code::Opcode::OpJumpNotTruthy, vec![9999]);
+                let jump_not_truthy_pos = self.emit(code::Opcode::OpJumpNotTruthy, vec![9999]);
 
                 let err = self.compile(ast::Node::Statement(ast::Statement::BlockStatement(node.consequence?)));
                 if err.is_some() {
@@ -87,6 +87,9 @@ impl Compiler {
                 if self.last_instruction_is_pop() {
                     self.remove_last_pop()
                 }
+
+                let after_consequence_pos = self.instructions.0.len();
+                self.change_operand(jump_not_truthy_pos, after_consequence_pos)
             }
 
             ast::Node::Expression(ast::Expression::PrefixExpression(node)) => {
