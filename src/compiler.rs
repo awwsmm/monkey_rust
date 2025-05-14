@@ -564,6 +564,28 @@ mod tests {
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
+            CompilerTestCase::new(
+                "if (true) { 10 } else { 20 }; 3333;",
+                vec![10.into(), 20.into(), 3333.into()],
+                vec![
+                    // 0000
+                    code::make(code::Opcode::OpTrue, &vec![]),
+                    // 0001
+                    code::make(code::Opcode::OpJumpNotTruthy, &vec![10]),
+                    // 0004
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    // 0007
+                    code::make(code::Opcode::OpJump, &vec![13]),
+                    // 0010
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    // 0013
+                    code::make(code::Opcode::OpPop, &vec![]),
+                    // 0014
+                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    // 0017
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
         ];
 
         run_compiler_tests(tests)
