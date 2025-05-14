@@ -1,4 +1,5 @@
 use crate::{ast, code, object};
+use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
 
 pub(crate) struct Error {
@@ -157,6 +158,15 @@ impl Compiler {
         }
 
         None
+    }
+
+    fn last_instruction_is_pop(&mut self) -> bool {
+        self.last_instruction.opcode == Some(code::Opcode::OpPop)
+    }
+
+    fn remove_last_pop(&mut self) {
+        self.instructions.0.truncate(self.last_instruction.position);
+        self.last_instruction = self.previous_instruction;
     }
 
     pub(crate) fn bytecode(&self) -> Bytecode {
