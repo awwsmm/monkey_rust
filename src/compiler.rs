@@ -88,8 +88,10 @@ impl Compiler {
                     self.remove_last_pop()
                 }
 
-                let after_consequence_pos = self.instructions.0.len();
-                self.change_operand(jump_not_truthy_pos, after_consequence_pos)
+                if node.alternative.is_none() {
+                    let after_consequence_pos = self.instructions.0.len();
+                    self.change_operand(jump_not_truthy_pos, after_consequence_pos)
+                }
             }
 
             ast::Node::Expression(ast::Expression::PrefixExpression(node)) => {
