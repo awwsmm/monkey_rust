@@ -17,6 +17,7 @@ impl Display for Error {
     }
 }
 
+#[derive(Clone, Copy)]
 struct EmittedInstruction {
     opcode: Option<code::Opcode>,
     position: usize,
@@ -168,7 +169,19 @@ impl Compiler {
 
     fn emit(&mut self, op: code::Opcode, operands: Vec<usize>) -> usize {
         let ins = code::make(op, &operands);
-        self.add_instruction(ins)
+        let pos = self.add_instruction(ins);
+
+        self.set_last_instruction(op, pos);
+
+        pos
+    }
+
+    fn set_last_instruction(&mut self, op: code::Opcode, pos: usize) {
+        let previous = self.last_instruction;
+        let last = EmittedInstruction{ opcode: Some(op), position: pos };
+
+        self.previous_instruction = previous;
+        self.last_instruction = last;
     }
 
     fn add_instruction(&mut self, ins: Vec<u8>) -> usize {
