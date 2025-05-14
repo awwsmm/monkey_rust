@@ -17,9 +17,17 @@ impl Display for Error {
     }
 }
 
+struct EmittedInstruction {
+    opcode: Option<code::Opcode>,
+    position: usize,
+}
+
 pub(crate) struct Compiler {
     instructions: code::Instructions,
     constants: Vec<object::Object>,
+
+    last_instruction: EmittedInstruction,
+    previous_instruction: EmittedInstruction,
 }
 
 impl Compiler {
@@ -27,6 +35,9 @@ impl Compiler {
         Self {
             instructions: code::Instructions(vec![]),
             constants: vec![],
+
+            last_instruction: EmittedInstruction{ opcode: None, position: 0 },
+            previous_instruction: EmittedInstruction{ opcode: None, position: 0 },
         }
     }
 
