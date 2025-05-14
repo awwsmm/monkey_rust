@@ -205,6 +205,12 @@ impl Compiler {
         }
         pos_new_instruction
     }
+
+    fn replace_instructions(&mut self, pos: usize, new_instruction: Vec<u8>) {
+        for (i, byte) in new_instruction.iter().enumerate() {
+            self.instructions.0[pos+i] = *byte;
+        }
+    }
 }
 
 pub(crate) struct Bytecode {
