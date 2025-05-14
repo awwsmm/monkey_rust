@@ -211,6 +211,13 @@ impl Compiler {
             self.instructions.0[pos+i] = *byte;
         }
     }
+
+    fn change_operand(&mut self, op_pos: usize, operand: usize) {
+        let op: code::Opcode = self.instructions.0[op_pos].into();
+        let new_instruction = code::make(op, &vec![operand]);
+
+        self.replace_instructions(op_pos, new_instruction)
+    }
 }
 
 pub(crate) struct Bytecode {
