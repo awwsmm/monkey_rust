@@ -82,6 +82,10 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
+
+                if self.last_instruction_is_pop() {
+                    self.remove_last_pop()
+                }
             }
 
             ast::Node::Expression(ast::Expression::PrefixExpression(node)) => {
