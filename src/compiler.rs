@@ -89,7 +89,13 @@ impl Compiler {
                 }
 
                 if node.alternative.is_none() {
-                    let after_consequence_pos = self.instructions.0.len();
+                    let after_consequence_pos = self.instructions.len();
+                    self.change_operand(jump_not_truthy_pos, after_consequence_pos)
+                } else {
+                    // Emit an `OpJump` with a bogus value
+                    self.emit(code::Opcode::OpJump, vec![9999]);
+
+                    let after_consequence_pos = self.instructions.len();
                     self.change_operand(jump_not_truthy_pos, after_consequence_pos)
                 }
             }
@@ -170,7 +176,7 @@ impl Compiler {
     }
 
     fn remove_last_pop(&mut self) {
-        self.instructions.0.truncate(self.last_instruction.position);
+        self.instructions.truncate(self.last_instruction.position);
         self.last_instruction = self.previous_instruction;
     }
 
@@ -204,21 +210,21 @@ impl Compiler {
     }
 
     fn add_instruction(&mut self, ins: Vec<u8>) -> usize {
-        let pos_new_instruction = self.instructions.0.len();
+        let pos_new_instruction = self.instructions.len();
         for byte in ins.iter() {
-            self.instructions.0.push(*byte)
+            self.instructions.push(*byte)
         }
         pos_new_instruction
     }
 
     fn replace_instructions(&mut self, pos: usize, new_instruction: Vec<u8>) {
         for (i, byte) in new_instruction.iter().enumerate() {
-            self.instructions.0[pos+i] = *byte;
+            self.instructions[pos+i] = *byte;
         }
     }
 
     fn change_operand(&mut self, op_pos: usize, operand: usize) {
-        let op: code::Opcode = self.instructions.0[op_pos].into();
+        let op: code::Opcode = self.instructions[op_pos].into();
         let new_instruction = code::make(op, &vec![operand]);
 
         self.replace_instructions(op_pos, new_instruction)
@@ -286,14 +292,14 @@ mod tests {
     ) -> Option<Error> {
         let concatted = concat_instructions(expected);
 
-        if actual.0.len() != concatted.0.len() {
+        if actual.len() != concatted.len() {
             return Error::new(format!(
                 "wrong instructions length.\nwant=\n{}\ngot =\n{}", concatted, actual
             ))
         }
 
-        for (i, ins) in concatted.0.iter().enumerate() {
-            if actual.0.get(i) != Some(ins) {
+        for (i, ins) in concatted.iter().enumerate() {
+            if actual.get(i) != Some(ins) {
                 return Error::new(format!(
                     "wrong instruction at {}.\nwant=\n{}\ngot =\n{}", i, concatted, actual
                 ))
@@ -308,7 +314,7 @@ mod tests {
 
         for ins in s.into_iter() {
             for byte in ins.0 {
-                out.0.push(byte)
+                out.push(byte)
             }
         }
 

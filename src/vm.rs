@@ -36,12 +36,12 @@ impl VM {
 
     pub(crate) fn run(&mut self) -> Option<compiler::Error> {
         let mut ip = 0;
-        while ip < self.instructions.0.len() {
-            let op: code::Opcode = self.instructions.0[ip].into();
+        while ip < self.instructions.len() {
+            let op: code::Opcode = self.instructions[ip].into();
 
             match op {
                 code::Opcode::OpConstant => {
-                    let const_index = code::read_u16(&self.instructions.0[ip + 1..]);
+                    let const_index = code::read_u16(&self.instructions[ip + 1..]);
                     ip += 2;
                     if let Some(err) = self.push(self.constants[const_index as usize].clone()) {
                         return Some(err)

@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+use std::ops::{Deref, DerefMut};
 
 #[derive(Clone, Debug)]
 pub(crate) struct Instructions(pub(crate) Vec<u8>);
@@ -22,15 +23,29 @@ impl Instructions {
     }
 }
 
+impl Deref for Instructions {
+    type Target = Vec<u8>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Instructions {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl Display for Instructions {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut out = vec![];
 
         let mut i = 0;
-        while i < self.0.len() {
-            let def: Definition = self.0[i].into();
+        while i < self.len() {
+            let def: Definition = self[i].into();
 
-            let (operands, read) = read_operands(&def, &self.0[i+1..]);
+            let (operands, read) = read_operands(&def, &self[i+1..]);
 
             out.push(format!("{:04} {}\n", i, self.fmt_instruction(def, operands)));
 
@@ -316,7 +331,7 @@ mod tests {
         let mut concatted = Instructions(vec![]);
         for ins in instructions.iter() {
             for byte in ins.iter() {
-                concatted.0.push(*byte)
+                concatted.push(*byte)
             }
         }
 
