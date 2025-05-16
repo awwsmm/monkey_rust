@@ -322,6 +322,7 @@ mod tests {
     enum Expected {
         Integer(Integer),
         Boolean(Boolean),
+        Null,
     }
 
     struct Integer(i32);
@@ -358,6 +359,11 @@ mod tests {
                     eprintln!("test_boolean_object failed: {}", err)
                 }
             }
+
+            Expected::Null =>
+                if actual != None {
+                    eprintln!("object is not None: {:?}", actual)
+                }
 
             _ => () // TODO
         }
@@ -453,6 +459,8 @@ mod tests {
             VMTestCase::new("if (1 < 2) { 10 }", 10),
             VMTestCase::new("if (1 < 2) { 10 } else { 20 }", 10),
             VMTestCase::new("if (1 > 2) { 10 } else { 20 }", 20),
+            VMTestCase::new("if (1 > 2) { 10 }", Expected::Null),
+            VMTestCase::new("if (false) { 10 }", Expected::Null),
         ];
 
         if run_vm_tests(tests) {
