@@ -73,6 +73,7 @@ pub(crate) enum Opcode {
     OpBang,
     OpJumpNotTruthy,
     OpJump,
+    OpNull,
 }
 
 impl Into<u8> for Opcode {
@@ -93,6 +94,7 @@ impl Into<u8> for Opcode {
             Opcode::OpBang => 12,
             Opcode::OpJumpNotTruthy => 13,
             Opcode::OpJump => 14,
+            Opcode::OpNull => 15,
         }
     }
 }
@@ -201,6 +203,12 @@ const OP_JUMP: Definition = Definition{
     operand_widths: &[2],
 };
 
+const OP_NULL: Definition = Definition{
+    opcode: Opcode::OpNull,
+    name: "OpNull",
+    operand_widths: &[],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
@@ -220,6 +228,7 @@ impl Into<Definition> for u8 {
             12 => OP_BANG,
             13 => OP_JUMP_NOT_TRUTHY,
             14 => OP_JUMP,
+            15 => OP_NULL,
             _ => panic!("opcode {} undefined", self)
         }
     }
