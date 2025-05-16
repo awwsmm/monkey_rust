@@ -419,4 +419,21 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_conditionals() {
+        let tests = vec![
+            VMTestCase::new("if (true) { 10 }", 10),
+            VMTestCase::new("if (true) { 10 } else { 20 }", 10),
+            VMTestCase::new("if (false) { 10 } else { 20 }", 20),
+            VMTestCase::new("if (1) { 10 }", 10),
+            VMTestCase::new("if (1 < 2) { 10 }", 10),
+            VMTestCase::new("if (1 < 2) { 10 } else { 20 }", 10),
+            VMTestCase::new("if (1 > 2) { 10 } else { 20 }", 20),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
