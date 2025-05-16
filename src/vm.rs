@@ -14,6 +14,7 @@ pub(crate) struct VM {
 
 const TRUE: object::Object = object::Object::BooleanObj(object::BooleanObj{ value: true });
 const FALSE: object::Object = object::Object::BooleanObj(object::BooleanObj{ value: false });
+const NULL: object::Object = object::Object::NullObj(object::NullObj{});
 
 impl VM {
     pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
