@@ -53,6 +53,16 @@ impl VM {
                     ip = pos - 1
                 }
 
+                code::Opcode::OpJumpNotTruthy => {
+                    let pos = code::read_u16(&self.instructions[ip + 1..]) as usize;
+                    ip += 2;
+
+                    let condition = self.pop();
+                    if !Self::is_truthy(condition) {
+                        ip = pos - 1
+                    }
+                }
+
                 code::Opcode::OpAdd | code::Opcode::OpSub | code::Opcode::OpMul | code::Opcode::OpDiv =>
                     if let Some(err) = self.execute_binary_operation(op) {
                         return Some(err)
@@ -94,6 +104,13 @@ impl VM {
         }
 
         None
+    }
+
+    fn is_truthy(obj: Option<object::Object>) -> bool {
+        match obj {
+            Some(object::Object::BooleanObj(obj)) => obj.value,
+            _ => true
+        }
     }
 
     fn execute_minus_operator(&mut self) -> Option<compiler::Error> {
