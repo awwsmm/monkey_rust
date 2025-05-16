@@ -48,6 +48,11 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpJump => {
+                    let pos = code::read_u16(&self.instructions[ip + 1..]) as usize;
+                    ip = pos - 1
+                }
+
                 code::Opcode::OpAdd | code::Opcode::OpSub | code::Opcode::OpMul | code::Opcode::OpDiv =>
                     if let Some(err) = self.execute_binary_operation(op) {
                         return Some(err)
