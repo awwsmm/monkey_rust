@@ -573,14 +573,18 @@ mod tests {
                     // 0000
                     code::make(code::Opcode::OpTrue, &vec![]),
                     // 0001
-                    code::make(code::Opcode::OpJumpNotTruthy, &vec![7]),
+                    code::make(code::Opcode::OpJumpNotTruthy, &vec![10]),
                     // 0004
                     code::make(code::Opcode::OpConstant, &vec![0]),
                     // 0007
-                    code::make(code::Opcode::OpPop, &vec![]),
-                    // 0008
-                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpJump, &vec![11]),
+                    // 0010
+                    code::make(code::Opcode::OpNull, &vec![]),
                     // 0011
+                    code::make(code::Opcode::OpPop, &vec![]),
+                    // 0012
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    // 0015
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
