@@ -88,16 +88,15 @@ impl Compiler {
                     self.remove_last_pop()
                 }
 
+                // Emit an `OpJump` with a bogus value
+                let jump_pos = self.emit(code::Opcode::OpJump, vec![9999]);
+
+                let after_consequence_pos = self.instructions.len();
+                self.change_operand(jump_not_truthy_pos, after_consequence_pos);
+
                 if node.alternative.is_none() {
-                    let after_consequence_pos = self.instructions.len();
-                    self.change_operand(jump_not_truthy_pos, after_consequence_pos)
+                    self.emit(code::Opcode::OpNull, vec![]);
                 } else {
-                    // Emit an `OpJump` with a bogus value
-                    let jump_pos = self.emit(code::Opcode::OpJump, vec![9999]);
-
-                    let after_consequence_pos = self.instructions.len();
-                    self.change_operand(jump_not_truthy_pos, after_consequence_pos);
-
                     let err = self.compile(ast::Node::Statement(ast::Statement::BlockStatement(node.alternative?)));
                     if err.is_some() {
                         return err
@@ -106,10 +105,10 @@ impl Compiler {
                     if self.last_instruction_is_pop() {
                         self.remove_last_pop()
                     }
-
-                    let after_alternative_pos = self.instructions.len();
-                    self.change_operand(jump_pos, after_alternative_pos);
                 }
+
+                let after_alternative_pos = self.instructions.len();
+                self.change_operand(jump_pos, after_alternative_pos)
             }
 
             ast::Node::Expression(ast::Expression::PrefixExpression(node)) => {
