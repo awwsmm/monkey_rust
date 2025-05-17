@@ -2,6 +2,7 @@ use crate::object::ObjectLike;
 use crate::{code, compiler, object};
 
 const STACK_SIZE: usize = 2048;
+const GLOBALS_SIZE: usize = 65536;
 
 pub(crate) struct VM {
     constants: Vec<object::Object>,
@@ -9,7 +10,8 @@ pub(crate) struct VM {
 
     stack: [Option<object::Object>; STACK_SIZE],
     sp: usize, // Always points to the next value. Top of stack is stack[sp-1]
-    last_popped_stack_elem: Option<object::Object>,
+
+    globals: [Option<object::Object>; GLOBALS_SIZE],
 }
 
 const TRUE: object::Object = object::Object::BooleanObj(object::BooleanObj{ value: true });
@@ -24,7 +26,8 @@ impl VM {
 
             stack: [const { None }; STACK_SIZE],
             sp: 0,
-            last_popped_stack_elem: None,
+
+            globals: [const { None }; GLOBALS_SIZE],
         }
     }
 
