@@ -141,6 +141,7 @@ impl VM {
         match operand {
             Some(TRUE) => self.push(FALSE),
             Some(FALSE) => self.push(TRUE),
+            Some(NULL) => self.push(TRUE),
             _ => self.push(FALSE),
         }
     }
