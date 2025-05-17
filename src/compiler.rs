@@ -49,6 +49,13 @@ impl Compiler {
         }
     }
 
+    pub(crate) fn new_with_state(s: symbol_table::SymbolTable, constants: Vec<object::Object>) -> Self {
+        let mut compiler = Self::new();
+        compiler.symbol_table = s;
+        compiler.constants = constants;
+        compiler
+    }
+
     pub(crate) fn compile(&mut self, node: ast::Node) -> Option<Error> {
         match node {
             ast::Node::Program(node) => {
