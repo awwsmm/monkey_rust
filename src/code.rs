@@ -74,6 +74,8 @@ pub(crate) enum Opcode {
     OpJumpNotTruthy,
     OpJump,
     OpNull,
+    OpGetGlobal,
+    OpSetGlobal,
 }
 
 impl Into<u8> for Opcode {
@@ -95,6 +97,8 @@ impl Into<u8> for Opcode {
             Opcode::OpJumpNotTruthy => 13,
             Opcode::OpJump => 14,
             Opcode::OpNull => 15,
+            Opcode::OpGetGlobal => 16,
+            Opcode::OpSetGlobal => 17,
         }
     }
 }
@@ -209,6 +213,18 @@ const OP_NULL: Definition = Definition{
     operand_widths: &[],
 };
 
+const OP_GET_GLOBAL: Definition = Definition{
+    opcode: Opcode::OpGetGlobal,
+    name: "OpGetGlobal",
+    operand_widths: &[2],
+};
+
+const OP_SET_GLOBAL: Definition = Definition{
+    opcode: Opcode::OpSetGlobal,
+    name: "OpSetGlobal",
+    operand_widths: &[2],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
@@ -229,6 +245,8 @@ impl Into<Definition> for u8 {
             13 => OP_JUMP_NOT_TRUTHY,
             14 => OP_JUMP,
             15 => OP_NULL,
+            16 => OP_GET_GLOBAL,
+            17 => OP_SET_GLOBAL,
             _ => panic!("opcode {} undefined", self)
         }
     }
