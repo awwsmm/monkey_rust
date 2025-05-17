@@ -37,7 +37,7 @@ impl SymbolTable {
         symbol
     }
 
-    fn resolve(&self, name: impl Into<String>) -> Option<Symbol> {
+    pub(crate) fn resolve(&self, name: impl Into<String>) -> Option<Symbol> {
         let name = name.into();
         self.store.get(&name).cloned()
     }

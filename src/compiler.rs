@@ -191,6 +191,13 @@ impl Compiler {
                 };
             }
 
+            ast::Node::Expression(ast::Expression::Identifier(node)) => {
+                let symbol = match self.symbol_table.resolve(node.value) {
+                    None => return Error::new(format!("undefined variable {}", node.value)),
+                    Some(symbol) => symbol
+                };
+            }
+
             _ => ()
         }
 
