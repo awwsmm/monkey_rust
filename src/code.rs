@@ -288,7 +288,7 @@ fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<usize>, usize) {
 
     for width in def.operand_widths.iter() {
         match *width {
-            2 => operands.push(read_u16(&ins[offset..]) as usize),
+            2 => operands.push(read_usize(&ins[offset..])),
             _ => panic!()
         }
 
@@ -298,9 +298,9 @@ fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<usize>, usize) {
     (operands, offset)
 }
 
-pub(crate) fn read_u16(ins: &[u8]) -> u16 {
+pub(crate) fn read_usize(ins: &[u8]) -> usize {
     // https://stackoverflow.com/a/50244328/2925434
-    ((ins[0] as u16) << 8) | ins[1] as u16
+    ((ins[0] as usize) << 8) | ins[1] as usize
 }
 
 #[cfg(test)]

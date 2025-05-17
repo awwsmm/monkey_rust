@@ -45,20 +45,20 @@ impl VM {
 
             match op {
                 code::Opcode::OpConstant => {
-                    let const_index = code::read_u16(&self.instructions[ip + 1..]);
+                    let const_index = code::read_usize(&self.instructions[ip + 1..]);
                     ip += 2;
-                    if let Some(err) = self.push(self.constants[const_index as usize].clone()) {
+                    if let Some(err) = self.push(self.constants[const_index].clone()) {
                         return Some(err)
                     }
                 }
 
                 code::Opcode::OpJump => {
-                    let pos = code::read_u16(&self.instructions[ip + 1..]) as usize;
+                    let pos = code::read_usize(&self.instructions[ip + 1..]);
                     ip = pos - 1
                 }
 
                 code::Opcode::OpJumpNotTruthy => {
-                    let pos = code::read_u16(&self.instructions[ip + 1..]) as usize;
+                    let pos = code::read_usize(&self.instructions[ip + 1..]);
                     ip += 2;
 
                     let condition = self.pop();
@@ -105,6 +105,13 @@ impl VM {
                     if let Some(err) = self.push(NULL) {
                         return Some(err)
                     }
+
+                code::Opcode::OpSetGlobal => {
+                    let global_index = code::read_usize(&self.instructions[ip+1..]);
+                    ip += 2;
+
+                    self.globals[global_index] = self.pop()
+                }
 
                 _ => () // TODO
             }
