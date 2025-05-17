@@ -7,10 +7,10 @@ struct SymbolScope(&'static str);
 const GLOBAL_SCOPE: SymbolScope = SymbolScope("GLOBAL");
 
 #[derive(Debug, Clone, PartialEq)]
-struct Symbol {
+pub(crate) struct Symbol {
     name: String,
     scope: SymbolScope,
-    index: usize,
+    pub(crate) index: usize,
 }
 
 impl Symbol {

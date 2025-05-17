@@ -83,6 +83,7 @@ impl Compiler {
                     return err
                 }
                 let symbol = self.symbol_table.define(node.name?.value);
+                self.emit(code::Opcode::OpSetGlobal, vec![symbol.index]);
             }
 
             ast::Node::Expression(ast::Expression::IfExpression(node)) => {
