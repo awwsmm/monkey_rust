@@ -447,6 +447,7 @@ mod tests {
 		    VMTestCase::new("!!true", true),
 		    VMTestCase::new("!!false", false),
 		    VMTestCase::new("!!5", true),
+            VMTestCase::new("!(if (false) { 5; })", true),
         ];
 
         if run_vm_tests(tests) {
