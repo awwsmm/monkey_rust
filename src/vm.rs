@@ -468,6 +468,7 @@ mod tests {
             VMTestCase::new("if (1 > 2) { 10 } else { 20 }", 20),
             VMTestCase::new("if (1 > 2) { 10 }", Expected::Null),
             VMTestCase::new("if (false) { 10 }", Expected::Null),
+            VMTestCase::new("if ((if (false) { 10 })) { 10 } else { 20 }", 20),
         ];
 
         if run_vm_tests(tests) {
