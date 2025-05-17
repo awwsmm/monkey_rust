@@ -587,7 +587,7 @@ mod tests {
     }
 
     #[test]
-    fn test_comditionals() {
+    fn test_conditionals() {
         let tests = vec![
             CompilerTestCase::new(
                 "if (true) { 10 }; 3333;",

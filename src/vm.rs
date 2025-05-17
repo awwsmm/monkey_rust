@@ -476,4 +476,17 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_global_let_statements() {
+        let tests = vec![
+            VMTestCase::new("let one = 1; one", 1),
+            VMTestCase::new("let one = 1; let two = 2; one + two", 3),
+            VMTestCase::new("let one = 1; let two = one + one; one + two", 3),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
