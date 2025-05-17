@@ -71,6 +71,13 @@ impl Compiler {
                 }
             }
 
+            ast::Node::Statement(ast::Statement::LetStatement(node)) => {
+                let err = self.compile(ast::Node::Expression(node.value?));
+                if err.is_some() {
+                    return err
+                }
+            }
+
             ast::Node::Expression(ast::Expression::IfExpression(node)) => {
                 let err = self.compile(ast::Node::Expression(*node.condition?));
                 if err.is_some() {
