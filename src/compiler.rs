@@ -32,6 +32,8 @@ pub(crate) struct Compiler {
 
     last_instruction: EmittedInstruction,
     previous_instruction: EmittedInstruction,
+
+    symbol_table: symbol_table::SymbolTable,
 }
 
 impl Compiler {
@@ -42,6 +44,8 @@ impl Compiler {
 
             last_instruction: EmittedInstruction{ opcode: None, position: 0 },
             previous_instruction: EmittedInstruction{ opcode: None, position: 0 },
+
+            symbol_table: symbol_table::SymbolTable::new(),
         }
     }
 

@@ -19,13 +19,13 @@ impl Symbol {
     }
 }
 
-struct SymbolTable {
+pub(crate) struct SymbolTable {
     store: HashMap<String, Symbol>,
     num_definitions: usize,
 }
 
 impl SymbolTable {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self { store: Default::default(), num_definitions: 0 }
     }
 
