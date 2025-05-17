@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use std::convert::Into;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct SymbolScope(String);
 
 const GLOBAL_SCOPE: SymbolScope = SymbolScope("GLOBAL".into());
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Symbol {
     name: String,
     scope: SymbolScope,
@@ -27,6 +27,14 @@ struct SymbolTable {
 impl SymbolTable {
     fn new() -> Self {
         Self { store: Default::default(), num_definitions: 0 }
+    }
+
+    fn define(&mut self, name: impl Into<String>) -> Symbol {
+        let name = name.into();
+        let symbol = Symbol::new(name.clone(), GLOBAL_SCOPE, self.num_definitions);
+        self.store.insert(name, symbol.clone());
+        self.num_definitions += 1;
+        symbol
     }
 }
 
