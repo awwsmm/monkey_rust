@@ -2,7 +2,7 @@ use crate::object::ObjectLike;
 use crate::{code, compiler, object};
 
 const STACK_SIZE: usize = 2048;
-const GLOBALS_SIZE: usize = 65536;
+const GLOBALS_SIZE: usize = 2048;
 
 pub(crate) struct VM {
     constants: Vec<object::Object>,
@@ -111,6 +111,16 @@ impl VM {
                     ip += 2;
 
                     self.globals[global_index] = self.pop()
+                }
+
+                code::Opcode::OpGetGlobal => {
+                    let global_index = code::read_usize(&self.instructions[ip+1..]);
+                    ip += 2;
+
+                    let obj = self.globals[global_index].clone()?;
+                    if let Some(err) = self.push(obj) {
+                        return Some(err)
+                    }
                 }
 
                 _ => () // TODO
