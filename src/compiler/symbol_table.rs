@@ -29,7 +29,7 @@ impl SymbolTable {
         Self { store: Default::default(), num_definitions: 0 }
     }
 
-    fn define(&mut self, name: impl Into<String>) -> Symbol {
+    pub(crate) fn define(&mut self, name: impl Into<String>) -> Symbol {
         let name = name.into();
         let symbol = Symbol::new(name.clone(), GLOBAL_SCOPE, self.num_definitions);
         self.store.insert(name, symbol.clone());

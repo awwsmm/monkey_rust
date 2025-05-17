@@ -82,6 +82,7 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
+                let symbol = self.symbol_table.define(node.name?.value);
             }
 
             ast::Node::Expression(ast::Expression::IfExpression(node)) => {
