@@ -37,9 +37,8 @@ impl SymbolTable {
         symbol
     }
 
-    pub(crate) fn resolve(&self, name: impl Into<String>) -> Option<Symbol> {
-        let name = name.into();
-        self.store.get(&name).cloned()
+    pub(crate) fn resolve(&self, name: &str) -> Option<Symbol> {
+        self.store.get(name).cloned()
     }
 }
 
@@ -84,7 +83,7 @@ mod tests {
         let mut should_panic = false;
 
         for sym in expected.into_iter() {
-            let result = match global.resolve(sym.name.clone()) {
+            let result = match global.resolve(sym.name.as_str()) {
                 None => {
                     should_panic = true;
                     eprintln!("name {} not resolvable", sym.name);

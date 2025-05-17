@@ -192,10 +192,12 @@ impl Compiler {
             }
 
             ast::Node::Expression(ast::Expression::Identifier(node)) => {
-                let symbol = match self.symbol_table.resolve(node.value) {
+                let symbol = match self.symbol_table.resolve(node.value.as_str()) {
                     None => return Error::new(format!("undefined variable {}", node.value)),
                     Some(symbol) => symbol
                 };
+
+                self.emit(code::Opcode::OpGetGlobal, vec![symbol.index]);
             }
 
             _ => ()
@@ -657,7 +659,7 @@ mod tests {
                 let one = 1;
                 one;
                 "#,
-                vec![1.into(), 2.into()],
+                vec![1.into()],
                 vec![
                     code::make(code::Opcode::OpConstant, &vec![0]),
                     code::make(code::Opcode::OpSetGlobal, &vec![0]),
@@ -672,7 +674,7 @@ mod tests {
                 let two = one;
                 two;
                 "#,
-                vec![1.into(), 2.into()],
+                vec![1.into()],
                 vec![
                     code::make(code::Opcode::OpConstant, &vec![0]),
                     code::make(code::Opcode::OpSetGlobal, &vec![0]),
