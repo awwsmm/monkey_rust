@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use std::convert::Into;
 
-#[derive(Debug, Clone)]
-struct SymbolScope(String);
+#[derive(Debug, Clone, PartialEq)]
+struct SymbolScope(&'static str);
 
-const GLOBAL_SCOPE: SymbolScope = SymbolScope("GLOBAL".into());
+const GLOBAL_SCOPE: SymbolScope = SymbolScope("GLOBAL");
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Symbol {
     name: String,
     scope: SymbolScope,
@@ -36,18 +36,24 @@ impl SymbolTable {
         self.num_definitions += 1;
         symbol
     }
+
+    fn resolve(&self, name: impl Into<String>) -> Option<Symbol> {
+        let name = name.into();
+        self.store.get(&name).cloned()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    #[test]
     fn test_define() {
         let mut expected = HashMap::new();
         expected.insert("a", Symbol::new("a", GLOBAL_SCOPE, 0));
         expected.insert("b", Symbol::new("b", GLOBAL_SCOPE, 1));
 
-        let global = SymbolTable::new();
+        let mut global = SymbolTable::new();
 
         let mut should_panic = false;
 
@@ -64,8 +70,9 @@ mod tests {
         }
     }
 
+    #[test]
     fn test_resolve_global() {
-        let global = SymbolTable::new();
+        let mut global = SymbolTable::new();
         global.define("a");
         global.define("b");
 
@@ -77,7 +84,7 @@ mod tests {
         let mut should_panic = false;
 
         for sym in expected.into_iter() {
-            let result = match global.resolve(sym.name) {
+            let result = match global.resolve(sym.name.clone()) {
                 None => {
                     should_panic = true;
                     eprintln!("name {} not resolvable", sym.name);
