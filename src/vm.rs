@@ -115,6 +115,7 @@ impl VM {
     fn is_truthy(obj: Option<object::Object>) -> bool {
         match obj {
             Some(object::Object::BooleanObj(obj)) => obj.value,
+            Some(object::Object::NullObj(_)) => false,
             _ => true
         }
     }
