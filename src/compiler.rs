@@ -1,3 +1,5 @@
+mod symbol_table;
+
 use crate::{ast, code, object};
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
