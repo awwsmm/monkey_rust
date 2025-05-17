@@ -31,6 +31,12 @@ impl VM {
         }
     }
 
+    pub(crate) fn new_with_globals_store(bytecode: compiler::Bytecode, s: [Option<object::Object>; GLOBALS_SIZE]) -> Self {
+        let mut vm = Self::new(bytecode);
+        vm.globals = s;
+        vm
+    }
+
     pub(crate) fn stack_top(&self) -> Option<&object::Object> {
         if self.sp == 0 {
             return None
