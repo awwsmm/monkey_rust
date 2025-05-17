@@ -98,6 +98,11 @@ impl VM {
                         return Some(err)
                     }
 
+                code::Opcode::OpNull =>
+                    if let Some(err) = self.push(NULL) {
+                        return Some(err)
+                    }
+
                 _ => () // TODO
             }
 
