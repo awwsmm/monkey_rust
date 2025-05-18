@@ -1,4 +1,4 @@
-mod symbol_table;
+pub(crate) mod symbol_table;
 
 use crate::{ast, code, object};
 use std::cmp::PartialEq;
@@ -33,7 +33,7 @@ pub(crate) struct Compiler {
     last_instruction: EmittedInstruction,
     previous_instruction: EmittedInstruction,
 
-    symbol_table: symbol_table::SymbolTable,
+    pub(crate) symbol_table: symbol_table::SymbolTable,
 }
 
 impl Compiler {
@@ -273,6 +273,7 @@ impl Compiler {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct Bytecode {
     pub(crate) instructions: code::Instructions,
     pub(crate) constants: Vec<object::Object>,

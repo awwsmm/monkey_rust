@@ -5,6 +5,11 @@ use std::io::{BufRead, Write};
 const PROMPT: &'static [u8] = ">> ".as_bytes();
 
 pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
+
+    let mut constants = vec![];
+    let mut globals = [const { None }; vm::GLOBALS_SIZE];
+    let mut symbol_table = compiler::symbol_table::SymbolTable::new();
+
     loop {
         writer.write(PROMPT).unwrap();
         writer.flush().unwrap();
@@ -25,14 +30,17 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
             continue
         }
 
-        let mut comp = compiler::Compiler::new();
+        let mut comp = compiler::Compiler::new_with_state(symbol_table.clone(), constants.clone());
         let err = comp.compile(ast::Node::Program(program));
         if let Some(err) = err {
             write!(writer, "Woops! Compilation failed:\n {}\n", err).unwrap();
             continue
         }
 
-        let mut machine = vm::VM::new(comp.bytecode());
+        let code = comp.bytecode().clone();
+        constants = code.constants.clone();
+
+        let mut machine = vm::VM::new_with_globals_store(code, globals.clone());
         let err = machine.run();
         if let Some(err) = err {
             write!(writer, "Woops! Executing bytecode failed:\n {}\n", err).unwrap();
@@ -42,6 +50,8 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
         let last_popped = machine.last_popped_stack_elem();
         write!(writer, "{}\n", last_popped.unwrap().inspect()).unwrap();
 
+        symbol_table = comp.symbol_table;
+        globals = machine.globals;
     }
 }
 
