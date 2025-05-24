@@ -373,10 +373,12 @@ mod tests {
     enum Expected {
         Integer(Integer),
         Boolean(Boolean),
+        String(String),
     }
 
     struct Integer(i32);
     struct Boolean(bool);
+    struct String(&'static str);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
@@ -387,6 +389,12 @@ mod tests {
     impl Into<Expected> for bool {
         fn into(self) -> Expected {
             Expected::Boolean(Boolean(self))
+        }
+    }
+
+    impl Into<Expected> for &'static str {
+        fn into(self) -> Expected {
+            Expected::String(String(self))
         }
     }
 
@@ -689,6 +697,32 @@ mod tests {
                     code::make(code::Opcode::OpGetGlobal, &vec![0]),
                     code::make(code::Opcode::OpSetGlobal, &vec![1]),
                     code::make(code::Opcode::OpGetGlobal, &vec![1]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
+
+    #[test]
+    fn test_string_expressions() {
+        let tests = vec![
+            CompilerTestCase::new(
+                r#""monkey""#,
+                vec!["monkey".into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                r#""mon" + "key""#,
+                vec!["mon".into(), "key".into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpAdd, &vec![]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
