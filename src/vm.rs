@@ -379,12 +379,14 @@ mod tests {
         Integer(ExpectedInteger),
         Boolean(ExpectedBoolean),
         String(ExpectedString),
+        IntArray(ExpectedIntArray),
         Null,
     }
 
     struct ExpectedInteger(i32);
     struct ExpectedBoolean(bool);
     struct ExpectedString(&'static str);
+    struct ExpectedIntArray(Vec<i32>);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
@@ -401,6 +403,12 @@ mod tests {
     impl Into<Expected> for &'static str {
         fn into(self) -> Expected {
             Expected::String(ExpectedString(self))
+        }
+    }
+
+    impl Into<Expected> for Vec<i32> {
+        fn into(self) -> Expected {
+            Expected::IntArray(ExpectedIntArray(self))
         }
     }
 
@@ -429,6 +437,32 @@ mod tests {
                 if let Some(err) = err {
                     should_panic = true;
                     eprintln!("test_string_object failed: {}", err)
+                }
+            }
+
+            Expected::IntArray(ExpectedIntArray(expected)) => {
+                let array = match actual {
+                    Some(object::Object::ArrayObj(obj)) => obj,
+                    _ => {
+                        should_panic = true;
+                        eprintln!("object not Array: {:?}", actual);
+                        return should_panic
+                    }
+                };
+
+                if array.elements.len() != expected.len() {
+                    should_panic = true;
+                    eprintln!("wrong num of elements. want={}, got={}",
+                        expected.len(), array.elements.len());
+                    return should_panic
+                }
+
+                for (i, expected_elem) in expected.iter().enumerate() {
+                    let err = test_integer_object(*expected_elem, array.elements.get(i));
+                    if let Some(err) = err {
+                        should_panic = true;
+                        eprintln!("test_integer_object failed: {}", err)
+                    }
                 }
             }
 
@@ -578,6 +612,19 @@ mod tests {
             VMTestCase::new(r#""monkey"#, "monkey"),
             VMTestCase::new(r#""mon" + "key""#, "monkey"),
             VMTestCase::new(r#""mon" + "key" + "banana""#, "monkeybanana"),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_array_literals() {
+        let tests = vec![
+            VMTestCase::new("[]", Vec::<i32>::new()),
+            VMTestCase::new("[1, 2, 3]", vec![1, 2, 3]),
+            VMTestCase::new("[1 + 2, 3 * 4, 5 + 6]", vec![3, 12, 11]),
         ];
 
         if run_vm_tests(tests) {
