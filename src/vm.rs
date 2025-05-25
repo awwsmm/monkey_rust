@@ -401,6 +401,14 @@ mod tests {
                 }
             }
 
+            Expected::String(ExpectedString(expected)) => {
+                let err = test_string_object(expected, actual);
+                if let Some(err) = err {
+                    should_panic = true;
+                    eprintln!("test_string_object failed: {}", err)
+                }
+            }
+
             Expected::Null =>
                 if actual != None {
                     eprintln!("object is not None: {:?}", actual)
@@ -412,9 +420,26 @@ mod tests {
         should_panic
     }
 
+    fn test_string_object(expected: &'static str, actual: Option<&object::Object>) -> Option<compiler::Error> {
+        let result = match actual {
+            Some(object::Object::StringObj(obj)) => obj,
+            _ => return compiler::Error::new(format!(
+                "object is not String. got={:?}", actual
+            ))
+        };
+
+        if result.value != expected {
+            return compiler::Error::new(format!(
+                "object has wrong value. got={}, want={}", result.value, expected
+            ))
+        };
+
+        None
+    }
+
     fn test_boolean_object(expected: bool, actual: Option<&object::Object>) -> Option<compiler::Error> {
         let result = match actual {
-            Some(object::Object::BooleanObj(boolean_obj)) => boolean_obj,
+            Some(object::Object::BooleanObj(obj)) => obj,
             _ => return compiler::Error::new(format!(
                 "object is not Boolean. got={:?}", actual
             ))
