@@ -196,6 +196,19 @@ impl Compiler {
                 self.emit(code::Opcode::OpConstant, vec![constant]);
             }
 
+            ast::Node::Expression(ast::Expression::ArrayLiteral(node)) => {
+                let len = node.elements.len();
+
+                for element in node.elements.into_iter() {
+                    let err = self.compile(ast::Node::Expression(element));
+                    if err.is_some() {
+                        return err
+                    }
+                }
+
+                self.emit(code::Opcode::OpArray, vec![len]);
+            }
+
             ast::Node::Expression(ast::Expression::Boolean(node)) => {
                 if node.value {
                     self.emit(code::Opcode::OpTrue, vec![])
