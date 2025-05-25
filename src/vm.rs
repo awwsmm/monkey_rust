@@ -353,23 +353,31 @@ mod tests {
     }
 
     enum Expected {
-        Integer(Integer),
-        Boolean(Boolean),
+        Integer(ExpectedInteger),
+        Boolean(ExpectedBoolean),
+        String(ExpectedString),
         Null,
     }
 
-    struct Integer(i32);
-    struct Boolean(bool);
+    struct ExpectedInteger(i32);
+    struct ExpectedBoolean(bool);
+    struct ExpectedString(&'static str);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
-            Expected::Integer(Integer(self))
+            Expected::Integer(ExpectedInteger(self))
         }
     }
 
     impl Into<Expected> for bool {
         fn into(self) -> Expected {
-            Expected::Boolean(Boolean(self))
+            Expected::Boolean(ExpectedBoolean(self))
+        }
+    }
+
+    impl Into<Expected> for &'static str {
+        fn into(self) -> Expected {
+            Expected::String(ExpectedString(self))
         }
     }
 
@@ -377,7 +385,7 @@ mod tests {
         let mut should_panic = false;
 
         match expected {
-            Expected::Integer(Integer(expected)) => {
+            Expected::Integer(ExpectedInteger(expected)) => {
                 let err = test_integer_object(expected, actual);
                 if let Some(err) = err {
                     should_panic = true;
@@ -385,7 +393,7 @@ mod tests {
                 }
             }
 
-            Expected::Boolean(Boolean(expected)) => {
+            Expected::Boolean(ExpectedBoolean(expected)) => {
                 let err = test_boolean_object(expected, actual);
                 if let Some(err) = err {
                     should_panic = true;
@@ -509,6 +517,19 @@ mod tests {
             VMTestCase::new("let one = 1; one", 1),
             VMTestCase::new("let one = 1; let two = 2; one + two", 3),
             VMTestCase::new("let one = 1; let two = one + one; one + two", 3),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_string_expressions() {
+        let tests = vec![
+            VMTestCase::new(r#""monkey"#, "monkey"),
+            VMTestCase::new(r#""mon" + "key""#, "monkey"),
+            VMTestCase::new(r#""mon" + "key" + "banana""#, "monkeybanana"),
         ];
 
         if run_vm_tests(tests) {
