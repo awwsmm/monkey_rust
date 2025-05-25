@@ -762,4 +762,48 @@ mod tests {
 
         run_compiler_tests(tests)
     }
+
+    #[test]
+    fn test_array_literals() {
+        let tests = vec![
+            CompilerTestCase::new(
+                "[]",
+                vec![],
+                vec![
+                    code::make(code::Opcode::OpArray, &vec![0]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "[1, 2, 3]",
+                vec![1.into(), 2.into(), 3.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpArray, &vec![3]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "[1 + 2, 3 - 4, 5 * 6]",
+                vec![1.into(), 2.into(), 3.into(), 4.into(), 5.into(), 6.into()],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpAdd, &vec![]),
+                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpConstant, &vec![3]),
+                    code::make(code::Opcode::OpSub, &vec![]),
+                    code::make(code::Opcode::OpConstant, &vec![4]),
+                    code::make(code::Opcode::OpConstant, &vec![5]),
+                    code::make(code::Opcode::OpMul, &vec![]),
+                    code::make(code::Opcode::OpArray, &vec![3]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
 }
