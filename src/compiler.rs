@@ -185,8 +185,14 @@ impl Compiler {
             }
 
             ast::Node::Expression(ast::Expression::IntegerLiteral(node)) => {
-                let integer = object::Object::IntegerObj(object::IntegerObj{ value: node.value });
-                let constant = self.add_constant(integer);
+                let obj = object::Object::IntegerObj(object::IntegerObj{ value: node.value });
+                let constant = self.add_constant(obj);
+                self.emit(code::Opcode::OpConstant, vec![constant]);
+            }
+
+            ast::Node::Expression(ast::Expression::StringLiteral(node)) => {
+                let obj = object::Object::StringObj(object::StringObj{ value: node.value });
+                let constant = self.add_constant(obj);
                 self.emit(code::Opcode::OpConstant, vec![constant]);
             }
 
