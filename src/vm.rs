@@ -227,22 +227,45 @@ impl VM {
         let right_type = right.as_ref()?.inner().object_type();
 
         if left_type == object::ObjectType::IntegerObj && right_type == object::ObjectType::IntegerObj {
-            return self.execute_binary_integer_operation(op, left?, right?)
+            self.execute_binary_integer_operation(op, left?, right?)
+
+        } else if left_type == object::ObjectType::StringObj && right_type == object::ObjectType::StringObj {
+            self.execute_binary_string_operation(op, left?, right?)
+
+        } else {
+            compiler::Error::new(format!(
+                "unsupported types for binary operation: {:?} {:?}",
+                left_type, right_type
+            ))
+        }
+    }
+
+    fn execute_binary_string_operation(&mut self, op: code::Opcode, left: object::Object, right: object::Object) -> Option<compiler::Error> {
+        if op != code::Opcode::OpAdd {
+            return compiler::Error::new(format!(
+                "unknown string operator: {:?}", op
+            ))
         }
 
-        compiler::Error::new(format!(
-            "unsupported types for binary operation: {:?} {:?}",
-            left_type, right_type
-        ))
+        let left_value = match left {
+            object::Object::StringObj(obj) => obj.value,
+            _ => panic!()
+        };
+        let right_value = match right {
+            object::Object::StringObj(obj) => obj.value,
+            _ => panic!()
+        };
+
+        self.push(object::Object::StringObj(object::StringObj { value: format!("{}{}", left_value, right_value) }))
     }
 
     fn execute_binary_integer_operation(&mut self, op: code::Opcode, left: object::Object, right: object::Object) -> Option<compiler::Error> {
         let left_value = match left {
-            object::Object::IntegerObj(integer_obj) => integer_obj.value,
+            object::Object::IntegerObj(obj) => obj.value,
             _ => panic!()
         };
         let right_value = match right {
-            object::Object::IntegerObj(integer_obj) => integer_obj.value,
+            object::Object::IntegerObj(obj) => obj.value,
             _ => panic!()
         };
 
