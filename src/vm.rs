@@ -129,6 +129,18 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpArray => {
+                    let num_elements = code::read_usize(&self.instructions[ip+1..]);
+                    ip += 2;
+
+                    let array = self.build_array(self.sp-num_elements, self.sp);
+                    self.sp -= num_elements;
+
+                    if let Some(err) = self.push(array) {
+                        return Some(err)
+                    }
+                }
+
                 _ => () // TODO
             }
 
@@ -136,6 +148,16 @@ impl VM {
         }
 
         None
+    }
+
+    fn build_array(&self, start_index: usize, end_index: usize) -> object::Object {
+        let mut elements = Vec::with_capacity(end_index - start_index);
+
+        for i in start_index..end_index {
+            elements.push(self.stack[i].as_ref().unwrap().clone());
+        }
+
+        object::Object::ArrayObj(object::ArrayObj{ elements })
     }
 
     fn is_truthy(obj: Option<object::Object>) -> bool {
