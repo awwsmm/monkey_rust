@@ -305,6 +305,15 @@ mod tests {
                     }
                 }
 
+                Expected::String(String(constant)) => {
+                    let err = test_string_object(constant, actual.get(i).cloned()?);
+                    if let Some(err) = err {
+                        return Error::new(format!(
+                            "constant {} - test_string_object failed: {}", i, err
+                        ))
+                    }
+                }
+
                 _ => () // TODO
             }
         }
@@ -312,9 +321,26 @@ mod tests {
         None
     }
 
+    fn test_string_object(expected: &'static str, actual: object::Object) -> Option<Error> {
+        let result = match actual {
+            object::Object::StringObj(obj) => obj,
+            _ => return Error::new(format!(
+                "object is not String. got={:?}", actual
+            )),
+        };
+
+        if result.value != expected {
+            return Error::new(format!(
+                "object has wrong value. got={}, want={}", result.value, expected
+            ))
+        }
+
+        None
+    }
+
     fn test_integer_object(expected: i32, actual: object::Object) -> Option<Error> {
         let result = match actual {
-            object::Object::IntegerObj(integer_obj) => integer_obj,
+            object::Object::IntegerObj(obj) => obj,
             _ => return Error::new(format!(
                 "object is not Integer. got={:?}", actual
             )),
