@@ -209,6 +209,30 @@ impl Compiler {
                 self.emit(code::Opcode::OpArray, vec![len]);
             }
 
+            ast::Node::Expression(ast::Expression::HashLiteral(node)) => {
+                let mut keys = vec![];
+                for (k, _) in node.pairs.iter() {
+                    keys.push(k)
+                }
+                keys.sort_by_key(|k| k.to_string());
+
+                let len = node.pairs.len();
+
+                for k in keys.into_iter() {
+                    let err = self.compile(ast::Node::Expression(k.clone()));
+                    if err.is_some() {
+                        return err
+                    }
+
+                    let err = self.compile(ast::Node::Expression(node.pairs[k].clone()));
+                    if err.is_some() {
+                        return err
+                    }
+                }
+
+                self.emit(code::Opcode::OpHash, vec![len * 2]);
+            }
+
             ast::Node::Expression(ast::Expression::Boolean(node)) => {
                 if node.value {
                     self.emit(code::Opcode::OpTrue, vec![])
@@ -833,7 +857,7 @@ mod tests {
             ),
             CompilerTestCase::new(
                 "{1: 2, 3: 4, 5: 6}",
-                vec![],
+                vec![1.into(), 2.into(), 3.into(), 4.into(), 5.into(), 6.into()],
                 vec![
                     code::make(code::Opcode::OpConstant, &vec![0]),
                     code::make(code::Opcode::OpConstant, &vec![1]),
@@ -847,7 +871,7 @@ mod tests {
             ),
             CompilerTestCase::new(
                 "{1: 2 + 3, 4: 5 * 6}",
-                vec![],
+                vec![1.into(), 2.into(), 3.into(), 4.into(), 5.into(), 6.into()],
                 vec![
                     code::make(code::Opcode::OpConstant, &vec![0]),
                     code::make(code::Opcode::OpConstant, &vec![1]),
