@@ -141,6 +141,21 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpHash => {
+                    let num_elements = code::read_usize(&self.instructions[ip+1..]);
+                    ip += 2;
+
+                    let hash = match self.build_hash(self.sp-num_elements, self.sp) {
+                        Ok(hash) => hash,
+                        Err(error) => return error
+                    };
+                    self.sp -= num_elements;
+
+                    if let Some(err) = self.push(hash) {
+                        return Some(err)
+                    }
+                }
+
                 _ => () // TODO
             }
 
@@ -329,7 +344,7 @@ impl VM {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::object::{HasHashKey, Object};
+    use crate::object::HasHashKey;
     use crate::{ast, compiler, lexer, object, parser};
     use std::collections::BTreeMap;
 
@@ -500,7 +515,7 @@ mod tests {
 
             Expected::IntValueHash(ExpectedIntValueHash(expected)) => {
                 let hash = match actual {
-                    Some(Object::HashObj(obj)) => obj,
+                    Some(object::Object::HashObj(obj)) => obj,
                     _ =>  {
                         should_panic = true;
                         eprintln!("object is not Hash. got={:?}", actual);
