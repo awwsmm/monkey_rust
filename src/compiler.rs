@@ -1002,4 +1002,70 @@ mod tests {
 
         run_compiler_tests(tests)
     }
+
+    #[test]
+    fn test_compiler_scopes() {
+        let mut should_panic = false;
+
+        let mut compiler = Compiler::new();
+        if compiler.scope_index != 0 {
+            should_panic = true;
+            eprintln!("scope_index wrong. got={}, want={}", compiler.scope_index, 0)
+        }
+
+        compiler.emit(code::Opcode::OpMul, vec![]);
+
+        compiler.enter_scope();
+        if compiler.scope_index != 1 {
+            should_panic = true;
+            eprintln!("scope_index wrong. got={}, want={}", compiler.scope_index, 1)
+        }
+
+        compiler.emit(code::Opcode::OpSub, vec![]);
+
+        let len = compiler.scopes[compiler.scope_index].instructions.len();
+        if len != 1 {
+            should_panic = true;
+            eprintln!("instructions length wrong. got={}", len)
+        }
+
+        let last = compiler.scopes[compiler.scope_index].last_instruction;
+        if last.opcode != code::Opcode::OpSub {
+            should_panic = true;
+            eprintln!("last_instruction.opcode wrong. got={:?}, want={:?}",
+                last.opcode, Some(code::Opcode::OpSub))
+        }
+
+        compiler.leave_scope();
+        if compiler.scope_index != 0 {
+            should_panic = true;
+            eprintln!("scope_index wrong. got={}, want={}", compiler.scope_index, 0)
+        }
+
+        compiler.emit(code::Opcode::OpAdd, vec![]);
+
+        let len = compiler.scopes[compiler.scope_index].instructions.len();
+        if len != 2 {
+            should_panic = true;
+            eprintln!("instructions length wrong. got={}", len)
+        }
+
+        let last = compiler.scopes[compiler.scope_index].last_instruction;
+        if last.opcode != code::Opcode::OpAdd {
+            should_panic = true;
+            eprintln!("last_instruction.opcode wrong. got={:?}, want={:?}",
+                last.opcode, Some(code::Opcode::OpAdd))
+        }
+
+        let previous = compiler.scopes[compiler.scope_index].previous_instruction;
+        if previous.opcode != code::Opcode::OpMul {
+            should_panic = true;
+            eprintln!("previous_instruction.opcode wrong. got={:?}, want={:?}",
+                      previous.opcode, Some(code::Opcode::OpMul))
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
