@@ -371,6 +371,23 @@ mod tests {
                     }
                 }
 
+                Expected::Instructions(Instructions(constant)) => {
+                    let func = match actual.get(i).cloned()? {
+                        object::Object::CompiledFunctionObj(obj) => obj,
+                        _ => return Error::new(format!(
+                            "constant {} - not a function: {:?}",
+                            i, actual[i]
+                        ))
+                    };
+
+                    let err = test_instructions(constant, func.instructions);
+                    if let Some(err) = err {
+                        return Error::new(format!(
+                            "constant {} - test_instructions failed: {}", i, err
+                        ))
+                    }
+                }
+
                 _ => () // TODO
             }
         }
@@ -463,7 +480,7 @@ mod tests {
     struct Integer(i32);
     struct Boolean(bool);
     struct String(&'static str);
-    struct Instructions(Vec<Vec<u8>>);
+    struct Instructions(Vec<code::Instructions>);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
@@ -485,7 +502,7 @@ mod tests {
 
     impl Into<Expected> for Vec<Vec<u8>> {
         fn into(self) -> Expected {
-            Expected::Instructions(Instructions(self))
+            Expected::Instructions(Instructions(self.into_iter().map(code::Instructions).collect()))
         }
     }
 

@@ -370,7 +370,7 @@ impl Parser {
 
         stmt.return_value = self.parse_expression(Precedence::Lowest);
 
-        while !self.cur_token_is(TokenType::SEMICOLON) {
+        if self.peek_token_is(TokenType::SEMICOLON) {
             self.next_token()
         }
 
