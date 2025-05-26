@@ -300,7 +300,7 @@ impl Compiler {
 
     pub(crate) fn bytecode(&self) -> Bytecode {
         Bytecode {
-            instructions: self.instructions.clone(),
+            instructions: self.current_instructions().clone(),
             constants: self.constants.clone(),
         }
     }
