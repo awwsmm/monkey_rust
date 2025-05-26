@@ -175,6 +175,21 @@ impl VM {
         None
     }
 
+    fn execute_index_expression(&self, left: Option<object::Object>, index: Option<object::Object>) -> Option<compiler::Error> {
+        let left_type = left.as_ref()?.object_type();
+        let index_type = index.as_ref()?.object_type();
+
+        if left_type == object::ObjectType::ArrayObj && index_type == object::ObjectType::IntegerObj {
+            self.execute_array_index(left, index)
+
+        } else if left_type == object::ObjectType::HashObj {
+            self.execute_hash_index(left, index)
+
+        } else {
+            compiler::Error::new(format!("index operator not supported: {:?}", left_type))
+        }
+    }
+
     fn build_hash(&self, start_index: usize, end_index: usize) -> Result<object::Object, Option<compiler::Error>> {
         let mut hashed_pairs = BTreeMap::new();
 
