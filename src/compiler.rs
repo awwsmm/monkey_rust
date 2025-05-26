@@ -122,7 +122,7 @@ impl Compiler {
                 // Emit an `OpJump` with a bogus value
                 let jump_pos = self.emit(code::Opcode::OpJump, vec![9999]);
 
-                let after_consequence_pos = self.instructions.len();
+                let after_consequence_pos = self.current_instructions().len();
                 self.change_operand(jump_not_truthy_pos, after_consequence_pos);
 
                 if node.alternative.is_none() {
@@ -138,7 +138,7 @@ impl Compiler {
                     }
                 }
 
-                let after_alternative_pos = self.instructions.len();
+                let after_alternative_pos = self.current_instructions().len();
                 self.change_operand(jump_pos, after_alternative_pos)
             }
 
