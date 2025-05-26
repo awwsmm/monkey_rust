@@ -329,7 +329,9 @@ impl VM {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::object::{HasHashKey, Object};
     use crate::{ast, compiler, lexer, object, parser};
+    use std::collections::BTreeMap;
 
     fn parse(input: impl Into<String>) -> ast::Program {
         let l = lexer::Lexer::new(input);
@@ -402,6 +404,7 @@ mod tests {
         Boolean(ExpectedBoolean),
         String(ExpectedString),
         IntArray(ExpectedIntArray),
+        IntValueHash(ExpectedIntValueHash),
         Null,
     }
 
@@ -409,6 +412,7 @@ mod tests {
     struct ExpectedBoolean(bool);
     struct ExpectedString(&'static str);
     struct ExpectedIntArray(Vec<i32>);
+    struct ExpectedIntValueHash(BTreeMap<object::HashKey, i32>);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
@@ -431,6 +435,12 @@ mod tests {
     impl Into<Expected> for Vec<i32> {
         fn into(self) -> Expected {
             Expected::IntArray(ExpectedIntArray(self))
+        }
+    }
+
+    impl Into<Expected> for BTreeMap<object::HashKey, i32> {
+        fn into(self) -> Expected {
+            Expected::IntValueHash(ExpectedIntValueHash(self))
         }
     }
 
@@ -481,6 +491,41 @@ mod tests {
 
                 for (i, expected_elem) in expected.iter().enumerate() {
                     let err = test_integer_object(*expected_elem, array.elements.get(i));
+                    if let Some(err) = err {
+                        should_panic = true;
+                        eprintln!("test_integer_object failed: {}", err)
+                    }
+                }
+            }
+
+            Expected::IntValueHash(ExpectedIntValueHash(expected)) => {
+                let hash = match actual {
+                    Some(Object::HashObj(obj)) => obj,
+                    _ =>  {
+                        should_panic = true;
+                        eprintln!("object is not Hash. got={:?}", actual);
+                        return should_panic
+                    }
+                };
+
+                if hash.pairs.len() != expected.len() {
+                    should_panic = true;
+                    eprintln!("hash has wrong number of Pairs. want={}, got={}",
+                        expected.len(), hash.pairs.len());
+                    return should_panic
+                }
+
+                for (expected_key, expected_value) in expected.into_iter() {
+                    let pair = match hash.pairs.get(&expected_key) {
+                        Some(pair) => pair,
+                        _ => {
+                            should_panic = true;
+                            eprintln!("no pair for given key in Pairs");
+                            return should_panic
+                        }
+                    };
+
+                    let err = test_integer_object(expected_value, Some(&pair.value));
                     if let Some(err) = err {
                         should_panic = true;
                         eprintln!("test_integer_object failed: {}", err)
@@ -647,6 +692,34 @@ mod tests {
             VMTestCase::new("[]", Vec::<i32>::new()),
             VMTestCase::new("[1, 2, 3]", vec![1, 2, 3]),
             VMTestCase::new("[1 + 2, 3 * 4, 5 + 6]", vec![3, 12, 11]),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_hash_literals() {
+        let tests = vec![
+            VMTestCase::new(
+                "{}",
+                BTreeMap::<object::HashKey, i32>::new(),
+            ),
+            VMTestCase::new(
+                "{1: 2, 2: 3}",
+                BTreeMap::<object::HashKey, i32>::from([
+                    ((object::IntegerObj{ value: 1 }).hash_key(), 2),
+                    ((object::IntegerObj{ value: 2 }).hash_key(), 3),
+                ]),
+            ),
+            VMTestCase::new(
+                "{1 + 1: 2 * 2, 3 + 3: 4 * 4}",
+                BTreeMap::<object::HashKey, i32>::from([
+                    ((object::IntegerObj{ value: 2 }).hash_key(), 4),
+                    ((object::IntegerObj{ value: 6 }).hash_key(), 16),
+                ]),
+            ),
         ];
 
         if run_vm_tests(tests) {
