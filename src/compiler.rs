@@ -457,11 +457,13 @@ mod tests {
         Integer(Integer),
         Boolean(Boolean),
         String(String),
+        Instructions(Instructions),
     }
 
     struct Integer(i32);
     struct Boolean(bool);
     struct String(&'static str);
+    struct Instructions(Vec<Vec<u8>>);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
@@ -478,6 +480,12 @@ mod tests {
     impl Into<Expected> for &'static str {
         fn into(self) -> Expected {
             Expected::String(String(self))
+        }
+    }
+
+    impl Into<Expected> for Vec<Vec<u8>> {
+        fn into(self) -> Expected {
+            Expected::Instructions(Instructions(self))
         }
     }
 
@@ -933,6 +941,31 @@ mod tests {
                     code::make(code::Opcode::OpConstant, &vec![3]),
                     code::make(code::Opcode::OpSub, &vec![]),
                     code::make(code::Opcode::OpIndex, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
+
+    #[test]
+    fn test_functions() {
+        let tests = vec![
+            CompilerTestCase::new(
+                "fn() { return 5 + 10 }",
+                vec![
+                    5.into(),
+                    10.into(),
+                    vec![
+                        code::make(code::Opcode::OpConstant, &vec![0]),
+                        code::make(code::Opcode::OpConstant, &vec![1]),
+                        code::make(code::Opcode::OpAdd, &vec![]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![2]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
