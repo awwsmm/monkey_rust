@@ -764,4 +764,24 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_index_expressions() {
+        let tests = vec![
+            VMTestCase::new("[1, 2, 3][1]", 2),
+            VMTestCase::new("[1, 2, 3][0 + 2]", 3),
+            VMTestCase::new("[[1, 1, 1]][0][0]", 1),
+            VMTestCase::new("[][0]", Expected::Null),
+            VMTestCase::new("[1, 2, 3][99]", Expected::Null),
+            VMTestCase::new("[1][-1]", Expected::Null),
+            VMTestCase::new("{1: 1, 2: 2}[1]", 1),
+            VMTestCase::new("{1: 1, 2: 2}[2]", 2),
+            VMTestCase::new("{1: 1}[0]", Expected::Null),
+            VMTestCase::new("{}[0]", Expected::Null),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
