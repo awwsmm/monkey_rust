@@ -1,6 +1,5 @@
 pub(crate) mod symbol_table;
 
-use crate::code::Instructions;
 use crate::{ast, code, object};
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
@@ -292,9 +291,9 @@ impl Compiler {
         let previous = self.scopes[self.scope_index].previous_instruction;
 
         let old = self.current_instructions();
-        let new = old.0[..last.position];
+        let new = &old.0[..last.position];
 
-        self.scopes[self.scope_index].instructions = Instructions(Vec::from(new));
+        self.scopes[self.scope_index].instructions = code::Instructions(Vec::from(new));
         self.scopes[self.scope_index].last_instruction = previous;
     }
 
@@ -343,6 +342,8 @@ impl Compiler {
         for (i, byte) in new_instruction.iter().enumerate() {
             ins[pos+i] = *byte;
         }
+
+        self.scopes[self.scope_index].instructions = ins;
     }
 
     fn change_operand(&mut self, op_pos: usize, operand: usize) {
@@ -350,6 +351,25 @@ impl Compiler {
         let new_instruction = code::make(op, &vec![operand]);
 
         self.replace_instruction(op_pos, new_instruction)
+    }
+
+    fn enter_scope(&mut self) {
+        let scope = CompilationScope{
+            instructions: code::Instructions(vec![]),
+            last_instruction: EmittedInstruction { opcode: None, position: 0 },
+            previous_instruction: EmittedInstruction { opcode: None, position: 0 },
+        };
+        self.scopes.push(scope);
+        self.scope_index += 1;
+    }
+
+    fn leave_scope(&mut self) -> code::Instructions {
+        let instructions = self.current_instructions();
+
+        self.scopes.pop();
+        self.scope_index -= 1;
+
+        instructions
     }
 }
 
@@ -1041,7 +1061,7 @@ mod tests {
         }
 
         let last = compiler.scopes[compiler.scope_index].last_instruction;
-        if last.opcode != code::Opcode::OpSub {
+        if last.opcode != Some(code::Opcode::OpSub) {
             should_panic = true;
             eprintln!("last_instruction.opcode wrong. got={:?}, want={:?}",
                 last.opcode, Some(code::Opcode::OpSub))
@@ -1062,14 +1082,14 @@ mod tests {
         }
 
         let last = compiler.scopes[compiler.scope_index].last_instruction;
-        if last.opcode != code::Opcode::OpAdd {
+        if last.opcode != Some(code::Opcode::OpAdd) {
             should_panic = true;
             eprintln!("last_instruction.opcode wrong. got={:?}, want={:?}",
                 last.opcode, Some(code::Opcode::OpAdd))
         }
 
         let previous = compiler.scopes[compiler.scope_index].previous_instruction;
-        if previous.opcode != code::Opcode::OpMul {
+        if previous.opcode != Some(code::Opcode::OpMul) {
             should_panic = true;
             eprintln!("previous_instruction.opcode wrong. got={:?}, want={:?}",
                       previous.opcode, Some(code::Opcode::OpMul))
