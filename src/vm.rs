@@ -175,7 +175,27 @@ impl VM {
         None
     }
 
-    fn execute_index_expression(&self, left: Option<object::Object>, index: Option<object::Object>) -> Option<compiler::Error> {
+    fn execute_array_index(&mut self, array: Option<object::Object>, index: Option<object::Object>) -> Option<compiler::Error> {
+        let array_object = match array {
+            Some(object::Object::ArrayObj(obj)) => obj,
+            _ => panic!()
+        };
+
+        let i = match index {
+            Some(object::Object::IntegerObj(obj)) => obj.value,
+            _ => panic!()
+        };
+
+        let max = (array_object.elements.len() - 1) as i32;
+
+        if i < 0 || i > max {
+            return self.push(NULL)
+        }
+
+        self.push(array_object.elements[i])
+    }
+
+    fn execute_index_expression(&mut self, left: Option<object::Object>, index: Option<object::Object>) -> Option<compiler::Error> {
         let left_type = left.as_ref()?.object_type();
         let index_type = index.as_ref()?.object_type();
 
