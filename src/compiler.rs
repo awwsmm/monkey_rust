@@ -320,11 +320,13 @@ impl Compiler {
         self.last_instruction = last;
     }
 
-    fn add_instruction(&mut self, ins: Vec<u8>) -> usize {
-        let pos_new_instruction = self.instructions.len();
-        for byte in ins.iter() {
-            self.instructions.push(*byte)
-        }
+    fn add_instruction(&mut self, mut ins: Vec<u8>) -> usize {
+        let pos_new_instruction = self.current_instructions().len();
+        let mut updated_instructions = self.current_instructions().0.clone();
+        updated_instructions.append(&mut ins);
+
+        self.scopes[self.scope_index].instructions = code::Instructions(updated_instructions);
+
         pos_new_instruction
     }
 
