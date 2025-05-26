@@ -26,6 +26,12 @@ struct EmittedInstruction {
     position: usize,
 }
 
+struct CompilationScope {
+    instructions: code::Instructions,
+    last_instruction: EmittedInstruction,
+    previous_instruction: EmittedInstruction,
+}
+
 pub(crate) struct Compiler {
     instructions: code::Instructions,
     constants: Vec<object::Object>,
@@ -34,6 +40,9 @@ pub(crate) struct Compiler {
     previous_instruction: EmittedInstruction,
 
     pub(crate) symbol_table: symbol_table::SymbolTable,
+
+    scopes: Vec<CompilationScope>,
+    scope_index: usize,
 }
 
 impl Compiler {
@@ -46,6 +55,9 @@ impl Compiler {
             previous_instruction: EmittedInstruction{ opcode: None, position: 0 },
 
             symbol_table: symbol_table::SymbolTable::new(),
+
+            scopes: vec![],
+            scope_index: 0,
         }
     }
 
