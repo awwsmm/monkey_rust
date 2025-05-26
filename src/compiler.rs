@@ -1,5 +1,6 @@
 pub(crate) mod symbol_table;
 
+use crate::code::Instructions;
 use crate::{ast, code, object};
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
@@ -283,12 +284,18 @@ impl Compiler {
     }
 
     fn last_instruction_is_pop(&mut self) -> bool {
-        self.last_instruction.opcode == Some(code::Opcode::OpPop)
+        self.scopes[self.scope_index].last_instruction.opcode == Some(code::Opcode::OpPop)
     }
 
     fn remove_last_pop(&mut self) {
-        self.instructions.truncate(self.last_instruction.position);
-        self.last_instruction = self.previous_instruction;
+        let last = self.scopes[self.scope_index].last_instruction;
+        let previous = self.scopes[self.scope_index].previous_instruction;
+
+        let old = self.current_instructions();
+        let new = old.0[..last.position];
+
+        self.scopes[self.scope_index].instructions = Instructions(Vec::from(new));
+        self.scopes[self.scope_index].last_instruction = previous;
     }
 
     pub(crate) fn bytecode(&self) -> Bytecode {
@@ -313,11 +320,11 @@ impl Compiler {
     }
 
     fn set_last_instruction(&mut self, op: code::Opcode, pos: usize) {
-        let previous = self.last_instruction;
+        let previous = self.scopes[self.scope_index].last_instruction;
         let last = EmittedInstruction{ opcode: Some(op), position: pos };
 
-        self.previous_instruction = previous;
-        self.last_instruction = last;
+        self.scopes[self.scope_index].previous_instruction = previous;
+        self.scopes[self.scope_index].last_instruction = last;
     }
 
     fn add_instruction(&mut self, mut ins: Vec<u8>) -> usize {
@@ -330,17 +337,19 @@ impl Compiler {
         pos_new_instruction
     }
 
-    fn replace_instructions(&mut self, pos: usize, new_instruction: Vec<u8>) {
+    fn replace_instruction(&mut self, pos: usize, new_instruction: Vec<u8>) {
+        let mut ins = self.current_instructions();
+
         for (i, byte) in new_instruction.iter().enumerate() {
-            self.instructions[pos+i] = *byte;
+            ins[pos+i] = *byte;
         }
     }
 
     fn change_operand(&mut self, op_pos: usize, operand: usize) {
-        let op: code::Opcode = self.instructions[op_pos].into();
+        let op: code::Opcode = self.current_instructions()[op_pos].into();
         let new_instruction = code::make(op, &vec![operand]);
 
-        self.replace_instructions(op_pos, new_instruction)
+        self.replace_instruction(op_pos, new_instruction)
     }
 }
 
