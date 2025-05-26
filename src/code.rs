@@ -77,6 +77,7 @@ pub(crate) enum Opcode {
     OpGetGlobal,
     OpSetGlobal,
     OpArray,
+    OpHash,
 }
 
 impl Into<u8> for Opcode {
@@ -101,6 +102,7 @@ impl Into<u8> for Opcode {
             Opcode::OpGetGlobal => 16,
             Opcode::OpSetGlobal => 17,
             Opcode::OpArray => 18,
+            Opcode::OpHash => 19,
         }
     }
 }
@@ -233,6 +235,12 @@ const OP_ARRAY: Definition = Definition{
     operand_widths: &[2],
 };
 
+const OP_HASH: Definition = Definition{
+    opcode: Opcode::OpHash,
+    name: "OpHash",
+    operand_widths: &[2],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
@@ -256,6 +264,7 @@ impl Into<Definition> for u8 {
             16 => OP_GET_GLOBAL,
             17 => OP_SET_GLOBAL,
             18 => OP_ARRAY,
+            19 => OP_HASH,
             _ => panic!("opcode {} undefined", self)
         }
     }
