@@ -80,6 +80,7 @@ pub(crate) enum Opcode {
     OpHash,
     OpIndex,
     OpCall,
+    OpReturnValue,
 }
 
 impl Into<u8> for Opcode {
@@ -107,6 +108,7 @@ impl Into<u8> for Opcode {
             Opcode::OpHash => 19,
             Opcode::OpIndex => 20,
             Opcode::OpCall => 21,
+            Opcode::OpReturnValue => 22,
         }
     }
 }
@@ -257,6 +259,12 @@ const OP_CALL: Definition = Definition{
     operand_widths: &[],
 };
 
+const OP_RETURN_VALUE: Definition = Definition{
+    opcode: Opcode::OpReturnValue,
+    name: "OpReturnValue",
+    operand_widths: &[],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
@@ -283,6 +291,7 @@ impl Into<Definition> for u8 {
             19 => OP_HASH,
             20 => OP_INDEX,
             21 => OP_CALL,
+            22 => OP_RETURN_VALUE,
             _ => panic!("opcode {} undefined", self)
         }
     }
