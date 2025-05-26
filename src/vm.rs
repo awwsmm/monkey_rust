@@ -175,8 +175,27 @@ impl VM {
         None
     }
 
+    fn execute_hash_index(&mut self, hash: Option<object::Object>, index: Option<object::Object>) -> Option<compiler::Error> {
+        let mut hash_object = match hash {
+            Some(object::Object::HashObj(obj)) => obj,
+            _ => panic!()
+        };
+
+        let key = match index.as_ref()?.as_hashable() {
+            Some(obj) => obj,
+            None => return compiler::Error::new(format!("unusable as hash key: {:?}", index.as_ref()?.object_type())),
+        };
+
+        let pair = match hash_object.pairs.remove(&key.hash_key()) {
+            Some(obj) => obj,
+            None => return self.push(NULL)
+        };
+
+        self.push(pair.value)
+    }
+
     fn execute_array_index(&mut self, array: Option<object::Object>, index: Option<object::Object>) -> Option<compiler::Error> {
-        let array_object = match array {
+        let mut array_object = match array {
             Some(object::Object::ArrayObj(obj)) => obj,
             _ => panic!()
         };
@@ -186,13 +205,13 @@ impl VM {
             _ => panic!()
         };
 
-        let max = (array_object.elements.len() - 1) as i32;
+        let max = array_object.elements.len() as i32 - 1;
 
         if i < 0 || i > max {
             return self.push(NULL)
         }
 
-        self.push(array_object.elements[i])
+        self.push(array_object.elements.remove(i as usize))
     }
 
     fn execute_index_expression(&mut self, left: Option<object::Object>, index: Option<object::Object>) -> Option<compiler::Error> {
