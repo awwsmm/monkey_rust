@@ -33,11 +33,7 @@ struct CompilationScope {
 }
 
 pub(crate) struct Compiler {
-    instructions: code::Instructions,
     constants: Vec<object::Object>,
-
-    last_instruction: EmittedInstruction,
-    previous_instruction: EmittedInstruction,
 
     pub(crate) symbol_table: symbol_table::SymbolTable,
 
@@ -47,16 +43,16 @@ pub(crate) struct Compiler {
 
 impl Compiler {
     pub(crate) fn new() -> Self {
-        Self {
+        let main_scope = CompilationScope{
             instructions: code::Instructions(vec![]),
+            last_instruction: EmittedInstruction { opcode: None, position: 0 },
+            previous_instruction: EmittedInstruction { opcode: None, position: 0 },
+        };
+
+        Self {
             constants: vec![],
-
-            last_instruction: EmittedInstruction{ opcode: None, position: 0 },
-            previous_instruction: EmittedInstruction{ opcode: None, position: 0 },
-
             symbol_table: symbol_table::SymbolTable::new(),
-
-            scopes: vec![],
+            scopes: vec![main_scope],
             scope_index: 0,
         }
     }
