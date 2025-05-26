@@ -1,4 +1,4 @@
-use crate::ast;
+use crate::{ast, code};
 use std::cell::RefCell;
 use std::cmp::PartialEq;
 use std::collections::BTreeMap;
@@ -19,6 +19,7 @@ pub(crate) enum ObjectType {
     BuiltinObj,
     ArrayObj,
     HashObj,
+    CompiledFunctionObj,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -33,6 +34,7 @@ pub(crate) enum Object {
     BuiltinObj(BuiltinObj),
     ArrayObj(ArrayObj),
     HashObj(HashObj),
+    CompiledFunctionObj(CompiledFunctionObj),
 }
 
 pub(crate) trait ObjectLike {
@@ -53,6 +55,7 @@ impl Object {
             Object::BuiltinObj(inner) => Box::new(inner),
             Object::ArrayObj(inner) => Box::new(inner),
             Object::HashObj(inner) => Box::new(inner),
+            Object::CompiledFunctionObj(inner) => Box::new(inner),
         }
     }
 
@@ -320,6 +323,21 @@ impl HasHashKey for Hashable {
             Hashable::IntegerObj(inner) => inner.hash_key(),
             Hashable::StringObj(inner) => inner.hash_key(),
         }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct CompiledFunctionObj {
+    instructions: code::Instructions,
+}
+
+impl ObjectLike for CompiledFunctionObj {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::CompiledFunctionObj
+    }
+
+    fn inspect(&self) -> String {
+        format!("CompiledFunction[{:p}]", &self)
     }
 }
 

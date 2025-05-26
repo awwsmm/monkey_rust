@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Instructions(pub(crate) Vec<u8>);
 
 impl Instructions {
