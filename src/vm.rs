@@ -157,6 +157,15 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpIndex => {
+                    let index = self.pop();
+                    let left = self.pop();
+
+                    if let Some(err) = self.execute_index_expression(left, index) {
+                        return Some(err)
+                    }
+                }
+
                 _ => () // TODO
             }
 
