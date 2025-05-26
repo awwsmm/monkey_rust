@@ -278,6 +278,10 @@ impl Compiler {
         None
     }
 
+    fn current_instructions(&self) -> code::Instructions {
+        self.scopes[self.scope_index].instructions.clone()
+    }
+
     fn last_instruction_is_pop(&mut self) -> bool {
         self.last_instruction.opcode == Some(code::Opcode::OpPop)
     }
