@@ -250,6 +250,20 @@ impl Compiler {
                 self.emit(code::Opcode::OpGetGlobal, vec![symbol.index]);
             }
 
+            ast::Node::Expression(ast::Expression::IndexExpression(node)) => {
+                let err = self.compile(ast::Node::Expression(*node.left));
+                if err.is_some() {
+                    return err
+                }
+
+                let err = self.compile(ast::Node::Expression(*node.index?));
+                if err.is_some() {
+                    return err
+                }
+
+                self.emit(code::Opcode::OpIndex, vec![]);
+            }
+
             _ => ()
         }
 
