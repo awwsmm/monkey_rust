@@ -1,5 +1,6 @@
-use crate::object::ObjectLike;
+use crate::object::{HasHashKey, ObjectLike};
 use crate::{code, compiler, object};
+use std::collections::BTreeMap;
 
 const STACK_SIZE: usize = 2048;
 pub(crate) const GLOBALS_SIZE: usize = 2048;
@@ -163,6 +164,28 @@ impl VM {
         }
 
         None
+    }
+
+    fn build_hash(&self, start_index: usize, end_index: usize) -> Result<object::Object, Option<compiler::Error>> {
+        let mut hashed_pairs = BTreeMap::new();
+
+        let mut i = start_index;
+        while i < end_index {
+            let key = self.stack[i].as_ref().unwrap().clone();
+            let value= self.stack[i+1].as_ref().unwrap().clone();
+
+            let hash_key = match key.as_hashable() {
+                Some(key) => key,
+                _ => return Err(compiler::Error::new(format!("unusable as hash key: {:?}", key.object_type())))
+            };
+
+            let pair = object::HashPair{ key, value };
+
+            hashed_pairs.insert(hash_key.hash_key(), pair);
+            i += 2;
+        }
+
+        Ok(object::Object::HashObj(object::HashObj{ pairs: hashed_pairs }))
     }
 
     fn build_array(&self, start_index: usize, end_index: usize) -> object::Object {
