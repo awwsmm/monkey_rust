@@ -288,6 +288,10 @@ impl Compiler {
                     return err
                 }
 
+                if self.last_instruction_is(code::Opcode::OpPop) {
+                    self.replace_last_pop_with_return()
+                }
+
                 let instructions = self.leave_scope();
 
                 let compiled_func = object::Object::CompiledFunctionObj(object::CompiledFunctionObj{ instructions });
@@ -299,6 +303,13 @@ impl Compiler {
         }
 
         None
+    }
+
+    fn replace_last_pop_with_return(&mut self) {
+        let last_pos = self.scopes[self.scope_index].last_instruction.position;
+        self.replace_instruction(last_pos, code::make(code::Opcode::OpReturnValue, &vec![]));
+
+        self.scopes[self.scope_index].last_instruction.opcode = Some(code::Opcode::OpReturnValue)
     }
 
     fn current_instructions(&self) -> code::Instructions {
