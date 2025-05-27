@@ -1171,4 +1171,24 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_functions_without_return_value() {
+        let tests = vec![
+            CompilerTestCase::new(
+                "fn() { }",
+                vec![
+                    vec![
+                        code::make(code::Opcode::OpReturn, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
 }
