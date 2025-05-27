@@ -26,18 +26,18 @@ const NULL: object::Object = object::Object::NullObj(object::NullObj{});
 const MAX_FRAMES: usize = 1024;
 
 impl VM {
-    fn current_frame(&self) -> frame::Frame {
-        self.frames[self.frames_index-1]
+    fn current_frame(&mut self) -> &mut frame::Frame {
+        &mut self.frames[(self.frames_index-1) as usize]
     }
 
     fn push_frame(&mut self, f: frame::Frame) {
-        self.frames[self.frames_index] = f;
+        self.frames[self.frames_index as usize] = f;
         self.frames_index += 1;
     }
 
     fn pop_frame(&mut self) -> frame::Frame {
         self.frames_index -= 1;
-        self.frames[self.frames_index]
+        self.frames.remove(self.frames_index as usize)
     }
 
     pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
@@ -74,9 +74,16 @@ impl VM {
     }
 
     pub(crate) fn run(&mut self) -> Option<compiler::Error> {
-        let mut ip = 0;
-        while ip < self.instructions.len() {
-            let op: code::Opcode = self.instructions[ip].into();
+        let mut ip: usize;
+        let mut ins: code::Instructions;
+        let mut op: code::Opcode;
+
+        while self.current_frame().ip < (self.current_frame().instructions().len() - 1) as i32 {
+            self.current_frame().ip += 1;
+
+            ip = self.current_frame().ip as usize;
+            ins = self.current_frame().instructions();
+            op = ins[ip].into();
 
             match op {
                 code::Opcode::OpConstant => {
@@ -196,8 +203,6 @@ impl VM {
 
                 _ => () // TODO
             }
-
-            ip += 1
         }
 
         None

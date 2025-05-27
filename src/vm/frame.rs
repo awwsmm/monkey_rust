@@ -2,7 +2,7 @@ use crate::{code, object};
 
 pub(crate) struct Frame {
     func: object::CompiledFunctionObj,
-    ip: i32,
+    pub(crate) ip: i32,
 }
 
 impl Frame {
@@ -10,7 +10,7 @@ impl Frame {
         Self { func, ip: -1 }
     }
 
-    fn instructions(&self) -> code::Instructions {
+    pub(crate) fn instructions(&self) -> code::Instructions {
         self.func.instructions.clone()
     }
 }
