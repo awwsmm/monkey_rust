@@ -222,6 +222,15 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpReturn => {
+                    self.pop_frame();
+                    self.pop();
+
+                    if let Some(err) = self.push(NULL) {
+                        return Some(err)
+                    }
+                }
+
                 _ => () // TODO
             }
         }
