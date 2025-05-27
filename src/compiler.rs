@@ -291,6 +291,9 @@ impl Compiler {
                 if self.last_instruction_is(code::Opcode::OpPop) {
                     self.replace_last_pop_with_return()
                 }
+                if !self.last_instruction_is(code::Opcode::OpReturnValue) {
+                    self.emit(code::Opcode::OpReturn, vec![]);
+                }
 
                 let instructions = self.leave_scope();
 
