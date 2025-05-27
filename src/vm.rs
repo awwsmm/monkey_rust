@@ -935,4 +935,28 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_functions_with_return_statement() {
+        let tests = vec![
+            VMTestCase::new(
+                r#"
+                let earlyExit = fn() { return 99; 100; };
+			    earlyExit();
+                "#,
+                99,
+            ),
+            VMTestCase::new(
+                r#"
+                let earlyExit = fn() { return 99; return 100; };
+			    earlyExit();
+                "#,
+                99,
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
