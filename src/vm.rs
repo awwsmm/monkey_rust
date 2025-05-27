@@ -1,3 +1,5 @@
+mod frame;
+
 use crate::object::{HasHashKey, ObjectLike};
 use crate::{code, compiler, object};
 use std::collections::BTreeMap;
