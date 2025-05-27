@@ -1,6 +1,6 @@
 mod frame;
 
-use crate::object::{HasHashKey, Object, ObjectLike};
+use crate::object::{HasHashKey, ObjectLike};
 use crate::{code, compiler, object};
 use std::collections::BTreeMap;
 
@@ -203,12 +203,23 @@ impl VM {
 
                 code::Opcode::OpCall => {
                     let func = match self.stack[self.sp-1].clone() {
-                        Some(Object::CompiledFunctionObj(obj)) => obj,
+                        Some(object::Object::CompiledFunctionObj(obj)) => obj,
                         _ => return compiler::Error::new("calling non-function")
                     };
 
                     let frame = frame::Frame::new(func);
                     self.push_frame(frame)
+                }
+
+                code::Opcode::OpReturnValue => {
+                    let return_value = self.pop();
+
+                    self.pop_frame();
+                    self.pop();
+
+                    if let Some(err) = self.push(return_value?) {
+                        return Some(err)
+                    }
                 }
 
                 _ => () // TODO
