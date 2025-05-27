@@ -995,4 +995,22 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_first_class_functions() {
+        let tests = vec![
+            VMTestCase::new(
+                r#"
+			    let returnsOne = fn() { 1; };
+                let returnsOneReturner = fn() { returnsOne; };
+                returnsOneReturner()();
+                "#,
+                1,
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
