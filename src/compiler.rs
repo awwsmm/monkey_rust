@@ -1052,6 +1052,23 @@ mod tests {
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
+            CompilerTestCase::new(
+                "fn() { 5 + 10 }",
+                vec![
+                    5.into(),
+                    10.into(),
+                    vec![
+                        code::make(code::Opcode::OpConstant, &vec![0]),
+                        code::make(code::Opcode::OpConstant, &vec![1]),
+                        code::make(code::Opcode::OpAdd, &vec![]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
         ];
 
         run_compiler_tests(tests)
