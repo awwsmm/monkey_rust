@@ -1,6 +1,6 @@
 mod frame;
 
-use crate::object::{HasHashKey, ObjectLike};
+use crate::object::{HasHashKey, Object, ObjectLike};
 use crate::{code, compiler, object};
 use std::collections::BTreeMap;
 
@@ -31,7 +31,7 @@ impl VM {
     }
 
     fn push_frame(&mut self, f: frame::Frame) {
-        self.frames[self.frames_index as usize] = f;
+        self.frames.push(f);
         self.frames_index += 1;
     }
 
@@ -199,6 +199,16 @@ impl VM {
                     if let Some(err) = self.execute_index_expression(left, index) {
                         return Some(err)
                     }
+                }
+
+                code::Opcode::OpCall => {
+                    let func = match self.stack[self.sp-1].clone() {
+                        Some(Object::CompiledFunctionObj(obj)) => obj,
+                        _ => return compiler::Error::new("calling non-function")
+                    };
+
+                    let frame = frame::Frame::new(func);
+                    self.push_frame(frame)
                 }
 
                 _ => () // TODO
