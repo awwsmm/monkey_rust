@@ -880,4 +880,21 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_calling_functions_without_arguments() {
+        let tests = vec![
+            VMTestCase::new(
+                r#"
+                let fivePlusTen = fn() { 5 + 10; };
+                fivePlusTen();
+                "#,
+                15,
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }

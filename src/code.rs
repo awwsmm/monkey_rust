@@ -1,8 +1,14 @@
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Deref, DerefMut};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub(crate) struct Instructions(pub(crate) Vec<u8>);
+
+impl Debug for Instructions {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
 
 impl Instructions {
     fn fmt_instruction(&self, def: Definition, operands: Vec<usize>) -> String {
