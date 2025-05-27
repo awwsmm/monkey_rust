@@ -912,6 +912,23 @@ mod tests {
                 "#,
                 15,
             ),
+            VMTestCase::new(
+                r#"
+                let one = fn() { 1; };
+                let two = fn() { 2; };
+                one() + two()
+                "#,
+                3,
+            ),
+            VMTestCase::new(
+                r#"
+                let a = fn() { 1 };
+                let b = fn() { a() + 1 };
+                let c = fn() { b() + 1 };
+                c();
+                "#,
+                3,
+            ),
         ];
 
         if run_vm_tests(tests) {
