@@ -1194,4 +1194,47 @@ mod tests {
 
         run_compiler_tests(tests)
     }
+
+    #[test]
+    fn test_function_calls() {
+        let tests = vec![
+            CompilerTestCase::new(
+                "fn() { 24 }();",
+                vec![
+                    24.into(),
+                    vec![
+                        code::make(code::Opcode::OpConstant, &vec![0]), // The literal "24"
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![1]), // The compiled function
+                    code::make(code::Opcode::OpCall, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                r#"
+                let noArg = fn() { 24 }();
+                noArg();
+                "#,
+                vec![
+                    24.into(),
+                    vec![
+                        code::make(code::Opcode::OpConstant, &vec![0]), // The literal "24"
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![1]), // The compiled function
+                    code::make(code::Opcode::OpSetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpGetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpCall, &vec![]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
 }
