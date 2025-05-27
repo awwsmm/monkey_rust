@@ -101,6 +101,14 @@ impl Compiler {
                 self.emit(code::Opcode::OpSetGlobal, vec![symbol.index]);
             }
 
+            ast::Node::Statement(ast::Statement::ReturnStatement(node)) => {
+                let err = self.compile(ast::Node::Expression(node.return_value?));
+                if err.is_some() {
+                    return err
+                }
+                self.emit(code::Opcode::OpReturnValue, vec![]);
+            }
+
             ast::Node::Expression(ast::Expression::IfExpression(node)) => {
                 let err = self.compile(ast::Node::Expression(*node.condition?));
                 if err.is_some() {
