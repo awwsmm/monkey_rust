@@ -122,7 +122,7 @@ impl Compiler {
                     return err
                 }
 
-                if self.last_instruction_is_pop() {
+                if self.last_instruction_is() {
                     self.remove_last_pop()
                 }
 
@@ -140,7 +140,7 @@ impl Compiler {
                         return err
                     }
 
-                    if self.last_instruction_is_pop() {
+                    if self.last_instruction_is() {
                         self.remove_last_pop()
                     }
                 }
@@ -305,8 +305,12 @@ impl Compiler {
         self.scopes[self.scope_index].instructions.clone()
     }
 
-    fn last_instruction_is_pop(&mut self) -> bool {
-        self.scopes[self.scope_index].last_instruction.opcode == Some(code::Opcode::OpPop)
+    fn last_instruction_is(&mut self, op: code::Opcode) -> bool {
+        if self.current_instructions().len() == 0 {
+            return false
+        }
+
+        self.scopes[self.scope_index].last_instruction.opcode == Some(op)
     }
 
     fn remove_last_pop(&mut self) {
