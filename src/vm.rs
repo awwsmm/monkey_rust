@@ -689,8 +689,9 @@ mod tests {
             }
 
             Expected::Null =>
-                if actual != None {
-                    eprintln!("object is not None: {:?}", actual)
+                if actual != Some(&NULL) {
+                    should_panic = true;
+                    eprintln!("object is not NULL: {:?}", actual)
                 }
 
             _ => () // TODO
@@ -952,6 +953,32 @@ mod tests {
 			    earlyExit();
                 "#,
                 99,
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_functions_without_return_value() {
+        let tests = vec![
+            VMTestCase::new(
+                r#"
+			    let noReturn = fn() { };
+			    noReturn();
+                "#,
+                Expected::Null,
+            ),
+            VMTestCase::new(
+                r#"
+                let noReturn = fn() { };
+                let noReturnTwo = fn() { noReturn(); };
+			    noReturn();
+			    noReturnTwo();
+                "#,
+                Expected::Null,
             ),
         ];
 
