@@ -24,6 +24,8 @@ const TRUE: object::Object = object::Object::BooleanObj(object::BooleanObj{ valu
 const FALSE: object::Object = object::Object::BooleanObj(object::BooleanObj{ value: false });
 const NULL: object::Object = object::Object::NullObj(object::NullObj{});
 
+const MAX_FRAMES: usize = 1024;
+
 impl VM {
     fn current_frame(&self) -> frame::Frame {
         self.frames[self.frames_index-1]
@@ -40,8 +42,13 @@ impl VM {
     }
 
     pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
+        let main_func = object::CompiledFunctionObj{ instructions: bytecode.instructions };
+        let main_frame = frame::Frame::new(main_func);
+
+        let mut frames = Vec::with_capacity(MAX_FRAMES);
+        frames.push(main_frame);
+
         Self {
-            instructions: bytecode.instructions,
             constants: bytecode.constants,
 
             stack: [const { None }; STACK_SIZE],
@@ -49,8 +56,8 @@ impl VM {
 
             globals: [const { None }; GLOBALS_SIZE],
 
-            frames: vec![],
-            frames_index: 0,
+            frames,
+            frames_index: 1,
         }
     }
 

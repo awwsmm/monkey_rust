@@ -6,7 +6,7 @@ pub(crate) struct Frame {
 }
 
 impl Frame {
-    fn new(func: object::CompiledFunctionObj) -> Self {
+    pub(crate) fn new(func: object::CompiledFunctionObj) -> Self {
         Self { func, ip: -1 }
     }
 
