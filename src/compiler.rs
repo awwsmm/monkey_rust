@@ -122,7 +122,7 @@ impl Compiler {
                     return err
                 }
 
-                if self.last_instruction_is() {
+                if self.last_instruction_is(code::Opcode::OpPop) {
                     self.remove_last_pop()
                 }
 
@@ -140,7 +140,7 @@ impl Compiler {
                         return err
                     }
 
-                    if self.last_instruction_is() {
+                    if self.last_instruction_is(code::Opcode::OpPop) {
                         self.remove_last_pop()
                     }
                 }
