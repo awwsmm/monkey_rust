@@ -9,7 +9,6 @@ pub(crate) const GLOBALS_SIZE: usize = 2048;
 
 pub(crate) struct VM {
     constants: Vec<object::Object>,
-    instructions: code::Instructions,
 
     stack: [Option<object::Object>; STACK_SIZE],
     sp: usize, // Always points to the next value. Top of stack is stack[sp-1]
