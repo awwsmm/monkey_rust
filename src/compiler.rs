@@ -302,6 +302,14 @@ impl Compiler {
                 self.emit(code::Opcode::OpConstant, vec![size]);
             }
 
+            ast::Node::Expression(ast::Expression::CallExpression(node)) => {
+                let err = self.compile(ast::Node::Expression(*node.function));
+                if err.is_some() {
+                    return err
+                }
+                self.emit(code::Opcode::OpCall, vec![]);
+            }
+
             _ => ()
         }
 
@@ -1215,7 +1223,7 @@ mod tests {
             ),
             CompilerTestCase::new(
                 r#"
-                let noArg = fn() { 24 }();
+                let noArg = fn() { 24 };
                 noArg();
                 "#,
                 vec![
