@@ -1,6 +1,6 @@
 use crate::{code, object};
 
-struct Frame {
+pub(crate) struct Frame {
     func: object::CompiledFunctionObj,
     ip: i32,
 }

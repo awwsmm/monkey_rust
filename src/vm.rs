@@ -15,6 +15,9 @@ pub(crate) struct VM {
     sp: usize, // Always points to the next value. Top of stack is stack[sp-1]
 
     pub(crate) globals: [Option<object::Object>; GLOBALS_SIZE],
+
+    frames: Vec<frame::Frame>,
+    frames_index: i32,
 }
 
 const TRUE: object::Object = object::Object::BooleanObj(object::BooleanObj{ value: true });
@@ -22,6 +25,20 @@ const FALSE: object::Object = object::Object::BooleanObj(object::BooleanObj{ val
 const NULL: object::Object = object::Object::NullObj(object::NullObj{});
 
 impl VM {
+    fn current_frame(&self) -> frame::Frame {
+        self.frames[self.frames_index-1]
+    }
+
+    fn push_frame(&mut self, f: frame::Frame) {
+        self.frames[self.frames_index] = f;
+        self.frames_index += 1;
+    }
+
+    fn pop_frame(&mut self) -> frame::Frame {
+        self.frames_index -= 1;
+        self.frames[self.frames_index]
+    }
+
     pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
         Self {
             instructions: bytecode.instructions,
@@ -31,6 +48,9 @@ impl VM {
             sp: 0,
 
             globals: [const { None }; GLOBALS_SIZE],
+
+            frames: vec![],
+            frames_index: 0,
         }
     }
 
