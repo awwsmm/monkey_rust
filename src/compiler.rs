@@ -272,6 +272,21 @@ impl Compiler {
                 self.emit(code::Opcode::OpIndex, vec![]);
             }
 
+            ast::Node::Expression(ast::Expression::FunctionLiteral(node)) => {
+                self.enter_scope();
+
+                let err = self.compile(ast::Node::Statement(ast::Statement::BlockStatement(node.body?)));
+                if err.is_some() {
+                    return err
+                }
+
+                let instructions = self.leave_scope();
+
+                let compiled_func = object::Object::CompiledFunctionObj(object::CompiledFunctionObj{ instructions });
+                let size = self.add_constant(compiled_func);
+                self.emit(code::Opcode::OpConstant, vec![size]);
+            }
+
             _ => ()
         }
 
