@@ -88,6 +88,8 @@ pub(crate) enum Opcode {
     OpCall,
     OpReturnValue,
     OpReturn,
+    OpGetLocal,
+    OpSetLocal,
 }
 
 impl Into<u8> for Opcode {
@@ -117,6 +119,8 @@ impl Into<u8> for Opcode {
             Opcode::OpCall => 21,
             Opcode::OpReturnValue => 22,
             Opcode::OpReturn => 23,
+            Opcode::OpGetLocal => 24,
+            Opcode::OpSetLocal => 25,
         }
     }
 }
@@ -279,6 +283,18 @@ const OP_RETURN: Definition = Definition{
     operand_widths: &[],
 };
 
+const OP_GET_LOCAL: Definition = Definition{
+    opcode: Opcode::OpGetLocal,
+    name: "OpGetLocal",
+    operand_widths: &[1],
+};
+
+const OP_SET_LOCAL: Definition = Definition{
+    opcode: Opcode::OpSetLocal,
+    name: "OpSetLocal",
+    operand_widths: &[1],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
@@ -307,6 +323,8 @@ impl Into<Definition> for u8 {
             21 => OP_CALL,
             22 => OP_RETURN_VALUE,
             23 => OP_RETURN,
+            24 => OP_GET_LOCAL,
+            25 => OP_SET_LOCAL,
             _ => panic!("opcode {} undefined", self)
         }
     }
