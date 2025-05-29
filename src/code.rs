@@ -402,6 +402,7 @@ mod tests {
         let tests = vec![
             Test::new(Opcode::OpConstant, vec![65534], vec![Opcode::OpConstant.into(), 255, 254]),
             Test::new(Opcode::OpAdd, vec![], vec![Opcode::OpAdd.into()]),
+            Test::new(Opcode::OpGetLocal, vec![255], vec![Opcode::OpGetLocal.into(), 255]),
         ];
 
         for tt in tests.into_iter() {
