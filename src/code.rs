@@ -352,6 +352,7 @@ pub(crate) fn make(op: Opcode, operands: &Vec<usize>) -> Vec<u8> {
         let width = def.operand_widths.get(i).unwrap();
         match width {
             2 => u16::try_from(*o).unwrap().to_be_bytes().iter().for_each(|b| instruction.push(*b)),
+            1 => instruction.push(*o as u8),
             _ => panic!("unimplemented")
         }
         offset += width
