@@ -427,13 +427,15 @@ mod tests {
     fn test_instructions_string() {
         let instructions = vec![
             make(Opcode::OpAdd, &vec![]),
+            make(Opcode::OpGetLocal, &vec![1]),
             make(Opcode::OpConstant, &vec![2]),
             make(Opcode::OpConstant, &vec![65535]),
         ];
 
         let expected = r#"0000 OpAdd
-0001 OpConstant 2
-0004 OpConstant 65535
+0001 OpGetLocal 1
+0003 OpConstant 2
+0006 OpConstant 65535
 "#;
         let mut concatted = Instructions(vec![]);
         for ins in instructions.iter() {
@@ -471,6 +473,7 @@ mod tests {
 
         let tests = vec![
             Test::new(Opcode::OpConstant, vec![65535], 2),
+            Test::new(Opcode::OpGetLocal, vec![255], 1),
         ];
 
         let mut should_panic = false;
