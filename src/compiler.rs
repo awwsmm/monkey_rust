@@ -1,8 +1,10 @@
 pub(crate) mod symbol_table;
 
 use crate::{ast, code, object};
+use std::cell::RefCell;
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 
 pub(crate) struct Error {
     message: String
@@ -35,7 +37,7 @@ struct CompilationScope {
 pub(crate) struct Compiler {
     constants: Vec<object::Object>,
 
-    pub(crate) symbol_table: symbol_table::SymbolTable,
+    pub(crate) symbol_table: Rc<RefCell<symbol_table::SymbolTable>>,
 
     scopes: Vec<CompilationScope>,
     scope_index: usize,
@@ -57,7 +59,7 @@ impl Compiler {
         }
     }
 
-    pub(crate) fn new_with_state(s: symbol_table::SymbolTable, constants: Vec<object::Object>) -> Self {
+    pub(crate) fn new_with_state(s: Rc<RefCell<symbol_table::SymbolTable>>, constants: Vec<object::Object>) -> Self {
         let mut compiler = Self::new();
         compiler.symbol_table = s;
         compiler.constants = constants;
@@ -97,7 +99,7 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
-                let symbol = self.symbol_table.define(node.name?.value);
+                let symbol = self.symbol_table.borrow_mut().define(node.name?.value);
                 self.emit(code::Opcode::OpSetGlobal, vec![symbol.index]);
             }
 
@@ -258,7 +260,7 @@ impl Compiler {
             }
 
             ast::Node::Expression(ast::Expression::Identifier(node)) => {
-                let symbol = match self.symbol_table.resolve(node.value.as_str()) {
+                let symbol = match self.symbol_table.borrow().resolve(node.value.as_str()) {
                     None => return Error::new(format!("undefined variable {}", node.value)),
                     Some(symbol) => symbol
                 };

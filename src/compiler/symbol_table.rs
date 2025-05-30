@@ -1,9 +1,12 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::Into;
+use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 struct SymbolScope(&'static str);
 
+const LOCAL_SCOPE: SymbolScope = SymbolScope("LOCAL");
 const GLOBAL_SCOPE: SymbolScope = SymbolScope("GLOBAL");
 
 #[derive(Debug, Clone, PartialEq)]
@@ -21,19 +24,19 @@ impl Symbol {
 
 #[derive(Clone)]
 pub(crate) struct SymbolTable {
-    outer: Option<Box<SymbolTable>>,
+    outer: Option<Rc<RefCell<SymbolTable>>>,
 
     store: HashMap<String, Symbol>,
     num_definitions: usize,
 }
 
 impl SymbolTable {
-    pub(crate) fn new() -> Self {
-        Self { outer: None, store: Default::default(), num_definitions: 0 }
+    pub(crate) fn new() -> Rc<RefCell<Self>> {
+        Rc::new(RefCell::new(Self { outer: None, store: Default::default(), num_definitions: 0 }))
     }
 
-    pub(crate) fn new_enclosed(outer: SymbolTable) -> Self {
-        Self { outer: Some(Box::new(outer)), store: Default::default(), num_definitions: 0 }
+    pub(crate) fn new_enclosed(outer: Rc<RefCell<SymbolTable>>) -> Rc<RefCell<Self>> {
+        Rc::new(RefCell::new(Self { outer: Some(outer), store: Default::default(), num_definitions: 0 }))
     }
 
     pub(crate) fn define(&mut self, name: impl Into<String>) -> Symbol {
@@ -52,6 +55,7 @@ impl SymbolTable {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::RefCell;
 
     #[test]
     fn test_define() {
@@ -65,47 +69,59 @@ mod tests {
 
         let mut should_panic = false;
 
-        let mut global: SymbolTable = SymbolTable::new();
+        let mut global: Rc<RefCell<SymbolTable>> = SymbolTable::new();
 
-        let a = global.define("a");
+        let mut borrow = global.borrow_mut();
+
+        let a = borrow.define("a");
         if a != expected["a"] {
             should_panic = true;
             eprintln!("expected a={:?}, got={:?}", expected["a"], a)
         }
 
-        let b = global.define("b");
+        let b = borrow.define("b");
         if b != expected["b"] {
             should_panic = true;
             eprintln!("expected b={:?}, got={:?}", expected["b"], b)
         }
 
-        let mut first_local: SymbolTable = SymbolTable::new_enclosed(global);
+        drop(borrow);
 
-        let c = first_local.define("c");
+        let mut first_local: Rc<RefCell<SymbolTable>> = SymbolTable::new_enclosed(Rc::clone(&global));
+
+        let mut borrow = first_local.borrow_mut();
+
+        let c = borrow.define("c");
         if c != expected["c"] {
             should_panic = true;
             eprintln!("expected c={:?}, got={:?}", expected["c"], c)
         }
 
-        let d = first_local.define("d");
+        let d = borrow.define("d");
         if d != expected["d"] {
             should_panic = true;
             eprintln!("expected d={:?}, got={:?}", expected["d"], d)
         }
 
-        let mut second_local: SymbolTable = SymbolTable::new_enclosed(first_local);
+        drop(borrow);
 
-        let e = second_local.define("e");
+        let mut second_local: Rc<RefCell<SymbolTable>> = SymbolTable::new_enclosed(Rc::clone(&first_local));
+
+        let mut borrow = second_local.borrow_mut();
+
+        let e = borrow.define("e");
         if e != expected["e"] {
             should_panic = true;
             eprintln!("expected e={:?}, got={:?}", expected["e"], e)
         }
 
-        let f = second_local.define("f");
+        let f = borrow.define("f");
         if f != expected["f"] {
             should_panic = true;
             eprintln!("expected f={:?}, got={:?}", expected["f"], f)
         }
+
+        drop(borrow);
 
         if should_panic {
             panic!()
@@ -114,9 +130,12 @@ mod tests {
 
     #[test]
     fn test_resolve_global() {
-        let mut global = SymbolTable::new();
-        global.define("a");
-        global.define("b");
+        let mut global: Rc<RefCell<SymbolTable>> = SymbolTable::new();
+
+        let mut borrow = global.borrow_mut();
+        borrow.define("a");
+        borrow.define("b");
+        drop(borrow);
 
         let expected = vec![
             Symbol::new("a", GLOBAL_SCOPE, 0),
@@ -126,7 +145,7 @@ mod tests {
         let mut should_panic = false;
 
         for sym in expected.into_iter() {
-            let result = match global.resolve(sym.name.as_str()) {
+            let result = match global.borrow().resolve(sym.name.as_str()) {
                 None => {
                     should_panic = true;
                     eprintln!("name {} not resolvable", sym.name);
@@ -148,13 +167,19 @@ mod tests {
 
     #[test]
     fn test_resolve_local() {
-        let mut global: SymbolTable = SymbolTable::new();
-        global.define("a");
-        global.define("b");
+        let mut global: Rc<RefCell<SymbolTable>> = SymbolTable::new();
 
-        let mut local: SymbolTable = SymbolTable::new_enclosed(global);
-        local.define("c");
-        local.define("d");
+        let mut borrow = global.borrow_mut();
+        borrow.define("a");
+        borrow.define("b");
+        drop(borrow);
+
+        let mut local: Rc<RefCell<SymbolTable>> = SymbolTable::new_enclosed(Rc::clone(&global));
+
+        let mut borrow = local.borrow_mut();
+        borrow.define("c");
+        borrow.define("d");
+        drop(borrow);
 
         let expected = vec![
             Symbol::new("a", GLOBAL_SCOPE, 0),
@@ -166,7 +191,7 @@ mod tests {
         let mut should_panic = false;
 
         for sym in expected.into_iter() {
-            let result = match global.resolve(sym.name.as_str()) {
+            let result = match global.borrow().resolve(sym.name.as_str()) {
                 None => {
                     should_panic = true;
                     eprintln!("name {} not resolvable", sym.name);
@@ -188,25 +213,34 @@ mod tests {
 
     #[test]
     fn test_resolve_nested_local() {
-        let mut global: SymbolTable = SymbolTable::new();
-        global.define("a");
-        global.define("b");
+        let mut global: Rc<RefCell<SymbolTable>> = SymbolTable::new();
 
-        let mut first_local: SymbolTable = SymbolTable::new_enclosed(global);
-        first_local.define("c");
-        first_local.define("d");
+        let mut borrow = global.borrow_mut();
+        borrow.define("a");
+        borrow.define("b");
+        drop(borrow);
 
-        let mut second_local: SymbolTable = SymbolTable::new_enclosed(first_local);
-        second_local.define("e");
-        second_local.define("f");
+        let mut first_local: Rc<RefCell<SymbolTable>> = SymbolTable::new_enclosed(Rc::clone(&global));
+
+        let mut borrow = first_local.borrow_mut();
+        borrow.define("c");
+        borrow.define("d");
+        drop(borrow);
+
+        let mut second_local: Rc<RefCell<SymbolTable>> = SymbolTable::new_enclosed(Rc::clone(&first_local));
+
+        let mut borrow = second_local.borrow_mut();
+        borrow.define("e");
+        borrow.define("f");
+        drop(borrow);
 
         struct Test {
-            table: SymbolTable,
+            table: Rc<RefCell<SymbolTable>>,
             expected_symbols: Vec<Symbol>,
         }
 
         impl Test {
-            fn new(table: SymbolTable, expected_symbols: Vec<Symbol>) -> Self {
+            fn new(table: Rc<RefCell<SymbolTable>>, expected_symbols: Vec<Symbol>) -> Self {
                 Self { table, expected_symbols }
             }
         }
@@ -236,7 +270,7 @@ mod tests {
 
         for tt in tests.into_iter() {
             for sym in tt.expected_symbols.into_iter() {
-                let result = match tt.table.resolve(sym.name.as_str()) {
+                let result = match tt.table.borrow().resolve(sym.name.as_str()) {
                     None => {
                         should_panic = true;
                         eprintln!("name {} not resolvable", sym.name);
