@@ -21,7 +21,7 @@ impl Symbol {
 
 #[derive(Clone)]
 pub(crate) struct SymbolTable {
-    outer: Box<SymbolTable>,
+    outer: Option<Box<SymbolTable>>,
 
     store: HashMap<String, Symbol>,
     num_definitions: usize,
@@ -29,7 +29,11 @@ pub(crate) struct SymbolTable {
 
 impl SymbolTable {
     pub(crate) fn new() -> Self {
-        Self { store: Default::default(), num_definitions: 0 }
+        Self { outer: None, store: Default::default(), num_definitions: 0 }
+    }
+
+    pub(crate) fn new_enclosed(outer: SymbolTable) -> Self {
+        Self { outer: Some(Box::new(outer)), store: Default::default(), num_definitions: 0 }
     }
 
     pub(crate) fn define(&mut self, name: impl Into<String>) -> Symbol {
