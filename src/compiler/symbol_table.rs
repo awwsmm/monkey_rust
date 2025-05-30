@@ -52,10 +52,14 @@ mod tests {
         let mut expected = HashMap::new();
         expected.insert("a", Symbol::new("a", GLOBAL_SCOPE, 0));
         expected.insert("b", Symbol::new("b", GLOBAL_SCOPE, 1));
-
-        let mut global = SymbolTable::new();
+        expected.insert("c", Symbol::new("c", LOCAL_SCOPE, 0));
+        expected.insert("d", Symbol::new("d", LOCAL_SCOPE, 1));
+        expected.insert("e", Symbol::new("e", LOCAL_SCOPE, 0));
+        expected.insert("f", Symbol::new("f", LOCAL_SCOPE, 1));
 
         let mut should_panic = false;
+
+        let mut global: SymbolTable = SymbolTable::new();
 
         let a = global.define("a");
         if a != expected["a"] {
@@ -67,6 +71,34 @@ mod tests {
         if b != expected["b"] {
             should_panic = true;
             eprintln!("expected b={:?}, got={:?}", expected["b"], b)
+        }
+
+        let mut first_local: SymbolTable = SymbolTable::new_enclosed(global);
+
+        let c = first_local.define("c");
+        if c != expected["c"] {
+            should_panic = true;
+            eprintln!("expected c={:?}, got={:?}", expected["c"], c)
+        }
+
+        let d = first_local.define("d");
+        if d != expected["d"] {
+            should_panic = true;
+            eprintln!("expected d={:?}, got={:?}", expected["d"], d)
+        }
+
+        let mut second_local: SymbolTable = SymbolTable::new_enclosed(first_local);
+
+        let e = second_local.define("e");
+        if e != expected["e"] {
+            should_panic = true;
+            eprintln!("expected e={:?}, got={:?}", expected["e"], e)
+        }
+
+        let f = second_local.define("f");
+        if f != expected["f"] {
+            should_panic = true;
+            eprintln!("expected f={:?}, got={:?}", expected["f"], f)
         }
 
         if should_panic {
