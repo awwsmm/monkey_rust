@@ -1245,4 +1245,79 @@ mod tests {
 
         run_compiler_tests(tests)
     }
+
+    #[test]
+    fn test_let_statement_scopes() {
+        let tests = vec![
+            CompilerTestCase::new(
+                r#"
+                let num = 55;
+                fn() { num }
+                "#,
+                vec![
+                    55.into(),
+                    vec![
+                        code::make(code::Opcode::OpGetGlobal, &vec![0]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpSetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                r#"
+                fn() {
+                    let num = 55;
+                    num
+                }
+                "#,
+                vec![
+                    55.into(),
+                    vec![
+                        code::make(code::Opcode::OpConstant, &vec![0]),
+                        code::make(code::Opcode::OpSetLocal, &vec![0]),
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                r#"
+                fn() {
+                    let a = 55;
+                    let b = 77;
+                    a + b
+                }
+                "#,
+                vec![
+                    55.into(),
+                    77.into(),
+                    vec![
+                        code::make(code::Opcode::OpConstant, &vec![0]),
+                        code::make(code::Opcode::OpSetLocal, &vec![0]),
+                        code::make(code::Opcode::OpConstant, &vec![1]),
+                        code::make(code::Opcode::OpSetLocal, &vec![1]),
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpGetLocal, &vec![1]),
+                        code::make(code::Opcode::OpAdd, &vec![]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
 }
