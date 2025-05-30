@@ -114,7 +114,7 @@ mod tests {
         global.define("a");
         global.define("b");
 
-        let mut local: SymbolTable = SymbolTable::new_enclosed();
+        let mut local: SymbolTable = SymbolTable::new_enclosed(global);
         local.define("c");
         local.define("d");
 
@@ -140,6 +140,77 @@ mod tests {
                 should_panic = true;
                 eprintln!("expected {} to resolve to {:?}, got={:?}",
                           sym.name, sym, result)
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_resolve_nested_local() {
+        let mut global: SymbolTable = SymbolTable::new();
+        global.define("a");
+        global.define("b");
+
+        let mut first_local: SymbolTable = SymbolTable::new_enclosed(global);
+        first_local.define("c");
+        first_local.define("d");
+
+        let mut second_local: SymbolTable = SymbolTable::new_enclosed(first_local);
+        second_local.define("e");
+        second_local.define("f");
+
+        struct Test {
+            table: SymbolTable,
+            expected_symbols: Vec<Symbol>,
+        }
+
+        impl Test {
+            fn new(table: SymbolTable, expected_symbols: Vec<Symbol>) -> Self {
+                Self { table, expected_symbols }
+            }
+        }
+
+        let tests = vec![
+            Test::new(
+                first_local,
+                vec![
+                    Symbol::new("a", GLOBAL_SCOPE, 0),
+                    Symbol::new("b", GLOBAL_SCOPE, 1),
+                    Symbol::new("c", LOCAL_SCOPE, 0),
+                    Symbol::new("d", LOCAL_SCOPE, 1),
+                ]
+            ),
+            Test::new(
+                second_local,
+                vec![
+                    Symbol::new("a", GLOBAL_SCOPE, 0),
+                    Symbol::new("b", GLOBAL_SCOPE, 1),
+                    Symbol::new("e", LOCAL_SCOPE, 0),
+                    Symbol::new("f", LOCAL_SCOPE, 1),
+                ]
+            ),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            for sym in tt.expected_symbols.into_iter() {
+                let result = match tt.table.resolve(sym.name.as_str()) {
+                    None => {
+                        should_panic = true;
+                        eprintln!("name {} not resolvable", sym.name);
+                        continue
+                    }
+                    Some(result) => result
+                };
+                if result != sym {
+                    should_panic = true;
+                    eprintln!("expected {} to resolve to {:?}, got={:?}",
+                              sym.name, sym, result)
+                }
             }
         }
 
