@@ -367,7 +367,8 @@ fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<usize>, usize) {
 
     for width in def.operand_widths.iter() {
         match *width {
-            2 => operands.push(read_usize(&ins[offset..])),
+            2 => operands.push(read_two_bytes(&ins[offset..])),
+            1 => operands.push(read_one_byte(&ins[offset..])),
             _ => panic!()
         }
 
@@ -377,9 +378,13 @@ fn read_operands(def: &Definition, ins: &[u8]) -> (Vec<usize>, usize) {
     (operands, offset)
 }
 
-pub(crate) fn read_usize(ins: &[u8]) -> usize {
+pub(crate) fn read_two_bytes(ins: &[u8]) -> usize {
     // https://stackoverflow.com/a/50244328/2925434
     ((ins[0] as usize) << 8) | ins[1] as usize
+}
+
+pub(crate) fn read_one_byte(ins: &[u8]) -> usize {
+    ins[0] as usize
 }
 
 #[cfg(test)]

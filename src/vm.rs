@@ -87,7 +87,7 @@ impl VM {
 
             match op {
                 code::Opcode::OpConstant => {
-                    let const_index = code::read_usize(&ins[ip + 1..]);
+                    let const_index = code::read_two_bytes(&ins[ip + 1..]);
                     self.current_frame().ip += 2;
                     if let Some(err) = self.push(self.constants[const_index].clone()) {
                         return Some(err)
@@ -95,12 +95,12 @@ impl VM {
                 }
 
                 code::Opcode::OpJump => {
-                    let pos = code::read_usize(&ins[ip + 1..]);
+                    let pos = code::read_two_bytes(&ins[ip + 1..]);
                     self.current_frame().ip = (pos - 1) as i32
                 }
 
                 code::Opcode::OpJumpNotTruthy => {
-                    let pos = code::read_usize(&ins[ip + 1..]);
+                    let pos = code::read_two_bytes(&ins[ip + 1..]);
                     self.current_frame().ip += 2;
 
                     let condition = self.pop();
@@ -149,14 +149,14 @@ impl VM {
                     }
 
                 code::Opcode::OpSetGlobal => {
-                    let global_index = code::read_usize(&ins[ip+1..]);
+                    let global_index = code::read_two_bytes(&ins[ip+1..]);
                     self.current_frame().ip += 2;
 
                     self.globals[global_index] = self.pop()
                 }
 
                 code::Opcode::OpGetGlobal => {
-                    let global_index = code::read_usize(&ins[ip+1..]);
+                    let global_index = code::read_two_bytes(&ins[ip+1..]);
                     self.current_frame().ip += 2;
 
                     let obj = self.globals[global_index].clone()?;
@@ -166,7 +166,7 @@ impl VM {
                 }
 
                 code::Opcode::OpArray => {
-                    let num_elements = code::read_usize(&ins[ip+1..]);
+                    let num_elements = code::read_two_bytes(&ins[ip+1..]);
                     self.current_frame().ip += 2;
 
                     let array = self.build_array(self.sp-num_elements, self.sp);
@@ -178,7 +178,7 @@ impl VM {
                 }
 
                 code::Opcode::OpHash => {
-                    let num_elements = code::read_usize(&ins[ip+1..]);
+                    let num_elements = code::read_two_bytes(&ins[ip+1..]);
                     self.current_frame().ip += 2;
 
                     let hash = match self.build_hash(self.sp-num_elements, self.sp) {
