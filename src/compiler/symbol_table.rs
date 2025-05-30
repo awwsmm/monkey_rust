@@ -21,6 +21,8 @@ impl Symbol {
 
 #[derive(Clone)]
 pub(crate) struct SymbolTable {
+    outer: Box<SymbolTable>,
+
     store: HashMap<String, Symbol>,
     num_definitions: usize,
 }
