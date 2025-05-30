@@ -68,6 +68,10 @@ mod tests {
             should_panic = true;
             eprintln!("expected b={:?}, got={:?}", expected["b"], b)
         }
+
+        if should_panic {
+            panic!()
+        }
     }
 
     #[test]
@@ -99,5 +103,48 @@ mod tests {
             }
         }
 
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_resolve_local() {
+        let mut global: SymbolTable = SymbolTable::new();
+        global.define("a");
+        global.define("b");
+
+        let mut local: SymbolTable = SymbolTable::new_enclosed();
+        local.define("c");
+        local.define("d");
+
+        let expected = vec![
+            Symbol::new("a", GLOBAL_SCOPE, 0),
+            Symbol::new("b", GLOBAL_SCOPE, 1),
+            Symbol::new("c", LOCAL_SCOPE, 0),
+            Symbol::new("d", LOCAL_SCOPE, 1),
+        ];
+
+        let mut should_panic = false;
+
+        for sym in expected.into_iter() {
+            let result = match global.resolve(sym.name.as_str()) {
+                None => {
+                    should_panic = true;
+                    eprintln!("name {} not resolvable", sym.name);
+                    continue
+                }
+                Some(result) => result
+            };
+            if result != sym {
+                should_panic = true;
+                eprintln!("expected {} to resolve to {:?}, got={:?}",
+                          sym.name, sym, result)
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
     }
 }
