@@ -41,7 +41,14 @@ impl SymbolTable {
 
     pub(crate) fn define(&mut self, name: impl Into<String>) -> Symbol {
         let name = name.into();
-        let symbol = Symbol::new(name.clone(), GLOBAL_SCOPE, self.num_definitions);
+
+        let scope = if self.outer.is_none() {
+            GLOBAL_SCOPE
+        } else {
+            LOCAL_SCOPE
+        };
+
+        let symbol = Symbol::new(name.clone(), scope, self.num_definitions);
         self.store.insert(name, symbol.clone());
         self.num_definitions += 1;
         symbol
