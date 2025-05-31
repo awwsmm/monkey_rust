@@ -41,8 +41,8 @@ impl VM {
     }
 
     pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
-        let main_func = object::CompiledFunctionObj{ instructions: bytecode.instructions };
-        let main_frame = frame::Frame::new(main_func);
+        let main_func = object::CompiledFunctionObj{ instructions: bytecode.instructions, num_locals: 0 };
+        let main_frame = frame::Frame::new(main_func, 0);
 
         let mut frames = Vec::with_capacity(MAX_FRAMES);
         frames.push(main_frame);
@@ -207,7 +207,7 @@ impl VM {
                         _ => return compiler::Error::new("calling non-function")
                     };
 
-                    let frame = frame::Frame::new(func);
+                    let frame = frame::Frame::new(func, self.sp as i32);
                     self.push_frame(frame)
                 }
 
