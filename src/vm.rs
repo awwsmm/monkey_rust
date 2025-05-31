@@ -155,6 +155,15 @@ impl VM {
                     self.globals[global_index] = self.pop()
                 }
 
+                code::Opcode::OpSetLocal => {
+                    let local_index = code::read_one_byte(&ins[ip+1..]);
+                    self.current_frame().ip += 1;
+
+                    let base_pointer = self.current_frame().base_pointer as usize;
+
+                    self.stack[base_pointer + local_index] = self.pop();
+                }
+
                 code::Opcode::OpGetGlobal => {
                     let global_index = code::read_two_bytes(&ins[ip+1..]);
                     self.current_frame().ip += 2;
