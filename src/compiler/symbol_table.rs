@@ -55,7 +55,10 @@ impl SymbolTable {
     }
 
     pub(crate) fn resolve(&self, name: &str) -> Option<Symbol> {
-        self.store.get(name).cloned()
+        match self.store.get(name) {
+            None if self.outer.is_some() => self.outer.as_ref()?.borrow().resolve(name),
+            other => other.cloned(),
+        }
     }
 }
 
@@ -198,7 +201,7 @@ mod tests {
         let mut should_panic = false;
 
         for sym in expected.into_iter() {
-            let result = match global.borrow().resolve(sym.name.as_str()) {
+            let result = match local.borrow().resolve(sym.name.as_str()) {
                 None => {
                     should_panic = true;
                     eprintln!("name {} not resolvable", sym.name);
