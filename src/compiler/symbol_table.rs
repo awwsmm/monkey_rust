@@ -25,7 +25,7 @@ pub(crate) struct SymbolTable {
     pub(crate) outer: Option<Box<SymbolTable>>,
 
     store: HashMap<String, Symbol>,
-    num_definitions: usize,
+    pub(crate) num_definitions: usize,
 }
 
 impl SymbolTable {

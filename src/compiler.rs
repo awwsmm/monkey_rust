@@ -305,9 +305,12 @@ impl Compiler {
                     self.emit(code::Opcode::OpReturn, vec![]);
                 }
 
+                let num_locals = self.symbol_table.num_definitions;
                 let instructions = self.leave_scope();
 
-                let compiled_func = object::Object::CompiledFunctionObj(object::CompiledFunctionObj{ instructions });
+                let compiled_func = object::Object::CompiledFunctionObj(
+                    object::CompiledFunctionObj{ instructions, num_locals }
+                );
                 let size = self.add_constant(compiled_func);
                 self.emit(code::Opcode::OpConstant, vec![size]);
             }
