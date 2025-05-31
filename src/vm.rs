@@ -174,6 +174,17 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpGetLocal => {
+                    let local_index = code::read_one_byte(&ins[ip+1..]);
+                    self.current_frame().ip += 1;
+
+                    let base_pointer = self.current_frame().base_pointer as usize;
+                    let obj = self.stack[base_pointer + local_index].clone()?;
+                    if let Some(err) = self.push(obj) {
+                        return Some(err)
+                    }
+                }
+
                 code::Opcode::OpArray => {
                     let num_elements = code::read_two_bytes(&ins[ip+1..]);
                     self.current_frame().ip += 2;
