@@ -1013,4 +1013,59 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_calling_functions_with_bindings() {
+        let tests = vec![
+            VMTestCase::new(
+                r#"
+                let one = fn() { let one = 1; one };
+			    one();
+                "#,
+                1,
+            ),
+            VMTestCase::new(
+                r#"
+                let oneAndTwo = fn() { let one = 1; let two = 2; one + two; };
+			    oneAndTwo();
+                "#,
+                3,
+            ),
+            VMTestCase::new(
+                r#"
+                let oneAndTwo = fn() { let one = 1; let two = 2; one + two; };
+                let threeAndFour = fn() { let three = 3; let four = 4; three + four; };
+                oneAndTwo() + threeAndFour();
+                "#,
+                10,
+            ),
+            VMTestCase::new(
+                r#"
+                let firstFoobar = fn() { let foobar = 50; foobar; };
+                let secondFoobar = fn() { let foobar = 100; foobar; };
+                firstFoobar() + secondFoobar();
+                "#,
+                150,
+            ),
+            VMTestCase::new(
+                r#"
+                let globalSeed = 50;
+                let minusOne = fn() {
+                    let num = 1;
+                    globalSeed = num;
+                }
+                let minusTwo = fn() {
+                    let num = 2;
+                    globalSeed - num;
+                }
+                minusOne() + minusTwo();
+                "#,
+                97,
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
