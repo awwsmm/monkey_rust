@@ -1128,6 +1128,7 @@ mod tests {
             should_panic = true;
             eprintln!("scope_index wrong. got={}, want={}", compiler.scope_index, 0)
         }
+        let global_symbol_table = compiler.symbol_table.borrow().clone();
 
         compiler.emit(code::Opcode::OpMul, vec![]);
 
@@ -1152,10 +1153,26 @@ mod tests {
                 last.opcode, Some(code::Opcode::OpSub))
         }
 
+        let symbol_table = compiler.symbol_table.borrow().clone();
+        if symbol_table != global_symbol_table {
+            should_panic = true;
+            eprintln!("compiler did not enclose symbol_table")
+        }
+
         compiler.leave_scope();
         if compiler.scope_index != 0 {
             should_panic = true;
             eprintln!("scope_index wrong. got={}, want={}", compiler.scope_index, 0)
+        }
+
+        let symbol_table = compiler.symbol_table.borrow().clone();
+        if symbol_table != global_symbol_table {
+            should_panic = true;
+            eprintln!("compiler did not restore global symbol table")
+        }
+        if symbol_table.outer.is_some() {
+            should_panic = true;
+            eprintln!("compiler modified global symbol table incorrectly")
         }
 
         compiler.emit(code::Opcode::OpAdd, vec![]);

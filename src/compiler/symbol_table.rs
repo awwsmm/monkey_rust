@@ -22,9 +22,9 @@ impl Symbol {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub(crate) struct SymbolTable {
-    outer: Option<Rc<RefCell<SymbolTable>>>,
+    pub(crate) outer: Option<Rc<RefCell<SymbolTable>>>,
 
     store: HashMap<String, Symbol>,
     num_definitions: usize,
