@@ -1030,6 +1030,16 @@ mod tests {
                 "#,
                 1,
             ),
+            VMTestCase::new(
+                r#"
+			    let returnsOneReturner = fn() {
+                    let returnsOne = fn() { 1; };
+                    returnsOne;
+                };
+                returnsOneReturner()();
+                "#,
+                1,
+            ),
         ];
 
         if run_vm_tests(tests) {
