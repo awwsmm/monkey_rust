@@ -237,8 +237,8 @@ impl VM {
                 code::Opcode::OpReturnValue => {
                     let return_value = self.pop();
 
-                    self.pop_frame();
-                    self.pop();
+                    let frame = self.pop_frame();
+                    self.sp = (frame.base_pointer - 1) as usize;
 
                     if let Some(err) = self.push(return_value?) {
                         return Some(err)
@@ -246,8 +246,8 @@ impl VM {
                 }
 
                 code::Opcode::OpReturn => {
-                    self.pop_frame();
-                    self.pop();
+                    let frame = self.pop_frame();
+                    self.sp = (frame.base_pointer - 1) as usize;
 
                     if let Some(err) = self.push(NULL) {
                         return Some(err)
@@ -1075,7 +1075,7 @@ mod tests {
                 let globalSeed = 50;
                 let minusOne = fn() {
                     let num = 1;
-                    globalSeed = num;
+                    globalSeed - num;
                 }
                 let minusTwo = fn() {
                     let num = 2;
