@@ -207,8 +207,11 @@ impl VM {
                         _ => return compiler::Error::new("calling non-function")
                     };
 
+                    let mut new_pointer = func.num_locals;
                     let frame = frame::Frame::new(func, self.sp as i32);
-                    self.push_frame(frame)
+                    new_pointer += frame.base_pointer as usize;
+                    self.push_frame(frame);
+                    self.sp = new_pointer;
                 }
 
                 code::Opcode::OpReturnValue => {

@@ -3,7 +3,7 @@ use crate::{code, object};
 pub(crate) struct Frame {
     func: object::CompiledFunctionObj,
     pub(crate) ip: i32,
-    base_pointer: i32,
+    pub(crate) base_pointer: i32,
 }
 
 impl Frame {
