@@ -1,10 +1,9 @@
 pub(crate) mod symbol_table;
 
+use crate::compiler::symbol_table::{SymbolTable, GLOBAL_SCOPE};
 use crate::{ast, code, object};
-use std::cell::RefCell;
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
-use std::rc::Rc;
 
 pub(crate) struct Error {
     message: String
@@ -37,7 +36,7 @@ struct CompilationScope {
 pub(crate) struct Compiler {
     constants: Vec<object::Object>,
 
-    pub(crate) symbol_table: Rc<RefCell<symbol_table::SymbolTable>>,
+    pub(crate) symbol_table: symbol_table::SymbolTable,
 
     scopes: Vec<CompilationScope>,
     scope_index: usize,
@@ -59,7 +58,7 @@ impl Compiler {
         }
     }
 
-    pub(crate) fn new_with_state(s: Rc<RefCell<symbol_table::SymbolTable>>, constants: Vec<object::Object>) -> Self {
+    pub(crate) fn new_with_state(s: symbol_table::SymbolTable, constants: Vec<object::Object>) -> Self {
         let mut compiler = Self::new();
         compiler.symbol_table = s;
         compiler.constants = constants;
@@ -99,8 +98,13 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
-                let symbol = self.symbol_table.borrow_mut().define(node.name?.value);
-                self.emit(code::Opcode::OpSetGlobal, vec![symbol.index]);
+
+                let symbol = self.symbol_table.define(node.name?.value);
+                if symbol.scope == GLOBAL_SCOPE {
+                    self.emit(code::Opcode::OpSetGlobal, vec![symbol.index]);
+                } else {
+                    self.emit(code::Opcode::OpSetLocal, vec![symbol.index]);
+                }
             }
 
             ast::Node::Statement(ast::Statement::ReturnStatement(node)) => {
@@ -260,12 +264,16 @@ impl Compiler {
             }
 
             ast::Node::Expression(ast::Expression::Identifier(node)) => {
-                let symbol = match self.symbol_table.borrow().resolve(node.value.as_str()) {
+                let symbol = match self.symbol_table.resolve(node.value.as_str()) {
                     None => return Error::new(format!("undefined variable {}", node.value)),
                     Some(symbol) => symbol
                 };
 
-                self.emit(code::Opcode::OpGetGlobal, vec![symbol.index]);
+                if symbol.scope == GLOBAL_SCOPE {
+                    self.emit(code::Opcode::OpGetGlobal, vec![symbol.index]);
+                } else {
+                    self.emit(code::Opcode::OpGetLocal, vec![symbol.index]);
+                }
             }
 
             ast::Node::Expression(ast::Expression::IndexExpression(node)) => {
@@ -411,6 +419,7 @@ impl Compiler {
             previous_instruction: EmittedInstruction { opcode: None, position: 0 },
         };
         self.scopes.push(scope);
+        self.symbol_table = SymbolTable::new_enclosed(Box::new(self.symbol_table.clone()));
         self.scope_index += 1;
     }
 
@@ -419,6 +428,7 @@ impl Compiler {
 
         self.scopes.pop();
         self.scope_index -= 1;
+        self.symbol_table = *(self.symbol_table.outer.clone().unwrap());
 
         instructions
     }
@@ -1128,7 +1138,7 @@ mod tests {
             should_panic = true;
             eprintln!("scope_index wrong. got={}, want={}", compiler.scope_index, 0)
         }
-        let global_symbol_table = compiler.symbol_table.borrow().clone();
+        let global_symbol_table = compiler.symbol_table.clone();
 
         compiler.emit(code::Opcode::OpMul, vec![]);
 
@@ -1153,7 +1163,7 @@ mod tests {
                 last.opcode, Some(code::Opcode::OpSub))
         }
 
-        let symbol_table = compiler.symbol_table.borrow().clone();
+        let symbol_table = *(compiler.symbol_table.outer.clone().unwrap());
         if symbol_table != global_symbol_table {
             should_panic = true;
             eprintln!("compiler did not enclose symbol_table")
@@ -1165,7 +1175,7 @@ mod tests {
             eprintln!("scope_index wrong. got={}, want={}", compiler.scope_index, 0)
         }
 
-        let symbol_table = compiler.symbol_table.borrow().clone();
+        let symbol_table = compiler.symbol_table.clone();
         if symbol_table != global_symbol_table {
             should_panic = true;
             eprintln!("compiler did not restore global symbol table")
