@@ -1285,12 +1285,13 @@ mod tests {
             ),
             CompilerTestCase::new(
                 r#"
-                let oneArg = fn(a) { };
+                let oneArg = fn(a) { a };
                 oneArg(24);
                 "#,
                 vec![
                     vec![
-                        code::make(code::Opcode::OpReturn, &vec![]),
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
                     ].into(),
                     24.into(),
                 ],
@@ -1305,12 +1306,17 @@ mod tests {
             ),
             CompilerTestCase::new(
                 r#"
-                let manyArg = fn(a, b, c) { };
+                let manyArg = fn(a, b, c) { a; b; c };
                 manyArg(24, 25, 26);
                 "#,
                 vec![
                     vec![
-                        code::make(code::Opcode::OpReturn, &vec![]),
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpPop, &vec![]),
+                        code::make(code::Opcode::OpGetLocal, &vec![1]),
+                        code::make(code::Opcode::OpPop, &vec![]),
+                        code::make(code::Opcode::OpGetLocal, &vec![2]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
                     ].into(),
                     24.into(),
                     25.into(),
