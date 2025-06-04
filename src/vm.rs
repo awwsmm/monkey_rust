@@ -1165,6 +1165,24 @@ mod tests {
                 "#,
                 10,
             ),
+            VMTestCase::new(
+                r#"
+                let globalNum = 10;
+
+                let sum = fn(a, b) {
+                    let c = a + b;
+                    c + globalNum;
+                };
+
+                let outer = fn() {
+                    sum(1, 2) + sum(3, 4) + globalNum;
+                };
+
+                outer() + globalNum;
+                `,
+                "#,
+                50,
+            ),
         ];
 
         if run_vm_tests(tests) {
