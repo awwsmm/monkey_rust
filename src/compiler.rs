@@ -1249,7 +1249,7 @@ mod tests {
                 ],
                 vec![
                     code::make(code::Opcode::OpConstant, &vec![1]), // The compiled function
-                    code::make(code::Opcode::OpCall, &vec![]),
+                    code::make(code::Opcode::OpCall, &vec![0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
@@ -1269,7 +1269,7 @@ mod tests {
                     code::make(code::Opcode::OpConstant, &vec![1]), // The compiled function
                     code::make(code::Opcode::OpSetGlobal, &vec![0]),
                     code::make(code::Opcode::OpGetGlobal, &vec![0]),
-                    code::make(code::Opcode::OpCall, &vec![]),
+                    code::make(code::Opcode::OpCall, &vec![0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
