@@ -1273,6 +1273,50 @@ mod tests {
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
+            CompilerTestCase::new(
+                r#"
+                let oneArg = fn(a) { };
+                oneArg(24);
+                "#,
+                vec![
+                    vec![
+                        code::make(code::Opcode::OpReturn, &vec![]),
+                    ].into(),
+                    24.into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpSetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpGetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpCall, &vec![1]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                r#"
+                let manyArg = fn(a, b, c) { };
+                manyArg(24, 25, 26);
+                "#,
+                vec![
+                    vec![
+                        code::make(code::Opcode::OpReturn, &vec![]),
+                    ].into(),
+                    24.into(),
+                    25.into(),
+                    26.into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpSetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpGetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpConstant, &vec![3]),
+                    code::make(code::Opcode::OpCall, &vec![3]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
         ];
 
         run_compiler_tests(tests)
