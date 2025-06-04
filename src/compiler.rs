@@ -320,7 +320,7 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
-                self.emit(code::Opcode::OpCall, vec![]);
+                self.emit(code::Opcode::OpCall, vec![0]);
             }
 
             _ => ()

@@ -222,6 +222,7 @@ impl VM {
                 }
 
                 code::Opcode::OpCall => {
+                    self.current_frame().ip += 1;
                     let func = match self.stack[self.sp-1].clone() {
                         Some(object::Object::CompiledFunctionObj(obj)) => obj,
                         _ => return compiler::Error::new("calling non-function")
