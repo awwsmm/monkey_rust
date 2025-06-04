@@ -1102,4 +1102,28 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_calling_functions_with_arguments_and_bindings() {
+        let tests = vec![
+            VMTestCase::new(
+                r#"
+                let identity = fn(a) { a; };
+                identity(4);
+                "#,
+                4,
+            ),
+            VMTestCase::new(
+                r#"
+                let sum = fn(a, b) { a + b; };
+                sum(1, 2);
+                "#,
+                3,
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
