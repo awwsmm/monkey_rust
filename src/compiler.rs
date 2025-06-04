@@ -320,7 +320,17 @@ impl Compiler {
                 if err.is_some() {
                     return err
                 }
-                self.emit(code::Opcode::OpCall, vec![0]);
+
+                let len = node.arguments.len();
+
+                for a in node.arguments.into_iter() {
+                    let err = self.compile(ast::Node::Expression(a));
+                    if err.is_some() {
+                        return err
+                    }
+                }
+
+                self.emit(code::Opcode::OpCall, vec![len]);
             }
 
             _ => ()
