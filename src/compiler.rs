@@ -293,6 +293,10 @@ impl Compiler {
             ast::Node::Expression(ast::Expression::FunctionLiteral(node)) => {
                 self.enter_scope();
 
+                for p in node.parameters.iter() {
+                    self.symbol_table.define(p.value.clone());
+                }
+
                 let err = self.compile(ast::Node::Statement(ast::Statement::BlockStatement(node.body?)));
                 if err.is_some() {
                     return err
