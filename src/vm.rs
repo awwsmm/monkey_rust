@@ -42,7 +42,7 @@ impl VM {
     }
 
     pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
-        let main_func = object::CompiledFunctionObj{ instructions: bytecode.instructions, num_locals: 0 };
+        let main_func = object::CompiledFunctionObj{ instructions: bytecode.instructions, num_locals: 0, num_parameters: 0 };
         let main_frame = frame::Frame::new(main_func, 0);
 
         let mut frames = Vec::with_capacity(MAX_FRAMES);
@@ -264,6 +264,13 @@ impl VM {
             Some(object::Object::CompiledFunctionObj(obj)) => obj,
             _ => return compiler::Error::new("calling non-function")
         };
+
+        if num_args != func.num_parameters {
+            return compiler::Error::new(format!(
+                "wrong number of arguments: want={}, got={}",
+                func.num_parameters, num_args
+            ));
+        }
 
         let mut new_pointer = func.num_locals;
         let frame = frame::Frame::new(func, (self.sp - num_args) as i32);
@@ -1218,7 +1225,7 @@ mod tests {
 
             let mut vm = VM::new(comp.bytecode());
             let err = vm.run();
-            if err.is_some() {
+            if err.is_none() {
                 panic!("expected VM error but resulted in none.")
             }
 
