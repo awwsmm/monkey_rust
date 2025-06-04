@@ -225,16 +225,11 @@ impl VM {
                 code::Opcode::OpCall => {
                     let num_args = read_one_byte(&ins[ip+1..]);
                     self.current_frame().ip += 1;
-                    let func = match self.stack[self.sp-1-num_args].clone() {
-                        Some(object::Object::CompiledFunctionObj(obj)) => obj,
-                        _ => return compiler::Error::new("calling non-function")
-                    };
 
-                    let mut new_pointer = func.num_locals;
-                    let frame = frame::Frame::new(func, self.sp as i32);
-                    new_pointer += frame.base_pointer as usize;
-                    self.push_frame(frame);
-                    self.sp = new_pointer;
+                    let err = self.call_function(num_args);
+                    if err.is_some() {
+                        return err
+                    }
                 }
 
                 code::Opcode::OpReturnValue => {
@@ -260,6 +255,21 @@ impl VM {
                 _ => () // TODO
             }
         }
+
+        None
+    }
+
+    fn call_function(&mut self, num_args: usize) -> Option<compiler::Error> {
+        let func = match self.stack[self.sp-1-num_args].clone() {
+            Some(object::Object::CompiledFunctionObj(obj)) => obj,
+            _ => return compiler::Error::new("calling non-function")
+        };
+
+        let mut new_pointer = func.num_locals;
+        let frame = frame::Frame::new(func, (self.sp - num_args) as i32);
+        new_pointer += frame.base_pointer as usize;
+        self.push_frame(frame);
+        self.sp = new_pointer;
 
         None
     }
