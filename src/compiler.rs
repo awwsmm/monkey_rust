@@ -6,7 +6,7 @@ use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
 
 pub(crate) struct Error {
-    message: String
+    pub(crate) message: String
 }
 
 impl Error {

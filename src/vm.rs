@@ -1189,4 +1189,49 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_calling_functions_with_wrong_arguments() {
+        let tests = vec![
+            VMTestCase::new(
+                "fn() { 1; }(1);",
+                "wrong number of arguments: want=0, got=1"
+            ),
+            VMTestCase::new(
+                "fn(a) { a; }();",
+                "wrong number of arguments: want=1, got=0"
+            ),
+            VMTestCase::new(
+                "fn(a, b) { a + b; }(1);",
+                "wrong number of arguments: want=2, got=1"
+            ),
+        ];
+
+        for tt in tests.into_iter() {
+            let program = parse(tt.input);
+
+            let mut comp = compiler::Compiler::new();
+            let err = comp.compile(ast::Node::Program(program));
+            if err.is_some() {
+                panic!("compiler error: {}", err.unwrap())
+            }
+
+            let mut vm = VM::new(comp.bytecode());
+            let err = vm.run();
+            if err.is_some() {
+                panic!("expected VM error but resulted in none.")
+            }
+
+            match tt.expected {
+                Expected::String(ExpectedString(expected)) => {
+                    let actual = err.unwrap().message;
+                    if actual != expected {
+                        panic!("wrong VM error: want={}, got={}", expected, actual)
+
+                    }
+                }
+                _ => panic!()
+            }
+        }
+    }
 }
