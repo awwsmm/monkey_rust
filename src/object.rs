@@ -330,6 +330,7 @@ impl HasHashKey for Hashable {
 pub(crate) struct CompiledFunctionObj {
     pub(crate) instructions: code::Instructions,
     pub(crate) num_locals: usize,
+    pub(crate) num_parameters: usize,
 }
 
 impl ObjectLike for CompiledFunctionObj {
