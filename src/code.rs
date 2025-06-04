@@ -268,7 +268,7 @@ const OP_INDEX: Definition = Definition{
 const OP_CALL: Definition = Definition{
     opcode: Opcode::OpCall,
     name: "OpCall",
-    operand_widths: &[],
+    operand_widths: &[1],
 };
 
 const OP_RETURN_VALUE: Definition = Definition{
