@@ -311,9 +311,10 @@ impl Compiler {
 
                 let num_locals = self.symbol_table.num_definitions;
                 let instructions = self.leave_scope();
+                let num_parameters = node.parameters.len();
 
                 let compiled_func = object::Object::CompiledFunctionObj(
-                    object::CompiledFunctionObj{ instructions, num_locals }
+                    object::CompiledFunctionObj{ instructions, num_locals, num_parameters }
                 );
                 let size = self.add_constant(compiled_func);
                 self.emit(code::Opcode::OpConstant, vec![size]);
