@@ -1,5 +1,6 @@
 mod frame;
 
+use crate::code::read_one_byte;
 use crate::object::{HasHashKey, ObjectLike};
 use crate::{code, compiler, object};
 use std::collections::BTreeMap;
@@ -222,8 +223,9 @@ impl VM {
                 }
 
                 code::Opcode::OpCall => {
+                    let num_args = read_one_byte(&ins[ip+1..]);
                     self.current_frame().ip += 1;
-                    let func = match self.stack[self.sp-1].clone() {
+                    let func = match self.stack[self.sp-1-num_args].clone() {
                         Some(object::Object::CompiledFunctionObj(obj)) => obj,
                         _ => return compiler::Error::new("calling non-function")
                     };
