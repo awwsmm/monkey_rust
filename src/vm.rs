@@ -1132,6 +1132,39 @@ mod tests {
                 "#,
                 3,
             ),
+            VMTestCase::new(
+                r#"
+                let sum = fn(a, b) {
+                    let c = a + b;
+                    c;
+                };
+                sum(1, 2);
+                "#,
+                3,
+            ),
+            VMTestCase::new(
+                r#"
+                let sum = fn(a, b) {
+                    let c = a + b;
+                    c;
+                };
+                sum(1, 2) + sum(3, 4);
+                "#,
+                10,
+            ),
+            VMTestCase::new(
+                r#"
+                let sum = fn(a, b) {
+                    let c = a + b;
+                    c;
+                };
+                let outer = fn() {
+                    sum(1, 2) + sum(3, 4);
+                };
+                outer();
+                "#,
+                10,
+            ),
         ];
 
         if run_vm_tests(tests) {
