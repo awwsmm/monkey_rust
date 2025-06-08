@@ -44,3 +44,12 @@ const BUILTINS: [Builtin; 1] = [
 fn new_error(string: String) -> Object {
     ErrorObj::new(string).unwrap()
 }
+
+fn get_builtin_by_name(name: &str) -> Option<&BuiltinObj> {
+    for def in BUILTINS.iter() {
+        if def.name == name {
+            return Some(&def.builtin)
+        }
+    }
+    None
+}
