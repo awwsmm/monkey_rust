@@ -12,36 +12,7 @@ impl Builtin {
 
             "first" => get_builtin_by_name(string).cloned(),
 
-            "last" => Some(object::BuiltinObj{
-                func: |args| {
-                    if args.len() != 1 {
-                        return object::ErrorObj::new(format!(
-                            "wrong number of arguments. got={}, want=1",
-                            args.len()
-                        )).unwrap()
-                    };
-
-                    if args.get(0).unwrap().object_type() != object::ObjectType::ArrayObj {
-                        return object::ErrorObj::new(format!(
-                            "argument to `last` must be ArrayObj, got {:?}",
-                            args.get(0).unwrap().object_type()
-                        )).unwrap()
-                    };
-
-                    let arr = match args.get(0) {
-                        Some(object::Object::ArrayObj(inner)) => inner,
-                        _ => panic!()
-                    };
-
-                    let length = arr.elements.len();
-
-                    if length > 0 {
-                        return arr.elements.get(length-1).cloned().unwrap()
-                    }
-
-                    object::Object::NullObj(NULL)
-                }
-            }),
+            "last" => get_builtin_by_name(string).cloned(),
 
             "rest" => Some(object::BuiltinObj{
                 func: |args| {

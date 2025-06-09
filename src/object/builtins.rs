@@ -11,7 +11,7 @@ impl Builtin {
     }
 }
 
-const BUILTINS: [Builtin; 3] = [
+const BUILTINS: [Builtin; 4] = [
     Builtin::new(
         "len",
         BuiltinObj{
@@ -81,7 +81,40 @@ const BUILTINS: [Builtin; 3] = [
                 None
             }
         }
-    )
+    ),
+    Builtin::new(
+        "last",
+        BuiltinObj{
+            func: |args| {
+                if args.len() != 1 {
+                    return new_error(format!(
+                        "wrong number of arguments. got={}, want=1",
+                        args.len()
+                    ))
+                };
+
+                if args.get(0).unwrap().object_type() != ObjectType::ArrayObj {
+                    return new_error(format!(
+                        "argument to `last` must be ArrayObj, got {:?}",
+                        args.get(0).unwrap().object_type()
+                    ))
+                };
+
+                let arr = match args.get(0) {
+                    Some(Object::ArrayObj(inner)) => inner,
+                    _ => panic!()
+                };
+
+                let length = arr.elements.len();
+
+                if length > 0 {
+                    return arr.elements.get(length-1).cloned()
+                }
+
+                None
+            }
+        }
+    ),
 ];
 
 fn new_error(string: String) -> Option<Object> {
