@@ -11,7 +11,7 @@ impl Builtin {
     }
 }
 
-const BUILTINS: [Builtin; 1] = [
+const BUILTINS: [Builtin; 2] = [
     Builtin::new(
         "len",
         BuiltinObj{
@@ -25,10 +25,10 @@ const BUILTINS: [Builtin; 1] = [
 
                 return match args.get(0) {
                     Some(Object::ArrayObj(arg)) =>
-                        Object::IntegerObj(IntegerObj { value: arg.elements.len() as i32 }),
+                        Some(Object::IntegerObj(IntegerObj { value: arg.elements.len() as i32 })),
 
                     Some(Object::StringObj(arg)) =>
-                        Object::IntegerObj(IntegerObj { value: arg.value.len() as i32 }),
+                        Some(Object::IntegerObj(IntegerObj { value: arg.value.len() as i32 })),
 
                     _ =>
                         new_error(format!(
@@ -38,11 +38,23 @@ const BUILTINS: [Builtin; 1] = [
                 }
             }
         }
+    ),
+    Builtin::new(
+        "puts",
+        BuiltinObj{
+            func: |args| {
+                for arg in args.iter() {
+                    println!("{}", arg.inspect())
+                }
+
+                None
+            }
+        }
     )
 ];
 
-fn new_error(string: String) -> Object {
-    ErrorObj::new(string).unwrap()
+fn new_error(string: String) -> Option<Object> {
+    ErrorObj::new(string)
 }
 
 pub(crate) fn get_builtin_by_name(name: &str) -> Option<&BuiltinObj> {

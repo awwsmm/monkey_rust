@@ -213,7 +213,7 @@ impl ObjectLike for StringObj {
     }
 }
 
-type BuiltinFunction = fn(Vec<Object>) -> Object;
+type BuiltinFunction = fn(Vec<Object>) -> Option<Object>;
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct BuiltinObj {
