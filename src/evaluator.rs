@@ -226,8 +226,12 @@ fn apply_function(func: object::Object, args: Vec<object::Object>) -> Option<obj
             unwrap_return_value(evaluated?).map(|x| *x)
         },
 
-        object::Object::BuiltinObj(func) =>
-            Some((func.func)(args)),
+        object::Object::BuiltinObj(func) => {
+            if let Some(result) = (func.func)(args) {
+                return Some(result)
+            }
+            Some(object::Object::NullObj(NULL))
+        }
 
         _ =>
             object::ErrorObj::new(format!("not a function: {:?}", func.object_type()))
