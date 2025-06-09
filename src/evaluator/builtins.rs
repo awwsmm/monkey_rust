@@ -133,15 +133,7 @@ impl Builtin {
                 }
             }),
 
-            "puts" => Some(object::BuiltinObj{
-                func: |args| {
-                    for arg in args.iter() {
-                        println!("{}", arg.inspect())
-                    }
-
-                    object::Object::NullObj(NULL)
-                }
-            }),
+            "puts" => get_builtin_by_name(string).cloned(),
 
             _ => None,
         }
