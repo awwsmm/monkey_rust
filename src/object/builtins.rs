@@ -11,7 +11,7 @@ impl Builtin {
     }
 }
 
-const BUILTINS: [Builtin; 2] = [
+const BUILTINS: [Builtin; 3] = [
     Builtin::new(
         "len",
         BuiltinObj{
@@ -45,6 +45,37 @@ const BUILTINS: [Builtin; 2] = [
             func: |args| {
                 for arg in args.iter() {
                     println!("{}", arg.inspect())
+                }
+
+                None
+            }
+        }
+    ),
+    Builtin::new(
+        "first",
+        BuiltinObj{
+            func: |args| {
+                if args.len() != 1 {
+                    return new_error(format!(
+                        "wrong number of arguments. got={}, want=1",
+                        args.len()
+                    ))
+                };
+
+                if args.get(0).unwrap().object_type() != ObjectType::ArrayObj {
+                    return new_error(format!(
+                        "argument to `first` must be ArrayObj, got {:?}",
+                        args.get(0).unwrap().object_type()
+                    ))
+                };
+
+                let arr = match args.get(0) {
+                    Some(Object::ArrayObj(inner)) => inner,
+                    _ => panic!()
+                };
+
+                if arr.elements.len() > 0 {
+                    return arr.elements.get(0).cloned()
                 }
 
                 None
