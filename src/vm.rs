@@ -252,6 +252,17 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpGetBuiltin => {
+                    let builtin_index = read_one_byte(&ins[ip+1..]);
+                    self.current_frame().ip += 1;
+
+                    let definition = object::builtins::BUILTINS[builtin_index].builtin.clone();
+
+                    if let Some(err) = self.push(object::Object::BuiltinObj(definition)) {
+                        return Some(err)
+                    }
+                }
+
                 _ => () // TODO
             }
         }

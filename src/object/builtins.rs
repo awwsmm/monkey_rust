@@ -2,7 +2,7 @@ use crate::object::*;
 
 pub(crate) struct Builtin {
     pub(crate) name: &'static str,
-    builtin: BuiltinObj,
+    pub(crate) builtin: BuiltinObj,
 }
 
 impl Builtin {
