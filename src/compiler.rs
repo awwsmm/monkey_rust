@@ -1115,7 +1115,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpClosure, &vec![2, 0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
@@ -1132,7 +1132,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpClosure, &vec![2, 0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
@@ -1149,7 +1149,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpClosure, &vec![2, 0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
