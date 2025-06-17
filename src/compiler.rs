@@ -1,6 +1,6 @@
 pub(crate) mod symbol_table;
 
-use crate::compiler::symbol_table::{Symbol, SymbolScope, SymbolTable, BUILTIN_SCOPE, GLOBAL_SCOPE, LOCAL_SCOPE};
+use crate::compiler::symbol_table::{Symbol, SymbolTable, BUILTIN_SCOPE, GLOBAL_SCOPE, LOCAL_SCOPE};
 use crate::{ast, code, object};
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
@@ -275,11 +275,7 @@ impl Compiler {
                     Some(symbol) => symbol
                 };
 
-                if symbol.scope == GLOBAL_SCOPE {
-                    self.emit(code::Opcode::OpGetGlobal, vec![symbol.index]);
-                } else {
-                    self.emit(code::Opcode::OpGetLocal, vec![symbol.index]);
-                }
+                self.load_symbol(symbol);
             }
 
             ast::Node::Expression(ast::Expression::IndexExpression(node)) => {
@@ -459,14 +455,10 @@ impl Compiler {
 
     fn load_symbol(&mut self, s: Symbol) {
         match s.scope {
-            SymbolScope(GLOBAL_SCOPE) =>
-                self.emit(code::Opcode::OpGetGlobal, vec![s.index]),
-
-            SymbolScope(LOCAL_SCOPE) =>
-                self.emit(code::Opcode::OpGetLocal, vec![s.index]),
-
-            SymbolScope(BUILTIN_SCOPE) =>
-                self.emit(code::Opcode::OpGetBuiltin, vec![s.index]),
+            GLOBAL_SCOPE => self.emit(code::Opcode::OpGetGlobal, vec![s.index]),
+            LOCAL_SCOPE => self.emit(code::Opcode::OpGetLocal, vec![s.index]),
+            BUILTIN_SCOPE => self.emit(code::Opcode::OpGetBuiltin, vec![s.index]),
+            _ => panic!(),
         };
     }
 }
