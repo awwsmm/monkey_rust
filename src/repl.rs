@@ -1,5 +1,5 @@
 use crate::object::ObjectLike;
-use crate::{ast, compiler, lexer, parser, vm};
+use crate::{ast, compiler, lexer, object, parser, vm};
 use std::io::{BufRead, Write};
 
 const PROMPT: &'static [u8] = ">> ".as_bytes();
@@ -9,6 +9,9 @@ pub(crate) fn start(reader: &mut impl BufRead, writer: &mut impl Write) {
     let mut constants = vec![];
     let mut globals = [const { None }; vm::GLOBALS_SIZE];
     let mut symbol_table = compiler::symbol_table::SymbolTable::new();
+    for (i, v) in object::builtins::BUILTINS.iter().enumerate() {
+        symbol_table.define_builtin(i, v.name);
+    }
 
     loop {
         writer.write(PROMPT).unwrap();
