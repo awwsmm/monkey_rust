@@ -36,7 +36,7 @@ struct CompilationScope {
 pub(crate) struct Compiler {
     constants: Vec<object::Object>,
 
-    pub(crate) symbol_table: symbol_table::SymbolTable,
+    pub(crate) symbol_table: SymbolTable,
 
     scopes: Vec<CompilationScope>,
     scope_index: usize,
@@ -50,15 +50,21 @@ impl Compiler {
             previous_instruction: EmittedInstruction { opcode: None, position: 0 },
         };
 
+        let mut symbol_table = SymbolTable::new();
+
+        for (i, v) in object::builtins::BUILTINS.iter().enumerate() {
+            symbol_table.define_builtin(i, v.name);
+        }
+
         Self {
             constants: vec![],
-            symbol_table: symbol_table::SymbolTable::new(),
+            symbol_table,
             scopes: vec![main_scope],
             scope_index: 0,
         }
     }
 
-    pub(crate) fn new_with_state(s: symbol_table::SymbolTable, constants: Vec<object::Object>) -> Self {
+    pub(crate) fn new_with_state(s: SymbolTable, constants: Vec<object::Object>) -> Self {
         let mut compiler = Self::new();
         compiler.symbol_table = s;
         compiler.constants = constants;

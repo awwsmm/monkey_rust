@@ -1,7 +1,7 @@
 use crate::object::*;
 
-struct Builtin {
-    name: &'static str,
+pub(crate) struct Builtin {
+    pub(crate) name: &'static str,
     builtin: BuiltinObj,
 }
 
@@ -11,7 +11,7 @@ impl Builtin {
     }
 }
 
-const BUILTINS: [Builtin; 6] = [
+pub(crate) const BUILTINS: [Builtin; 6] = [
     Builtin::new(
         "len",
         BuiltinObj{
