@@ -21,6 +21,7 @@ pub(crate) enum ObjectType {
     ArrayObj,
     HashObj,
     CompiledFunctionObj,
+    ClosureObj,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -36,6 +37,7 @@ pub(crate) enum Object {
     ArrayObj(ArrayObj),
     HashObj(HashObj),
     CompiledFunctionObj(CompiledFunctionObj),
+    ClosureObj(ClosureObj),
 }
 
 pub(crate) trait ObjectLike {
@@ -57,6 +59,7 @@ impl Object {
             Object::ArrayObj(inner) => Box::new(inner),
             Object::HashObj(inner) => Box::new(inner),
             Object::CompiledFunctionObj(inner) => Box::new(inner),
+            Object::ClosureObj(inner) => Box::new(inner),
         }
     }
 
@@ -341,6 +344,22 @@ impl ObjectLike for CompiledFunctionObj {
 
     fn inspect(&self) -> String {
         format!("CompiledFunction[{:p}]", &self)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct ClosureObj {
+    func: CompiledFunctionObj,
+    free: Vec<Object>,
+}
+
+impl ObjectLike for ClosureObj {
+    fn object_type(&self) -> ObjectType {
+        ObjectType::ClosureObj
+    }
+
+    fn inspect(&self) -> String {
+        format!("Closure[{:p}]", &self)
     }
 }
 
