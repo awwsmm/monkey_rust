@@ -59,6 +59,12 @@ impl SymbolTable {
             other => other.cloned(),
         }
     }
+
+    pub(crate) fn define_builtin(&mut self, index: usize, name: &str) -> Symbol {
+        let symbol = Symbol::new(name, BUILTIN_SCOPE, index);
+        self.store.insert(String::from(name), symbol.clone());
+        symbol
+    }
 }
 
 #[cfg(test)]
@@ -278,8 +284,6 @@ mod tests {
     #[test]
     fn test_define_resolve_builtins() {
         let mut global: SymbolTable = SymbolTable::new();
-        let mut first_local: SymbolTable = SymbolTable::new_enclosed(Box::new(global));
-        let mut second_local: SymbolTable = SymbolTable::new_enclosed(Box::new(first_local));
 
         let expected = vec![
             Symbol::new("a", BUILTIN_SCOPE, 0),
@@ -289,8 +293,11 @@ mod tests {
         ];
 
         for (i, v) in expected.iter().enumerate() {
-            global.define_builtin(i, v.name)
+            global.define_builtin(i, v.name.as_str());
         }
+
+        let first_local: SymbolTable = SymbolTable::new_enclosed(Box::new(global.clone()));
+        let second_local: SymbolTable = SymbolTable::new_enclosed(Box::new(first_local.clone()));
 
         let mut should_panic = false;
 
@@ -304,7 +311,7 @@ mod tests {
                     }
                     Some(result) => result
                 };
-                if result != sym {
+                if result != *sym {
                     should_panic = true;
                     eprintln!("expected {} to resolve to {:?}, got={:?}",
                               sym.name, sym, result)
