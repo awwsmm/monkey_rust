@@ -427,6 +427,7 @@ mod tests {
             Test::new(Opcode::OpConstant, vec![65534], vec![Opcode::OpConstant.into(), 255, 254]),
             Test::new(Opcode::OpAdd, vec![], vec![Opcode::OpAdd.into()]),
             Test::new(Opcode::OpGetLocal, vec![255], vec![Opcode::OpGetLocal.into(), 255]),
+            Test::new(Opcode::OpClosure, vec![65534, 255], vec![Opcode::OpClosure.into(), 255, 254, 255]),
         ];
 
         for tt in tests.into_iter() {
@@ -453,12 +454,14 @@ mod tests {
             make(Opcode::OpGetLocal, &vec![1]),
             make(Opcode::OpConstant, &vec![2]),
             make(Opcode::OpConstant, &vec![65535]),
+            make(Opcode::OpClosure, &vec![65535, 255]),
         ];
 
         let expected = r#"0000 OpAdd
 0001 OpGetLocal 1
 0003 OpConstant 2
 0006 OpConstant 65535
+0009 OpClosure 65535 255
 "#;
         let mut concatted = Instructions(vec![]);
         for ins in instructions.iter() {
@@ -497,6 +500,7 @@ mod tests {
         let tests = vec![
             Test::new(Opcode::OpConstant, vec![65535], 2),
             Test::new(Opcode::OpGetLocal, vec![255], 1),
+            Test::new(Opcode::OpClosure, vec![65535, 255], 3),
         ];
 
         let mut should_panic = false;
