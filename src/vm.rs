@@ -226,7 +226,7 @@ impl VM {
                     let num_args = read_one_byte(&ins[ip+1..]);
                     self.current_frame().ip += 1;
 
-                    let err = self.call_function(num_args);
+                    let err = self.execute_call(num_args);
                     if err.is_some() {
                         return err
                     }
@@ -270,12 +270,7 @@ impl VM {
         None
     }
 
-    fn call_function(&mut self, num_args: usize) -> Option<compiler::Error> {
-        let func = match self.stack[self.sp-1-num_args].clone() {
-            Some(object::Object::CompiledFunctionObj(obj)) => obj,
-            _ => return compiler::Error::new("calling non-function")
-        };
-
+    fn call_function(&mut self, func: object::CompiledFunctionObj, num_args: usize) -> Option<compiler::Error> {
         if num_args != func.num_parameters {
             return compiler::Error::new(format!(
                 "wrong number of arguments: want={}, got={}",
@@ -541,6 +536,19 @@ impl VM {
 
     pub(crate) fn last_popped_stack_elem(&self) -> Option<&object::Object> {
         self.stack[self.sp].as_ref()
+    }
+
+    fn execute_call(&mut self, num_args: usize) -> Option<compiler::Error> {
+        match self.stack[self.sp-1-num_args].clone() {
+            Some(object::Object::CompiledFunctionObj(obj)) =>
+                self.call_function(obj, num_args),
+
+            Some(object::Object::BuiltinObj(obj)) =>
+                self.call_builtin(obj, num_args),
+
+            _ =>
+                compiler::Error::new("calling non-function and not-built-in")
+        }
     }
 }
 
