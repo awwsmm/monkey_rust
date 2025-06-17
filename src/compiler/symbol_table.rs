@@ -273,4 +273,46 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_define_resolve_builtins() {
+        let mut global: SymbolTable = SymbolTable::new();
+        let mut first_local: SymbolTable = SymbolTable::new_enclosed(Box::new(global));
+        let mut second_local: SymbolTable = SymbolTable::new_enclosed(Box::new(first_local));
+
+        let expected = vec![
+            Symbol::new("a", BUILTIN_SCOPE, 0),
+            Symbol::new("c", BUILTIN_SCOPE, 1),
+            Symbol::new("e", BUILTIN_SCOPE, 2),
+            Symbol::new("f", BUILTIN_SCOPE, 3),
+        ];
+
+        for (i, v) in expected.iter().enumerate() {
+            global.define_builtin(i, v.name)
+        }
+
+        let mut should_panic = false;
+
+        for table in vec![global, first_local, second_local] {
+            for sym in expected.iter() {
+                let result = match table.resolve(sym.name.as_str()) {
+                    None => {
+                        should_panic = true;
+                        eprintln!("name {} not resolvable", sym.name);
+                        continue
+                    }
+                    Some(result) => result
+                };
+                if result != sym {
+                    should_panic = true;
+                    eprintln!("expected {} to resolve to {:?}, got={:?}",
+                              sym.name, sym, result)
+                }
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
