@@ -550,6 +550,18 @@ impl VM {
                 compiler::Error::new("calling non-function and not-built-in")
         }
     }
+
+    fn call_builtin(&mut self, builtin: object::BuiltinObj, num_args: usize) -> Option<compiler::Error> {
+        let args = Vec::from(&self.stack[self.sp-num_args .. self.sp]);
+
+        let result = (builtin.func)(args.into_iter().flatten().collect());
+        self.sp = self.sp - num_args - 1;
+
+        match result {
+            Some(result) => self.push(result),
+            None => self.push(NULL),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -632,6 +644,7 @@ mod tests {
         IntArray(ExpectedIntArray),
         IntValueHash(ExpectedIntValueHash),
         Null,
+        Error(ExpectedError),
     }
 
     struct ExpectedInteger(i32);
@@ -639,6 +652,7 @@ mod tests {
     struct ExpectedString(&'static str);
     struct ExpectedIntArray(Vec<i32>);
     struct ExpectedIntValueHash(BTreeMap<object::HashKey, i32>);
+    struct ExpectedError(&'static str);
 
     impl Into<Expected> for i32 {
         fn into(self) -> Expected {
@@ -704,7 +718,23 @@ mod tests {
                     eprintln!("object is not NULL: {:?}", actual)
                 }
 
+            Expected::Error(ExpectedError(expected)) => {
+                let error_obj = match actual {
+                    Some(object::Object::ErrorObj(obj)) => obj,
+                    _ => {
+                        should_panic = true;
+                        eprintln!("object is not Error: {:?}", actual);
+                        return should_panic
+                    }
+                };
 
+                if error_obj.message != expected {
+                    should_panic = true;
+                    eprintln!("wrong error message. expected={}, got={}",
+                              expected, error_obj.message);
+                    return should_panic
+                }
+            }
 
             Expected::IntArray(ExpectedIntArray(expected)) => {
                 let array = match actual {
@@ -1270,11 +1300,11 @@ mod tests {
             VMTestCase::new(r#"len("hello world")"#, 11),
             VMTestCase::new(
                 "len(1)",
-                "argument to `len` not supported, got INTEGER"
+                Expected::Error(ExpectedError("argument to `len` not supported, got Some(IntegerObj)"))
             ),
             VMTestCase::new(
                 r#"len("one", "two")"#,
-                "wrong number of arguments. got=2, want=1"
+                Expected::Error(ExpectedError("wrong number of arguments. got=2, want=1"))
             ),
             VMTestCase::new(r#"len([1, 2, 3])"#, 3),
             VMTestCase::new(r#"len([])"#, 0),
@@ -1283,20 +1313,20 @@ mod tests {
             VMTestCase::new(r#"first([])"#, Expected::Null),
             VMTestCase::new(
                 "first(1)",
-                "argument to `first` must be ARRAY, got INTEGER"
+                Expected::Error(ExpectedError("argument to `first` must be ArrayObj, got IntegerObj"))
             ),
             VMTestCase::new(r#"last([1, 2, 3])"#, 3),
             VMTestCase::new(r#"last([])"#, Expected::Null),
             VMTestCase::new(
                 "last(1)",
-                "argument to `last` must be ARRAY, got INTEGER"
+                Expected::Error(ExpectedError("argument to `last` must be ArrayObj, got IntegerObj"))
             ),
             VMTestCase::new(r#"rest([1, 2, 3])"#, vec![2, 3]),
             VMTestCase::new(r#"rest([])"#, Expected::Null),
             VMTestCase::new(r#"push([], 1)"#, vec![1]),
             VMTestCase::new(
                 "push(1, 1)",
-                "argument to `push` must be ARRAY, got INTEGER"
+                Expected::Error(ExpectedError("argument to `push` must be ArrayObj, got IntegerObj"))
             ),
         ];
 
