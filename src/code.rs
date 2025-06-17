@@ -22,6 +22,7 @@ impl Instructions {
         match operand_count {
             0 => return String::from(def.name),
             1 => return format!("{} {}", def.name, operands[0]),
+            2 => return format!("{} {} {}", def.name, operands[0], operands[1]),
             _ => ()
         }
 
