@@ -1417,4 +1417,47 @@ mod tests {
 
         run_compiler_tests(tests)
     }
+
+    #[test]
+    fn test_builtins() {
+        let tests = vec![
+            CompilerTestCase::new(
+                r#"
+                len([]);
+                push([], 1);
+                "#,
+                vec![
+                    1.into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpGetBuiltin, &vec![0]),
+                    code::make(code::Opcode::OpArray, &vec![0]),
+                    code::make(code::Opcode::OpCall, &vec![1]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                    code::make(code::Opcode::OpGetBuiltin, &vec![5]),
+                    code::make(code::Opcode::OpArray, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpCall, &vec![2]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+            CompilerTestCase::new(
+                "fn() { len([]) }",
+                vec![
+                    vec![
+                        code::make(code::Opcode::OpGetBuiltin, &vec![0]),
+                        code::make(code::Opcode::OpArray, &vec![0]),
+                        code::make(code::Opcode::OpCall, &vec![1]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
 }
