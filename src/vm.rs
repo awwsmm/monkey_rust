@@ -679,6 +679,14 @@ mod tests {
                 }
             }
 
+            Expected::Null =>
+                if actual != Some(&NULL) {
+                    should_panic = true;
+                    eprintln!("object is not NULL: {:?}", actual)
+                }
+
+
+
             Expected::IntArray(ExpectedIntArray(expected)) => {
                 let array = match actual {
                     Some(object::Object::ArrayObj(obj)) => obj,
@@ -739,12 +747,6 @@ mod tests {
                     }
                 }
             }
-
-            Expected::Null =>
-                if actual != Some(&NULL) {
-                    should_panic = true;
-                    eprintln!("object is not NULL: {:?}", actual)
-                }
 
             _ => () // TODO
         }
@@ -1234,11 +1236,53 @@ mod tests {
                     let actual = err.unwrap().message;
                     if actual != expected {
                         panic!("wrong VM error: want={}, got={}", expected, actual)
-
                     }
                 }
                 _ => panic!()
             }
+        }
+    }
+
+    #[test]
+    fn test_builtin_functions() {
+        let tests = vec![
+            VMTestCase::new(r#"len("")"#, 0),
+            VMTestCase::new(r#"len("four")"#, 4),
+            VMTestCase::new(r#"len("hello world")"#, 11),
+            VMTestCase::new(
+                "len(1)",
+                "argument to `len` not supported, got INTEGER"
+            ),
+            VMTestCase::new(
+                r#"len("one", "two")"#,
+                "wrong number of arguments. got=2, want=1"
+            ),
+            VMTestCase::new(r#"len([1, 2, 3])"#, 3),
+            VMTestCase::new(r#"len([])"#, 0),
+            VMTestCase::new(r#"puts("hello", "world!")"#, Expected::Null),
+            VMTestCase::new(r#"first([1, 2, 3])"#, 1),
+            VMTestCase::new(r#"first([])"#, Expected::Null),
+            VMTestCase::new(
+                "first(1)",
+                "argument to `first` must be ARRAY, got INTEGER"
+            ),
+            VMTestCase::new(r#"last([1, 2, 3])"#, 3),
+            VMTestCase::new(r#"last([])"#, Expected::Null),
+            VMTestCase::new(
+                "last(1)",
+                "argument to `last` must be ARRAY, got INTEGER"
+            ),
+            VMTestCase::new(r#"rest([1, 2, 3])"#, vec![2, 3]),
+            VMTestCase::new(r#"rest([])"#, Expected::Null),
+            VMTestCase::new(r#"push([], 1)"#, vec![1]),
+            VMTestCase::new(
+                "push(1, 1)",
+                "argument to `push` must be ARRAY, got INTEGER"
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
         }
     }
 }
