@@ -271,16 +271,16 @@ impl VM {
         None
     }
 
-    fn call_function(&mut self, func: object::CompiledFunctionObj, num_args: usize) -> Option<compiler::Error> {
-        if num_args != func.num_parameters {
+    fn call_closure(&mut self, cl: object::ClosureObj, num_args: usize) -> Option<compiler::Error> {
+        if num_args != cl.func.num_parameters {
             return compiler::Error::new(format!(
                 "wrong number of arguments: want={}, got={}",
-                func.num_parameters, num_args
+                cl.func.num_parameters, num_args
             ));
         }
 
-        let mut new_pointer = func.num_locals;
-        let frame = frame::Frame::new(func, (self.sp - num_args) as i32);
+        let mut new_pointer = cl.func.num_locals;
+        let frame = frame::Frame::new(cl, (self.sp - num_args) as i32);
         new_pointer += frame.base_pointer as usize;
         self.push_frame(frame);
         self.sp = new_pointer;
@@ -541,14 +541,14 @@ impl VM {
 
     fn execute_call(&mut self, num_args: usize) -> Option<compiler::Error> {
         match self.stack[self.sp-1-num_args].clone() {
-            Some(object::Object::CompiledFunctionObj(obj)) =>
-                self.call_function(obj, num_args),
+            Some(object::Object::ClosureObj(obj)) =>
+                self.call_closure(obj, num_args),
 
             Some(object::Object::BuiltinObj(obj)) =>
                 self.call_builtin(obj, num_args),
 
             _ =>
-                compiler::Error::new("calling non-function and not-built-in")
+                compiler::Error::new("calling non-closure and not-built-in")
         }
     }
 
