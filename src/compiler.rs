@@ -319,7 +319,7 @@ impl Compiler {
                     object::CompiledFunctionObj{ instructions, num_locals, num_parameters }
                 );
                 let size = self.add_constant(compiled_func);
-                self.emit(code::Opcode::OpConstant, vec![size]);
+                self.emit(code::Opcode::OpClosure, vec![size, 0]);
             }
 
             ast::Node::Expression(ast::Expression::CallExpression(node)) => {
