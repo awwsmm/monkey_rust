@@ -349,8 +349,8 @@ impl ObjectLike for CompiledFunctionObj {
 
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct ClosureObj {
-    func: CompiledFunctionObj,
-    free: Vec<Object>,
+    pub(crate) func: CompiledFunctionObj,
+    pub(crate) free: Vec<Object>,
 }
 
 impl ObjectLike for ClosureObj {

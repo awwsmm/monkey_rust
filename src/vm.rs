@@ -43,7 +43,8 @@ impl VM {
 
     pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
         let main_func = object::CompiledFunctionObj{ instructions: bytecode.instructions, num_locals: 0, num_parameters: 0 };
-        let main_frame = frame::Frame::new(main_func, 0);
+        let main_closure = object::ClosureObj{ func: main_func, free: vec![] };
+        let main_frame = frame::Frame::new(main_closure, 0);
 
         let mut frames = Vec::with_capacity(MAX_FRAMES);
         frames.push(main_frame);
