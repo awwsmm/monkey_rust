@@ -1471,4 +1471,38 @@ mod tests {
 
         run_compiler_tests(tests)
     }
+
+    #[test]
+    fn test_closures() {
+        let tests = vec![
+            CompilerTestCase::new(
+                r#"
+                fn(a) {
+                    fn(b) {
+                        a + b
+                    }
+                }
+                "#,
+                vec![
+                    vec![
+                        code::make(code::Opcode::OpGetFree, &vec![0]),
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpAdd, &vec![]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                    vec![
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpClosure, &vec![0, 1]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpClosure, &vec![1, 0]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
 }
