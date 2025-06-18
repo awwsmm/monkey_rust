@@ -1,3 +1,4 @@
+use crate::ast::Expression;
 use crate::token::TokenType;
 use crate::{ast, lexer, token};
 use std::cmp::PartialOrd;
@@ -185,6 +186,7 @@ impl Parser {
             token: self.cur_token.clone(),
             parameters: vec![],
             body: None,
+            name: String::from(""),
         };
 
         if !self.expect_peek(TokenType::LPAREN) {
@@ -334,6 +336,13 @@ impl Parser {
         self.next_token();
 
         stmt.value = self.parse_expression(Precedence::Lowest);
+
+        match &mut stmt.value {
+            Some(Expression::FunctionLiteral(fl)) => {
+                fl.name = stmt.name.clone()?.value
+            }
+            _ => ()
+        }
 
         if self.peek_token_is(TokenType::SEMICOLON) {
             self.next_token()

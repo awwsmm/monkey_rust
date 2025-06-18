@@ -661,19 +661,19 @@ mod tests {
                 panic!("compiler error: {}", err)
             }
 
-            for (i, constant) in comp.bytecode().constants.iter().enumerate() {
-                print!("CONSTANT {} {:?}:\n", i, constant);
-
-                match constant {
-                    Object::CompiledFunctionObj(constant) =>
-                        print!(" Instructions:\n{:?}", constant.instructions),
-                    Object::IntegerObj(constant) =>
-                        print!(" Value: {}\n", constant.value),
-                    _ => ()
-                }
-
-                print!("\n")
-            }
+            // for (i, constant) in comp.bytecode().constants.iter().enumerate() {
+            //     print!("CONSTANT {} {:?}:\n", i, constant);
+            //
+            //     match constant {
+            //         Object::CompiledFunctionObj(constant) =>
+            //             print!(" Instructions:\n{:?}", constant.instructions),
+            //         Object::IntegerObj(constant) =>
+            //             print!(" Value: {}\n", constant.value),
+            //         _ => ()
+            //     }
+            //
+            //     print!("\n")
+            // }
 
             let mut vm = VM::new(comp.bytecode());
             let err = vm.run();
