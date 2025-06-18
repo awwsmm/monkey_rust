@@ -411,9 +411,67 @@ mod tests {
             for (i, sym) in tt.expected_free_symbols.into_iter() {
                 let result = tt.table.free_symbols[i];
                 if result != sym {
+                    should_panic = true;
                     eprintln!("wrong free symbol. got={:?}, want={:?}",
                               result, sym);
                 }
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_resolve_unresolvable_free() {
+        let mut global: SymbolTable = SymbolTable::new();
+
+        global.define("a");
+
+        let mut first_local: SymbolTable = SymbolTable::new_enclosed(Box::new(global));
+
+        first_local.define("c");
+
+        let mut second_local: SymbolTable = SymbolTable::new_enclosed(Box::new(first_local.clone()));
+
+        second_local.define("e");
+        second_local.define("f");
+
+        let expected = vec![
+            Symbol::new("a", GLOBAL_SCOPE, 0),
+            Symbol::new("c", FREE_SCOPE, 0),
+            Symbol::new("e", LOCAL_SCOPE, 0),
+            Symbol::new("f", LOCAL_SCOPE, 1),
+        ];
+
+        let mut should_panic = false;
+
+        for sym in expected.into_iter() {
+            let result = match second_local.resolve(sym.name.as_str()) {
+                None => {
+                    should_panic = true;
+                    eprintln!("name {} not resolvable", sym.name);
+                    continue
+                }
+                Some(result) => result
+            };
+            if result != sym {
+                should_panic = true;
+                eprintln!("expected {} to resolve to {:?}, got={:?}",
+                          sym.name, sym, result)
+            }
+        }
+
+        let expected_unresolvable = vec![
+            "b",
+            "d",
+        ];
+
+        for name in expected_unresolvable.into_iter() {
+            if let Some(_) = second_local.resolve(name) {
+                should_panic = true;
+                eprintln!("name {} resolved, but was expected not to", name);
             }
         }
 
