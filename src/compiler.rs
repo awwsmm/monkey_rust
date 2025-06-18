@@ -1501,6 +1501,42 @@ mod tests {
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
+            CompilerTestCase::new(
+                r#"
+                fn(a) {
+                    fn(b) {
+                        fn(c) {
+                            a + b + c
+                        }
+                    }
+                }
+                "#,
+                vec![
+                    vec![
+                        code::make(code::Opcode::OpGetFree, &vec![0]),
+                        code::make(code::Opcode::OpGetFree, &vec![1]),
+                        code::make(code::Opcode::OpAdd, &vec![]),
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpAdd, &vec![]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                    vec![
+                        code::make(code::Opcode::OpGetFree, &vec![0]),
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpClosure, &vec![0, 2]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                    vec![
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpClosure, &vec![1, 1]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpClosure, &vec![2, 0]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
         ];
 
         run_compiler_tests(tests)
