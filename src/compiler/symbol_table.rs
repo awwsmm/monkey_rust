@@ -516,7 +516,7 @@ mod tests {
         global.define_function_name("a");
 
         let expected = Symbol{
-            name: "a",
+            name: String::from("a"),
             scope: FUNCTION_SCOPE,
             index: 0,
         } ;
@@ -529,6 +529,29 @@ mod tests {
         if result != expected {
             panic!("expected {} to resolve to {:?}, got={:?}",
                 expected.name, expected, result)
+        }
+    }
+
+    #[test]
+    fn test_shadowing_function_name() {
+        let mut global = SymbolTable::new();
+        global.define_function_name("a");
+        global.define("a");
+
+        let expected = Symbol{
+            name: String::from("a"),
+            scope: GLOBAL_SCOPE,
+            index: 0,
+        } ;
+
+        let result = match global.resolve(expected.name.as_str()) {
+            None => panic!("function name {} not resolvable", expected.name),
+            Some(result) => result,
+        };
+
+        if result != expected {
+            panic!("expected {} to resolve to {:?}, got={:?}",
+                   expected.name, expected, result)
         }
     }
 }
