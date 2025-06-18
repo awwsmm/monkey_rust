@@ -1252,7 +1252,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpClosure, &vec![0, 0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
@@ -1274,7 +1274,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![1]), // The compiled function
+                    code::make(code::Opcode::OpClosure, &vec![1, 0]),
                     code::make(code::Opcode::OpCall, &vec![0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
@@ -1292,7 +1292,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![1]), // The compiled function
+                    code::make(code::Opcode::OpClosure, &vec![1, 0]),
                     code::make(code::Opcode::OpSetGlobal, &vec![0]),
                     code::make(code::Opcode::OpGetGlobal, &vec![0]),
                     code::make(code::Opcode::OpCall, &vec![0]),
@@ -1312,7 +1312,7 @@ mod tests {
                     24.into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpClosure, &vec![0, 0]),
                     code::make(code::Opcode::OpSetGlobal, &vec![0]),
                     code::make(code::Opcode::OpGetGlobal, &vec![0]),
                     code::make(code::Opcode::OpConstant, &vec![1]),
@@ -1339,7 +1339,7 @@ mod tests {
                     26.into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpClosure, &vec![0, 0]),
                     code::make(code::Opcode::OpSetGlobal, &vec![0]),
                     code::make(code::Opcode::OpGetGlobal, &vec![0]),
                     code::make(code::Opcode::OpConstant, &vec![1]),
@@ -1372,7 +1372,7 @@ mod tests {
                 vec![
                     code::make(code::Opcode::OpConstant, &vec![0]),
                     code::make(code::Opcode::OpSetGlobal, &vec![0]),
-                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpClosure, &vec![1, 0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
@@ -1393,7 +1393,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![1]),
+                    code::make(code::Opcode::OpClosure, &vec![1, 0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
@@ -1420,7 +1420,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpClosure, &vec![2, 0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
@@ -1463,7 +1463,7 @@ mod tests {
                     ].into(),
                 ],
                 vec![
-                    code::make(code::Opcode::OpConstant, &vec![0]),
+                    code::make(code::Opcode::OpClosure, &vec![0, 0]),
                     code::make(code::Opcode::OpPop, &vec![]),
                 ],
             ),
