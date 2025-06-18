@@ -1,6 +1,5 @@
 mod frame;
 
-use crate::code::read_one_byte;
 use crate::object::{HasHashKey, ObjectLike};
 use crate::{code, compiler, object};
 use std::collections::BTreeMap;
@@ -224,7 +223,7 @@ impl VM {
                 }
 
                 code::Opcode::OpCall => {
-                    let num_args = read_one_byte(&ins[ip+1..]);
+                    let num_args = code::read_one_byte(&ins[ip+1..]);
                     self.current_frame().ip += 1;
 
                     let err = self.execute_call(num_args);
@@ -254,7 +253,7 @@ impl VM {
                 }
 
                 code::Opcode::OpGetBuiltin => {
-                    let builtin_index = read_one_byte(&ins[ip+1..]);
+                    let builtin_index = code::read_one_byte(&ins[ip+1..]);
                     self.current_frame().ip += 1;
 
                     let definition = object::builtins::BUILTINS[builtin_index].builtin.clone();
@@ -264,11 +263,34 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpClosure => {
+                    let const_index = code::read_two_bytes(&ins[ip+1..]);
+                    let _ = code::read_one_byte(&ins[ip+3..]);
+                    self.current_frame().ip += 3;
+
+                    if let Some(err) = self.push_closure(const_index) {
+                        return Some(err)
+                    }
+                }
+
                 _ => () // TODO
             }
         }
 
         None
+    }
+
+    fn push_closure(&mut self, const_index: usize) -> Option<compiler::Error> {
+        let constant = self.constants[const_index].clone();
+        let function = match constant {
+            object::Object::CompiledFunctionObj(obj) => obj,
+            _ => return compiler::Error::new(format!(
+                "not a function: {:?}", constant
+            ))
+        };
+
+        let closure = object::ClosureObj{ func: function, free: vec![] };
+        self.push(object::Object::ClosureObj(closure))
     }
 
     fn call_closure(&mut self, cl: object::ClosureObj, num_args: usize) -> Option<compiler::Error> {
