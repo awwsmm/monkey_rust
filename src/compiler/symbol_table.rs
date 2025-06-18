@@ -28,15 +28,17 @@ pub(crate) struct SymbolTable {
 
     store: HashMap<String, Symbol>,
     pub(crate) num_definitions: usize,
+
+    pub(crate) free_symbols: Vec<Symbol>,
 }
 
 impl SymbolTable {
     pub(crate) fn new() -> Self {
-        Self { outer: None, store: Default::default(), num_definitions: 0 }
+        Self { outer: None, store: Default::default(), num_definitions: 0, free_symbols: Default::default() }
     }
 
     pub(crate) fn new_enclosed(outer: Box<SymbolTable>) -> Self {
-        Self { outer: Some(outer), store: Default::default(), num_definitions: 0 }
+        Self { outer: Some(outer), store: Default::default(), num_definitions: 0, free_symbols: Default::default() }
     }
 
     pub(crate) fn define(&mut self, name: impl Into<String>) -> Symbol {
@@ -408,8 +410,8 @@ mod tests {
                 continue
             }
 
-            for (i, sym) in tt.expected_free_symbols.into_iter() {
-                let result = tt.table.free_symbols[i];
+            for (i, sym) in tt.expected_free_symbols.into_iter().enumerate() {
+                let result = tt.table.free_symbols[i].clone();
                 if result != sym {
                     should_panic = true;
                     eprintln!("wrong free symbol. got={:?}, want={:?}",
