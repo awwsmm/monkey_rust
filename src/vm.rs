@@ -607,7 +607,7 @@ impl VM {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::object::HasHashKey;
+    use crate::object::{HasHashKey, Object};
     use crate::{ast, compiler, lexer, object, parser};
     use std::collections::BTreeMap;
 
@@ -659,6 +659,20 @@ mod tests {
             let err = comp.compile(ast::Node::Program(program));
             if let Some(err) = err {
                 panic!("compiler error: {}", err)
+            }
+
+            for (i, constant) in comp.bytecode().constants.iter().enumerate() {
+                print!("CONSTANT {} {:?}:\n", i, constant);
+
+                match constant {
+                    Object::CompiledFunctionObj(constant) =>
+                        print!(" Instructions:\n{:?}", constant.instructions),
+                    Object::IntegerObj(constant) =>
+                        print!(" Value: {}\n", constant.value),
+                    _ => ()
+                }
+
+                print!("\n")
             }
 
             let mut vm = VM::new(comp.bytecode());
