@@ -1456,4 +1456,27 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_recursive_functions() {
+        let tests = vec![
+            VMTestCase::new(
+                r#"
+                let countDown = fn(x) {
+                    if (x == 0) {
+                        return 0;
+                    } else {
+                        countDown(x - 1);
+                    }
+                };
+                countDown(1);
+                "#,
+                0,
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
