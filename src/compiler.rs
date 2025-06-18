@@ -311,15 +311,20 @@ impl Compiler {
                     self.emit(code::Opcode::OpReturn, vec![]);
                 }
 
+                let free_symbols = self.symbol_table.free_symbols.clone();
                 let num_locals = self.symbol_table.num_definitions;
                 let instructions = self.leave_scope();
-                let num_parameters = node.parameters.len();
+
+                let free_symbols_len = free_symbols.len();
+                for s in free_symbols.into_iter() {
+                    self.load_symbol(s)
+                }
 
                 let compiled_func = object::Object::CompiledFunctionObj(
-                    object::CompiledFunctionObj{ instructions, num_locals, num_parameters }
+                    object::CompiledFunctionObj{ instructions, num_locals, num_parameters: node.parameters.len() }
                 );
-                let size = self.add_constant(compiled_func);
-                self.emit(code::Opcode::OpClosure, vec![size, 0]);
+                let func_index = self.add_constant(compiled_func);
+                self.emit(code::Opcode::OpClosure, vec![func_index, free_symbols_len]);
             }
 
             ast::Node::Expression(ast::Expression::CallExpression(node)) => {

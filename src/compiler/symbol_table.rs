@@ -57,21 +57,26 @@ impl SymbolTable {
     }
 
     pub(crate) fn resolve(&mut self, name: &str) -> Option<Symbol> {
-        match self.store.get(name) {
-            None if self.outer.is_some() => {
-                match self.outer.as_ref()?.clone().resolve(name) {
-                    None => None,
-                    Some(obj) => {
-                        if obj.scope == GLOBAL_SCOPE || obj.scope == BUILTIN_SCOPE {
-                            Some(obj)
-                        } else {
-                            let free = self.define_free(obj);
-                            Some(free)
+        match self.store.get(name).cloned() {
+            None => {
+                match self.outer.as_mut() {
+                    Some(mut outer) => {
+                        match outer.resolve(name) {
+                            None => None,
+                            Some(obj) => {
+                                if obj.scope == GLOBAL_SCOPE || obj.scope == BUILTIN_SCOPE {
+                                    Some(obj)
+                                } else {
+                                    let free = self.define_free(obj);
+                                    Some(free)
+                                }
+                            }
                         }
                     }
+                    None => None,
                 }
-            }
-            other => other.cloned(),
+            },
+            Some(obj) => Some(obj)
         }
     }
 
