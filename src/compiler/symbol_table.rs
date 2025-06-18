@@ -68,6 +68,16 @@ impl SymbolTable {
         self.store.insert(String::from(name), symbol.clone());
         symbol
     }
+
+    fn define_free(&mut self, original: Symbol) -> Symbol {
+        let original_name = original.name.clone();
+        self.free_symbols.push(original);
+
+        let symbol = Symbol::new(original_name.as_str(), FREE_SCOPE, self.free_symbols.len() - 1);
+
+        self.store.insert(original_name, symbol.clone());
+        symbol
+    }
 }
 
 #[cfg(test)]
