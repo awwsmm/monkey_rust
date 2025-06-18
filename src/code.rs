@@ -94,6 +94,7 @@ pub(crate) enum Opcode {
     OpGetBuiltin,
     OpClosure,
     OpGetFree,
+    OpCurrentClosure,
 }
 
 impl Into<u8> for Opcode {
@@ -128,6 +129,7 @@ impl Into<u8> for Opcode {
             Opcode::OpGetBuiltin => 26,
             Opcode::OpClosure => 27,
             Opcode::OpGetFree => 28,
+            Opcode::OpCurrentClosure => 29,
         }
     }
 }
@@ -320,6 +322,12 @@ const OP_GET_FREE: Definition = Definition{
     operand_widths: &[1],
 };
 
+const OP_CURRENT_CLOSURE: Definition = Definition{
+    opcode: Opcode::OpCurrentClosure,
+    name: "OpCurrentClosure",
+    operand_widths: &[],
+};
+
 // equivalent of "func Lookup()" in Go implementation
 impl Into<Definition> for u8 {
     fn into(self) -> Definition {
@@ -353,6 +361,7 @@ impl Into<Definition> for u8 {
             26 => OP_GET_BUILTIN,
             27 => OP_CLOSURE,
             28 => OP_GET_FREE,
+            29 => OP_CURRENT_CLOSURE,
             _ => panic!("opcode {} undefined", self)
         }
     }
