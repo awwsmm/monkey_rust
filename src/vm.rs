@@ -279,10 +279,6 @@ impl VM {
 
                     let current_closure = self.current_frame().cl.clone();
 
-                    if current_closure.free.len() <= free_index {
-                        return None
-                    }
-
                     if let Some(err) = self.push(current_closure.free[free_index].clone()) {
                         return Some(err)
                     }
@@ -305,12 +301,12 @@ impl VM {
         };
 
         let mut free = vec![];
-        for _ in 0..num_free {
-            free.push(self.stack[self.sp-num_free+1].clone());
+        for i in 0..num_free {
+            free.push(self.stack[self.sp-num_free+i].clone().unwrap());
         }
         self.sp -= num_free;
 
-        let closure = object::ClosureObj{ func: function, free: vec![] };
+        let closure = object::ClosureObj{ func: function, free };
         self.push(object::Object::ClosureObj(closure))
     }
 
@@ -1391,6 +1387,27 @@ mod tests {
                 closure();
                 "#,
                 99,
+            ),
+            VMTestCase::new(
+                r#"
+                let newAdder = fn(a, b) {
+                fn(c) { a + b + c };
+                };
+                let adder = newAdder(1, 2);
+                adder(8);
+                "#,
+                11,
+            ),
+            VMTestCase::new(
+                r#"
+                let newAdder = fn(a, b) {
+                let c = a + b;
+                fn(d) { c + d };
+                };
+                let adder = newAdder(1, 2);
+                adder(8);
+                "#,
+                11,
             ),
         ];
 
