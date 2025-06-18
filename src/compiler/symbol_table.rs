@@ -56,9 +56,21 @@ impl SymbolTable {
         symbol
     }
 
-    pub(crate) fn resolve(&self, name: &str) -> Option<Symbol> {
+    pub(crate) fn resolve(&mut self, name: &str) -> Option<Symbol> {
         match self.store.get(name) {
-            None if self.outer.is_some() => self.outer.as_ref()?.resolve(name),
+            None if self.outer.is_some() => {
+                match self.outer.as_ref()?.clone().resolve(name) {
+                    None => None,
+                    Some(obj) => {
+                        if obj.scope == GLOBAL_SCOPE || obj.scope == BUILTIN_SCOPE {
+                            Some(obj)
+                        } else {
+                            let free = self.define_free(obj);
+                            Some(free)
+                        }
+                    }
+                }
+            }
             other => other.cloned(),
         }
     }
@@ -271,7 +283,7 @@ mod tests {
 
         let mut should_panic = false;
 
-        for tt in tests.into_iter() {
+        for mut tt in tests.into_iter() {
             for sym in tt.expected_symbols.into_iter() {
                 let result = match tt.table.resolve(sym.name.as_str()) {
                     None => {
@@ -314,7 +326,7 @@ mod tests {
 
         let mut should_panic = false;
 
-        for table in vec![global, first_local, second_local] {
+        for mut table in vec![global, first_local, second_local] {
             for sym in expected.iter() {
                 let result = match table.resolve(sym.name.as_str()) {
                     None => {
@@ -396,7 +408,7 @@ mod tests {
 
         let mut should_panic = false;
 
-        for tt in tests.into_iter() {
+        for mut tt in tests.into_iter() {
             for sym in tt.expected_symbols.into_iter() {
                 let result = match tt.table.resolve(sym.name.as_str()) {
                     None => {
