@@ -100,12 +100,12 @@ impl Compiler {
             }
 
             ast::Node::Statement(ast::Statement::LetStatement(node)) => {
+                let symbol = self.symbol_table.define(node.name?.value);
                 let err = self.compile(ast::Node::Expression(node.value?));
                 if err.is_some() {
                     return err
                 }
 
-                let symbol = self.symbol_table.define(node.name?.value);
                 if symbol.scope == GLOBAL_SCOPE {
                     self.emit(code::Opcode::OpSetGlobal, vec![symbol.index]);
                 } else {
