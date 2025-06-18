@@ -265,10 +265,10 @@ impl VM {
 
                 code::Opcode::OpClosure => {
                     let const_index = code::read_two_bytes(&ins[ip+1..]);
-                    let _ = code::read_one_byte(&ins[ip+3..]);
+                    let num_free = code::read_one_byte(&ins[ip+3..]);
                     self.current_frame().ip += 3;
 
-                    if let Some(err) = self.push_closure(const_index) {
+                    if let Some(err) = self.push_closure(const_index, num_free) {
                         return Some(err)
                     }
                 }
