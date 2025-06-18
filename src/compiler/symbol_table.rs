@@ -509,4 +509,26 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_define_and_resolve_function_name() {
+        let mut global = SymbolTable::new();
+        global.define_function_name("a");
+
+        let expected = Symbol{
+            name: "a",
+            scope: FUNCTION_SCOPE,
+            index: 0,
+        } ;
+
+        let result = match global.resolve(expected.name.as_str()) {
+            None => panic!("function name {} not resolvable", expected.name),
+            Some(result) => result,
+        };
+
+        if result != expected {
+            panic!("expected {} to resolve to {:?}, got={:?}",
+                expected.name, expected, result)
+        }
+    }
 }
