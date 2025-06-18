@@ -1357,4 +1357,24 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_closures() {
+        let tests = vec![
+            VMTestCase::new(
+                r#"
+                let newClosure = fn(a) {
+                    fn() { a; };
+                };
+                let closure = new Closure(99);
+                closure();
+                "#,
+                99,
+            ),
+        ];
+
+        if run_vm_tests(tests) {
+            panic!()
+        }
+    }
 }
