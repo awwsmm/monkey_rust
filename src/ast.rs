@@ -334,7 +334,7 @@ pub(crate) struct FunctionLiteral {
     pub(crate) token: token::Token, // the 'fn' token
     pub(crate) parameters: Vec<Identifier>,
     pub(crate) body: Option<BlockStatement>,
-    name: String,
+    pub(crate) name: String,
 }
 
 impl Display for FunctionLiteral {

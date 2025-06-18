@@ -1830,4 +1830,40 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_function_literal_with_name() {
+        let input = "let myFunction = fn() { };";
+
+        let l = lexer::Lexer::new(input);
+        let mut p = Parser::new(l);
+        let program = p.parse_program();
+        check_parser_errors(p);
+
+        if program.statements.len() != 1 {
+            panic!("program.body does not contain 1 statements. got={}",
+                   program.statements.len());
+        }
+
+        let stmt = match &program.statements[0] {
+            Statement::LetStatement(ls) => ls,
+            _ => {
+                panic!("program.statements[0] is not ast::LetStatement. got={:?}",
+                       &program.statements[0]);
+            },
+        };
+
+        let function = match &stmt.value {
+            Some(Expression::FunctionLiteral(fl)) => fl,
+            _ => {
+                panic!("stmt.value is not ast::FunctionLiteral. got={:?}",
+                       &stmt.value);
+            },
+        };
+
+        if function.name != "myFunction" {
+            panic!("function literal name wrong. want 'myFunction', got={}\n",
+                function.name)
+        }
+    }
 }
