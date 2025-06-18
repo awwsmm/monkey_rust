@@ -1489,6 +1489,22 @@ mod tests {
                 "#,
                 0,
             ),
+            VMTestCase::new(
+                r#"
+                let wrapper = fn() {
+                    let countDown = fn(x) {
+                        if (x == 0) {
+                            return 0;
+                        } else {
+                            countDown(x - 1);
+                        }
+                    };
+                    countDown(1);
+                };
+                wrapper();
+                "#,
+                0,
+            ),
         ];
 
         if run_vm_tests(tests) {
