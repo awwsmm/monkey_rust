@@ -7,6 +7,7 @@ pub(crate) struct SymbolScope(&'static str);
 pub(crate) const LOCAL_SCOPE: SymbolScope = SymbolScope("LOCAL");
 pub(crate) const GLOBAL_SCOPE: SymbolScope = SymbolScope("GLOBAL");
 pub(crate) const BUILTIN_SCOPE: SymbolScope = SymbolScope("BUILTIN");
+pub(crate) const FREE_SCOPE: SymbolScope = SymbolScope("FREE");
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Symbol {
