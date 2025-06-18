@@ -280,7 +280,7 @@ impl VM {
         None
     }
 
-    fn push_closure(&mut self, const_index: usize) -> Option<compiler::Error> {
+    fn push_closure(&mut self, const_index: usize, num_free: usize) -> Option<compiler::Error> {
         let constant = self.constants[const_index].clone();
         let function = match constant {
             object::Object::CompiledFunctionObj(obj) => obj,
@@ -288,6 +288,12 @@ impl VM {
                 "not a function: {:?}", constant
             ))
         };
+
+        let mut free = vec![];
+        for _ in 0..num_free {
+            free.push(self.stack[self.sp-num_free+1].clone());
+        }
+        self.sp -= num_free;
 
         let closure = object::ClosureObj{ func: function, free: vec![] };
         self.push(object::Object::ClosureObj(closure))
