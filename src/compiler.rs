@@ -1605,4 +1605,38 @@ mod tests {
 
         run_compiler_tests(tests)
     }
+
+    #[test]
+    fn test_recursive_functions() {
+        let tests = vec![
+            CompilerTestCase::new(
+                r#"
+                let countDown = fn(x) { countDown(x - 1); };
+			    countDown(1);
+                "#,
+                vec![
+                    1.into(),
+                    vec![
+                        code::make(code::Opcode::OpCurrentClosure, &vec![]),
+                        code::make(code::Opcode::OpGetLocal, &vec![0]),
+                        code::make(code::Opcode::OpConstant, &vec![0]),
+                        code::make(code::Opcode::OpSub, &vec![]),
+                        code::make(code::Opcode::OpCall, &vec![1]),
+                        code::make(code::Opcode::OpReturnValue, &vec![]),
+                    ].into(),
+                    1.into(),
+                ],
+                vec![
+                    code::make(code::Opcode::OpClosure, &vec![1, 0]),
+                    code::make(code::Opcode::OpSetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpGetGlobal, &vec![0]),
+                    code::make(code::Opcode::OpConstant, &vec![2]),
+                    code::make(code::Opcode::OpCall, &vec![1]),
+                    code::make(code::Opcode::OpPop, &vec![]),
+                ],
+            ),
+        ];
+
+        run_compiler_tests(tests)
+    }
 }
