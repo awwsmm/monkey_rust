@@ -273,6 +273,21 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpGetFree => {
+                    let free_index = code::read_one_byte(&ins[ip+1..]);
+                    self.current_frame().ip += 1;
+
+                    let current_closure = self.current_frame().cl.clone();
+
+                    if current_closure.free.len() <= free_index {
+                        return None
+                    }
+
+                    if let Some(err) = self.push(current_closure.free[free_index].clone()) {
+                        return Some(err)
+                    }
+                }
+
                 _ => () // TODO
             }
         }
@@ -1372,7 +1387,7 @@ mod tests {
                 let newClosure = fn(a) {
                     fn() { a; };
                 };
-                let closure = new Closure(99);
+                let closure = newClosure(99);
                 closure();
                 "#,
                 99,

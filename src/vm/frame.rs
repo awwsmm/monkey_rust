@@ -1,7 +1,7 @@
 use crate::{code, object};
 
 pub(crate) struct Frame {
-    cl: object::ClosureObj,
+    pub(crate) cl: object::ClosureObj,
     pub(crate) ip: i32,
     pub(crate) base_pointer: i32,
 }
