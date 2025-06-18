@@ -333,7 +333,8 @@ impl NodeLike for BlockStatement {
 pub(crate) struct FunctionLiteral {
     pub(crate) token: token::Token, // the 'fn' token
     pub(crate) parameters: Vec<Identifier>,
-    pub(crate) body: Option<BlockStatement>
+    pub(crate) body: Option<BlockStatement>,
+    name: String,
 }
 
 impl Display for FunctionLiteral {
@@ -344,9 +345,10 @@ impl Display for FunctionLiteral {
             params.push(s.to_string())
         }
 
+        let name = if self.name == "" { String::from("") } else { format!("<{}>", self.name) };
         let body = self.body.as_ref().map(|b| b.to_string()).unwrap_or_else(|| String::from(""));
 
-        write!(f, "{}( {}) {}", self.token_literal(), params.join(", "), body)
+        write!(f, "{}{}( {}) {}", self.token_literal(), name, params.join(", "), body)
     }
 }
 
