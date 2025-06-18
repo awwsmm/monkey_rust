@@ -324,4 +324,101 @@ mod tests {
             panic!()
         }
     }
+
+    #[test]
+    fn test_resolve_free() {
+        let mut global: SymbolTable = SymbolTable::new();
+
+        global.define("a");
+        global.define("b");
+
+        let mut first_local: SymbolTable = SymbolTable::new_enclosed(Box::new(global));
+
+        first_local.define("c");
+        first_local.define("d");
+
+        let mut second_local: SymbolTable = SymbolTable::new_enclosed(Box::new(first_local.clone()));
+
+        second_local.define("e");
+        second_local.define("f");
+
+        struct Test {
+            table: SymbolTable,
+            expected_symbols: Vec<Symbol>,
+            expected_free_symbols: Vec<Symbol>,
+        }
+
+        impl Test {
+            fn new(table: SymbolTable, expected_symbols: Vec<Symbol>, expected_free_symbols: Vec<Symbol>) -> Self {
+                Self { table, expected_symbols, expected_free_symbols }
+            }
+        }
+
+        let tests = vec![
+            Test::new(
+                first_local,
+                vec![
+                    Symbol::new("a", GLOBAL_SCOPE, 0),
+                    Symbol::new("b", GLOBAL_SCOPE, 1),
+                    Symbol::new("c", LOCAL_SCOPE, 0),
+                    Symbol::new("d", LOCAL_SCOPE, 1),
+                ],
+                vec![],
+            ),
+            Test::new(
+                second_local,
+                vec![
+                    Symbol::new("a", GLOBAL_SCOPE, 0),
+                    Symbol::new("b", GLOBAL_SCOPE, 1),
+                    Symbol::new("c", FREE_SCOPE, 0),
+                    Symbol::new("d", FREE_SCOPE, 1),
+                    Symbol::new("e", LOCAL_SCOPE, 0),
+                    Symbol::new("f", LOCAL_SCOPE, 1),
+                ],
+                vec![
+                    Symbol::new("c", LOCAL_SCOPE, 0),
+                    Symbol::new("d", LOCAL_SCOPE, 1),
+                ],
+            ),
+        ];
+
+        let mut should_panic = false;
+
+        for tt in tests.into_iter() {
+            for sym in tt.expected_symbols.into_iter() {
+                let result = match tt.table.resolve(sym.name.as_str()) {
+                    None => {
+                        should_panic = true;
+                        eprintln!("name {} not resolvable", sym.name);
+                        continue
+                    }
+                    Some(result) => result
+                };
+                if result != sym {
+                    should_panic = true;
+                    eprintln!("expected {} to resolve to {:?}, got={:?}",
+                              sym.name, sym, result)
+                }
+            }
+
+            if tt.table.free_symbols.len() != tt.expected_free_symbols.len() {
+                should_panic = true;
+                eprintln!("wrong number of free symbols. got={}, want={}",
+                          tt.table.free_symbols.len(), tt.expected_free_symbols.len());
+                continue
+            }
+
+            for (i, sym) in tt.expected_free_symbols.into_iter() {
+                let result = tt.table.free_symbols[i];
+                if result != sym {
+                    eprintln!("wrong free symbol. got={:?}, want={:?}",
+                              result, sym);
+                }
+            }
+        }
+
+        if should_panic {
+            panic!()
+        }
+    }
 }
