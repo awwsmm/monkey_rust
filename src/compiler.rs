@@ -1,6 +1,6 @@
 pub(crate) mod symbol_table;
 
-use crate::compiler::symbol_table::{Symbol, SymbolTable, BUILTIN_SCOPE, GLOBAL_SCOPE, LOCAL_SCOPE};
+use crate::compiler::symbol_table::{Symbol, SymbolTable, BUILTIN_SCOPE, FREE_SCOPE, GLOBAL_SCOPE, LOCAL_SCOPE};
 use crate::{ast, code, object};
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
@@ -458,6 +458,7 @@ impl Compiler {
             GLOBAL_SCOPE => self.emit(code::Opcode::OpGetGlobal, vec![s.index]),
             LOCAL_SCOPE => self.emit(code::Opcode::OpGetLocal, vec![s.index]),
             BUILTIN_SCOPE => self.emit(code::Opcode::OpGetBuiltin, vec![s.index]),
+            FREE_SCOPE => self.emit(code::Opcode::OpGetFree, vec![s.index]),
             _ => panic!(),
         };
     }
