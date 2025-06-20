@@ -96,6 +96,12 @@ impl SymbolTable {
         self.store.insert(original_name, symbol.clone());
         symbol
     }
+
+    pub(crate) fn define_function_name(&mut self, name: &str) -> Symbol {
+        let symbol = Symbol::new(name, FUNCTION_SCOPE, 0);
+        self.store.insert(String::from(name), symbol.clone());
+        symbol
+    }
 }
 
 #[cfg(test)]
