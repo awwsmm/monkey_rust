@@ -3,5 +3,12 @@ name = "monkey_rust"
 version = "0.1.0"
 edition = "2024"
 
-[dependencies]
-log = "0.4.27"
+# cargo build --release --bin repl && ./target/release/repl
+[[bin]]
+name="repl"
+path="src/main.rs"
+
+# cargo build --release --bin benchmark && ./target/release/benchmark vm # or repl
+[[bin]]
+name="benchmark"
+path="src/benchmark.rs"

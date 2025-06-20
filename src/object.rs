@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::rc::Rc;
 
-pub(crate) mod environment;
+pub mod environment;
 pub(crate) mod builtins;
 
 #[derive(Debug, PartialEq, Clone, Eq, PartialOrd, Ord)]

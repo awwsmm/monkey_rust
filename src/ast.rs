@@ -2,7 +2,7 @@ use crate::token;
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
 
-pub(crate) enum Node {
+pub enum Node {
     Program(Program),
     Statement(Statement),
     Expression(Expression),

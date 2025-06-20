@@ -6,7 +6,7 @@ use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
 
 pub(crate) struct Error {
-    pub(crate) message: String
+    pub message: String
 }
 
 impl Error {
@@ -33,7 +33,7 @@ struct CompilationScope {
     previous_instruction: EmittedInstruction,
 }
 
-pub(crate) struct Compiler {
+pub struct Compiler {
     constants: Vec<object::Object>,
 
     pub(crate) symbol_table: SymbolTable,
@@ -43,7 +43,7 @@ pub(crate) struct Compiler {
 }
 
 impl Compiler {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         let main_scope = CompilationScope{
             instructions: code::Instructions(vec![]),
             last_instruction: EmittedInstruction { opcode: None, position: 0 },
@@ -71,7 +71,7 @@ impl Compiler {
         compiler
     }
 
-    pub(crate) fn compile(&mut self, node: ast::Node) -> Option<Error> {
+    pub fn compile(&mut self, node: ast::Node) -> Option<Error> {
         match node {
             ast::Node::Program(node) => {
                 for s in node.statements.iter() {
@@ -385,7 +385,7 @@ impl Compiler {
         self.scopes[self.scope_index].last_instruction = previous;
     }
 
-    pub(crate) fn bytecode(&self) -> Bytecode {
+    pub fn bytecode(&self) -> Bytecode {
         Bytecode {
             instructions: self.current_instructions().clone(),
             constants: self.constants.clone(),

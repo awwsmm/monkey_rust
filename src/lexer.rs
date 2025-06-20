@@ -1,7 +1,7 @@
 use crate::token::{Token, TokenType};
 
 #[derive(Default)]
-pub(crate) struct Lexer {
+pub struct Lexer {
     input: String,
     position: usize,
     read_position: usize,
@@ -9,7 +9,7 @@ pub(crate) struct Lexer {
 }
 
 impl Lexer {
-    pub(crate) fn new(input: impl Into<String>) -> Self {
+    pub fn new(input: impl Into<String>) -> Self {
         let mut l = Self {
             input: input.into(),
             ..Default::default()

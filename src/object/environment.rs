@@ -4,13 +4,13 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct Environment {
+pub struct Environment {
     store: HashMap<String, object::Object>,
     outer: Option<Rc<RefCell<Environment>>>,
 }
 
 impl Environment {
-    pub(crate) fn new(outer: Option<Rc<RefCell<Environment>>>) -> Self {
+    pub fn new(outer: Option<Rc<RefCell<Environment>>>) -> Self {
         Self { store: Default::default(), outer }
     }
 

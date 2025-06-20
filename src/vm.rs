@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 const STACK_SIZE: usize = 2048;
 pub(crate) const GLOBALS_SIZE: usize = 2048;
 
-pub(crate) struct VM {
+pub struct VM {
     constants: Vec<object::Object>,
 
     stack: [Option<object::Object>; STACK_SIZE],
@@ -40,7 +40,7 @@ impl VM {
         self.frames.remove(self.frames_index as usize)
     }
 
-    pub(crate) fn new(bytecode: compiler::Bytecode) -> Self {
+    pub fn new(bytecode: compiler::Bytecode) -> Self {
         let main_func = object::CompiledFunctionObj{ instructions: bytecode.instructions, num_locals: 0, num_parameters: 0 };
         let main_closure = object::ClosureObj{ func: main_func, free: vec![] };
         let main_frame = frame::Frame::new(main_closure, 0);
@@ -74,7 +74,7 @@ impl VM {
         self.stack[self.sp-1].as_ref()
     }
 
-    pub(crate) fn run(&mut self) -> Option<compiler::Error> {
+    pub fn run(&mut self) -> Option<compiler::Error> {
         let mut ip: usize;
         let mut ins: code::Instructions;
         let mut op: code::Opcode;
@@ -582,7 +582,7 @@ impl VM {
         o
     }
 
-    pub(crate) fn last_popped_stack_elem(&self) -> Option<&object::Object> {
+    pub fn last_popped_stack_elem(&self) -> Option<&object::Object> {
         self.stack[self.sp].as_ref()
     }
 

@@ -11,7 +11,7 @@ const NULL: object::NullObj = object::NullObj {};
 const TRUE: object::BooleanObj = object::BooleanObj { value: true };
 const FALSE: object::BooleanObj = object::BooleanObj { value: false };
 
-pub(crate) fn eval(node: Option<ast::Node>, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
+pub fn eval(node: Option<ast::Node>, env: Rc<RefCell<object::environment::Environment>>) -> Option<object::Object> {
     match node {
 
         // Statements

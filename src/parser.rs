@@ -4,7 +4,7 @@ use crate::{ast, lexer, token};
 use std::cmp::PartialOrd;
 use std::collections::HashMap;
 
-pub(crate) struct Parser {
+pub struct Parser {
     l: lexer::Lexer,
     pub(crate) errors: Vec<String>,
 
@@ -16,7 +16,7 @@ pub(crate) struct Parser {
 }
 
 impl Parser {
-    pub(crate) fn new(l: lexer::Lexer) -> Self {
+    pub fn new(l: lexer::Lexer) -> Self {
         let mut p = Parser{
             l,
             errors: vec![],
@@ -292,7 +292,7 @@ impl Parser {
         self.peek_token = self.l.next_token();
     }
 
-    pub(crate) fn parse_program(&mut self) -> ast::Program {
+    pub fn parse_program(&mut self) -> ast::Program {
         let mut program = ast::Program{ statements: vec![] };
 
         while self.cur_token.token_type != TokenType::EOF {
