@@ -284,6 +284,14 @@ impl VM {
                     }
                 }
 
+                code::Opcode::OpCurrentClosure => {
+                    let current_closure = self.current_frame().cl.clone();
+                    if let Some(err) = self.push(object::Object::ClosureObj(current_closure)) {
+                        return Some(err)
+                    }
+
+                }
+
                 _ => () // TODO
             }
         }
@@ -607,7 +615,7 @@ impl VM {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::object::{HasHashKey, Object};
+    use crate::object::HasHashKey;
     use crate::{ast, compiler, lexer, object, parser};
     use std::collections::BTreeMap;
 
