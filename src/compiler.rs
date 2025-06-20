@@ -1,6 +1,6 @@
 pub(crate) mod symbol_table;
 
-use crate::compiler::symbol_table::{Symbol, SymbolTable, BUILTIN_SCOPE, FREE_SCOPE, GLOBAL_SCOPE, LOCAL_SCOPE};
+use crate::compiler::symbol_table::{Symbol, SymbolTable, BUILTIN_SCOPE, FREE_SCOPE, FUNCTION_SCOPE, GLOBAL_SCOPE, LOCAL_SCOPE};
 use crate::{ast, code, object};
 use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter};
@@ -296,7 +296,7 @@ impl Compiler {
                 self.enter_scope();
 
                 if node.name != "" {
-                    self.symbol_table.define_function_name(node.name.as_str())
+                    self.symbol_table.define_function_name(node.name.as_str());
                 }
 
                 for p in node.parameters.iter() {
@@ -468,6 +468,7 @@ impl Compiler {
             LOCAL_SCOPE => self.emit(code::Opcode::OpGetLocal, vec![s.index]),
             BUILTIN_SCOPE => self.emit(code::Opcode::OpGetBuiltin, vec![s.index]),
             FREE_SCOPE => self.emit(code::Opcode::OpGetFree, vec![s.index]),
+            FUNCTION_SCOPE => self.emit(code::Opcode::OpCurrentClosure, vec![]),
             _ => panic!(),
         };
     }
