@@ -295,6 +295,10 @@ impl Compiler {
             ast::Node::Expression(ast::Expression::FunctionLiteral(node)) => {
                 self.enter_scope();
 
+                if node.name != "" {
+                    self.symbol_table.define_function_name(node.name.as_str())
+                }
+
                 for p in node.parameters.iter() {
                     self.symbol_table.define(p.value.clone());
                 }
