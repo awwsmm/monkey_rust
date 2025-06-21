@@ -33,15 +33,7 @@ const INPUT: &str = r#"
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    if args.len() != 2 {
-        panic!("exactly one argument required")
-    }
-
-    let engine = args[1].clone();
-
-    if engine != "vm" && engine != "eval" {
-        panic!("argument must be 'vm' or 'eval'")
-    }
+    let engine = String::from("vm");
 
     let l = lexer::Lexer::new(INPUT);
     let mut p = parser::Parser::new(l);

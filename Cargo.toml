@@ -12,3 +12,6 @@ path="src/main.rs"
 [[bin]]
 name="benchmark"
 path="src/benchmark.rs"
+
+[profile.release]
+debug = true
